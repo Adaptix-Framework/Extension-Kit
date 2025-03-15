@@ -1,0 +1,139 @@
+{
+    "name": "Situation Awareness Local BOF",
+    "description": "This extension enhances situational awareness by providing a set of local Beacon Object File (BOF) commands. These commands allow the operator to gather detailed information about the target system's network configuration, file access control, environment variables, and other critical system details.",
+    "extensions": [
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "arp",
+            "description": "Executes the arp command on the target machine. The arp command is used to display or modify the system's ARP (Address Resolution Protocol) cache, which maps IP addresses to physical MAC addresses",
+            "message": "BOF implementation: arp",
+            "example": "arp",
+            "exec": "execute bof $EXT_DIR()/_bin/arp.$ARCH().o"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "cacls",
+            "description": "Executes the cacls command to display or modify file or folder access control lists (ACLs) on the target system.",
+            "message": "BOF implementation: cacls",
+            "example": "cacls C:\\test.txt",
+            "args": [
+                "STRING <path>"
+            ],
+            "exec": "execute bof $EXT_DIR()/_bin/cacls.$ARCH().o $PACK_BOF(WSTR {path})"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "dir",
+            "description": "Lists files in a specified directory. Supports wildcards. Optionally, it can perform a recursive list with the /s argument.",
+            "message": "BOF implementation: dir",
+            "example": "dir /d C:\\Windows /s",
+            "args": [
+                "STRING <directory> (.\\)",
+                "BOOL </s> (false) {Recursive list}"
+            ],
+            "exec": "execute bof $EXT_DIR()/_bin/dir.$ARCH().o $PACK_BOF(WSTR {directory}, SHORT {/s})"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "env",
+            "description": "Executes the env command to retrieve and display the environment variables of the target system",
+            "message": "BOF implementation: env",
+            "example": "env",
+            "exec": "execute bof $EXT_DIR()/_bin/env.$ARCH().o"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "ipconfig",
+            "description": "Executes the ipconfig command to display network configuration details of the target system.",
+            "message": "BOF implementation: ipconfig",
+            "example": "ipconfig",
+            "exec": "execute bof $EXT_DIR()/_bin/ipconfig.$ARCH().o"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "listdns",
+            "description": "Executes a task to list DNS information from the target system.",
+            "message": "BOF implementation: listdns",
+            "example": "listdns",
+            "exec": "execute bof $EXT_DIR()/_bin/listdns.$ARCH().o"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "netstat",
+            "description": "Executes the netstat command to display network connections",
+            "message": "BOF implementation: netstat",
+            "example": "netstat",
+            "exec": "execute bof $EXT_DIR()/_bin/netstat.$ARCH().o"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "nslookup",
+            "description": "Executes the nslookup command to query DNS to obtain DNS records from the server. Supports specifying a DNS server and record type.",
+            "message": "BOF implementation: nslookup",
+            "example": "nslookup google.com 8.8.8.8 A",
+            "args": [
+                "STRING <domain>",
+                "STRING <type> (A)",
+                "STRING <server> (0)"
+            ],
+            "exec": "execute bof $EXT_DIR()/_bin/nslookup.$ARCH().o $PACK_BOF(CSTR {domain}, CSTR {type}, CSTR {server})"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "routerprint",
+            "description": "Executes the routerprint command to display the routing table of the target system.",
+            "message": "BOF implementation: routerprint",
+            "example": "routerprint",
+            "exec": "execute bof $EXT_DIR()/_bin/routerprint.$ARCH().o"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "uptime",
+            "description": "Executes the uptime command to display the system's uptime, which indicates how long the system has been running since the last boot.",
+            "message": "BOF implementation: uptime",
+            "example": "uptime",
+            "exec": "execute bof $EXT_DIR()/_bin/uptime.$ARCH().o"
+        },
+        {
+            "type": "command",
+            "agents": [
+                "beacon"
+            ],
+            "command": "whoami",
+            "description": "Executes the whoami command to display the current logged-in user’s username on the target system",
+            "message": "BOF implementation: whoami",
+            "example": "whoami",
+            "exec": "execute bof $EXT_DIR()/_bin/whoami.$ARCH().o"
+        }
+    ]
+}
