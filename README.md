@@ -67,6 +67,13 @@ BOFs for lateral movement with the specified method. [More details](https://gith
 ![](./LateralMovement-BOF/_img/01.png)
 
 
+## Postex-BOF
+
+BOFs for post exploitation. [More details](https://github.com/Adaptix-Framework/Extension-Kit/blob/main/Postex-BOF/README.md)
+
+![](./Postex-BOF/_img/01.jpg)
+
+
 
 ## SAL-BOF
 

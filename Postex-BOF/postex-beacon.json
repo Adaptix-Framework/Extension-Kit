@@ -1,0 +1,20 @@
+{
+    "name": "Postex-BOF",
+    "description": "BOF for post exploitation",
+    "extensions": [
+      {
+        "type": "command",
+        "agents": ["beacon"], 
+        "command": "screenshot",
+        "description": "Opsec screenshot, pid=0 will capture full screen, specific pid will capture specific PID (works even when minimized)",
+        "message": "Task: Executing Screenshot-BOF by @CodeXTF2 & @evilAdan0s",
+        "example": "screenshot C:\\User\\public\\pic.jpg 0",
+        "args": [
+          "STRING <filename>",
+          "INT <pid>"
+        ],
+        "exec": "execute bof $EXT_DIR()/_bin/screenshot.$ARCH().o $PACK_BOF(CSTR {filename}, INT {pid})"
+      }
+    ]
+  }
+  
