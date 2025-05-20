@@ -174,6 +174,22 @@ _DeleteSecurityContext          SECUR32$DeleteSecurityContext          __attribu
 _FreeCredentialsHandle          SECUR32$FreeCredentialsHandle          __attribute__((section(".data"))) = 0;
 _AcquireCredentialsHandleA      SECUR32$AcquireCredentialsHandleA      __attribute__((section(".data"))) = 0;
 
+
+#ifndef KerbSubmitTicketMessage
+#define KerbSubmitTicketMessage 21
+#endif
+
+#ifndef KERB_SUBMIT_TKT_REQUEST
+typedef struct _KERB_SUBMIT_TKT_REQUEST {
+    KERB_PROTOCOL_MESSAGE_TYPE MessageType;
+    LUID LogonId;
+    ULONG Flags;
+    ULONG KerbCredSize;
+    ULONG KerbCredOffset;
+} KERB_SUBMIT_TKT_REQUEST, *PKERB_SUBMIT_TKT_REQUEST;
+#endif
+
+
 LPVOID MemAlloc(SIZE_T dwBytes) {
     LPVOID mem = KERNEL32$VirtualAlloc(NULL, dwBytes, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
     MEMORY_BANK[BANK_COUNT++] = mem;
