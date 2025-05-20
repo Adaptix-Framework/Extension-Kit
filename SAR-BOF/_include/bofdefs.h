@@ -395,5 +395,25 @@ DECLSPEC_IMPORT DWORD WINAPI VERSION$GetFileVersionInfoSizeA(LPCSTR lptstrFilena
 DECLSPEC_IMPORT WINBOOL WINAPI VERSION$GetFileVersionInfoA(LPCSTR lptstrFilename, DWORD dwHandle, DWORD dwLen, LPVOID lpData);
 DECLSPEC_IMPORT WINBOOL WINAPI VERSION$VerQueryValueA(LPCVOID pBlock, LPCSTR lpSubBlock, LPVOID *lplpBuffer, PUINT puLen);
 
-
+//WTSINFO
+#ifndef WTSINFO
+typedef struct _WTSINFO {
+    WTS_CONNECTSTATE_CLASS State;
+    DWORD SessionId;
+    DWORD IncomingBytes;
+    DWORD OutgoingBytes;
+    DWORD IncomingFrames;
+    DWORD OutgoingFrames;
+    DWORD IncomingCompressedBytes;
+    DWORD OutgoingCompressedBytes;
+    WCHAR WinStationName[32];
+    WCHAR Domain[16];
+    WCHAR UserName[20];
+    LARGE_INTEGER ConnectTime;
+    LARGE_INTEGER DisconnectTime;
+    LARGE_INTEGER LastInputTime;
+    LARGE_INTEGER LogonTime;
+    LARGE_INTEGER CurrentTime;
+} WTSINFO, *PWTSINFO;
+#endif
 
