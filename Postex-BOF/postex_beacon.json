@@ -6,6 +6,23 @@
       "type": "command",
       "agents": ["beacon"],
 
+      "command": "addfirewallrule",
+      "description": "Add a new inbound or outbound firewall rule using COM",
+      "message": "BOF implementation: addfirewallrule",
+      "example": "addfirewallrule in 80 \"ExampleRuleName1\" \"ExampleGroup1\" \"Test rule\"",
+      "args" : [
+            "STRING <direction> (in)",
+            "STRING <port>",
+            "STRING <rulename> (testrule)",
+            "STRING <rulegroup> (testgroup)",
+            "STRING <description> (testdescription)"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/addfirewallrule.$ARCH().o $PACK_BOF(CSTR {direction}, WSTR {port}, WSTR {rulename}, WSTR {rulegroup}, WSTR {description})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+
       "command": "screenshot_bof",
       "description": "Alternative screenshot capability that does not do fork n run by @codex_tf2",
       "message": "Task: Screenshot BOF",

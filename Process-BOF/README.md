@@ -19,5 +19,11 @@ findobj <type> <name>
 
 ![](_img/02.png)
 
+## psc
+
+Show detailed information from processes with established TCP and RDP connections.
+
+
+
 ## Credits
 * C2-Tool-Collection - https://github.com/outflanknl/C2-Tool-Collection
