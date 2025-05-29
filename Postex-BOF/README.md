@@ -4,6 +4,15 @@ This extension allows you to customize the Beacon Object File (BOF) for future u
 
 ![](_img/01.png)
 
+## addfirewallrule
+
+A BOF tool that can be used to add a new inbound or outbound firewall rule using COM.
+
+```
+addfirewallrule <direction> <port> "<rulename>" "<rulegroup>" "<description>"
+```
+
+
 ## ScreenshotBOF
 
 An alternative screenshot capability that uses WinAPI and does not perform a fork & run:
