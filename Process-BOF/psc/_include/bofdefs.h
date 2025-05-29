@@ -15,7 +15,282 @@
 #include <shlwapi.h>
 
 
+//FROM psc.h
+enum IntegLevel {
+	Untrusted = 0,
+	LowIntegrity = 1,
+	MediumIntegrity = 2,
+	HighIntegrity = 3,
+	SystemIntegrity = 4,
+	ProtectedProcess = 5
+};
 
+
+typedef struct _SYSTEM_PROCESSES {
+	ULONG NextEntryDelta;
+	ULONG ThreadCount;
+	ULONG Reserved1[6];
+	LARGE_INTEGER CreateTime;
+	LARGE_INTEGER UserTime;
+	LARGE_INTEGER KernelTime;
+	UNICODE_STRING ProcessName;
+	KPRIORITY BasePriority;
+	HANDLE ProcessId;
+	HANDLE InheritedFromProcessId;
+} SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
+
+typedef struct _SYSTEM_PROCESS_ID_INFORMATION {
+	HANDLE ProcessId;
+	UNICODE_STRING ImageName;
+} SYSTEM_PROCESS_ID_INFORMATION, * PSYSTEM_PROCESS_ID_INFORMATION;
+
+
+typedef struct _SYSTEM_MODULE_INFORMATION_ENTRY {
+	HANDLE Section;
+	PVOID MappedBase;
+	PVOID ImageBase;
+	ULONG ImageSize;
+	ULONG Flags;
+	USHORT LoadOrderIndex;
+	USHORT InitOrderIndex;
+	USHORT LoadCount;
+	USHORT OffsetToFileName;
+	UCHAR FullPathName[256];
+} SYSTEM_MODULE_INFORMATION_ENTRY, *PSYSTEM_MODULE_INFORMATION_ENTRY;
+
+typedef struct _SYSTEM_MODULE_INFORMATION {
+	ULONG NumberOfModules;
+	SYSTEM_MODULE_INFORMATION_ENTRY Module[1];
+} SYSTEM_MODULE_INFORMATION, *PSYSTEM_MODULE_INFORMATION;
+
+
+typedef struct _PROCESS_BASIC_INFORMATION_WOW64 {
+	NTSTATUS ExitStatus;
+	ULONG64 PebBaseAddress;
+	ULONG64 AffinityMask;
+	KPRIORITY BasePriority;
+	ULONG64 UniqueProcessId;
+	ULONG64 InheritedFromUniqueProcessId;
+} PROCESS_BASIC_INFORMATION_WOW64, *PPROCESS_BASIC_INFORMATION_WOW64;
+
+typedef struct _UNICODE_STRING_WOW64 {
+	USHORT Length;
+	USHORT MaximumLength;
+	ULONG64 Buffer;
+} UNICODE_STRING_WOW64;
+
+
+typedef struct _API_SET_NAMESPACE {
+	ULONG Version;
+	ULONG Size;
+	ULONG Flags;
+	ULONG Count;
+	ULONG EntryOffset;
+	ULONG HashOffset;
+	ULONG HashFactor;
+} API_SET_NAMESPACE, *PAPI_SET_NAMESPACE;
+
+typedef struct _CURDIR64 {
+	UNICODE_STRING_WOW64 DosPath;
+	HANDLE Handle;
+} CURDIR64, *PCURDIR64;
+
+typedef struct _RTL_USER_PROCESS_PARAMETERS64 {
+	ULONG MaximumLength;
+	ULONG Length;
+    ULONG Flags;
+    ULONG DebugFlags;
+    ULONG64 ConsoleHandle;
+    ULONG ConsoleFlags;
+    ULONG64 StandardInput;
+    ULONG64 StandardOutput;
+    ULONG64 StandardError;
+    CURDIR64 CurrentDirectory;
+    UNICODE_STRING_WOW64 DllPath;
+    UNICODE_STRING_WOW64 ImagePathName;
+    UNICODE_STRING_WOW64 CommandLine;
+} RTL_USER_PROCESS_PARAMETERS64, *PRTL_USER_PROCESS_PARAMETERS64;
+
+// Partial PEB64
+typedef struct _PEB64 {
+    BYTE Reserved[16];
+    ULONG64 ImageBaseAddress;
+    ULONG64 LdrData;
+    ULONG64 ProcessParameters;
+} PEB64, *PPEB64;
+
+
+typedef struct _SECPROD {
+	DWORD dwPID;
+	WCHAR wcCompany[MAX_PATH];
+	WCHAR wcDescription[MAX_PATH];
+} SECPROD, *PSECPROD;
+
+typedef struct _SECCOMP {
+	WCHAR wcCompany[64];
+} SECCOMP, *PSECCOMP;
+
+
+EXTERN_C NTSTATUS ZwQuerySystemInformation(
+	SYSTEM_INFORMATION_CLASS SystemInformationClass,
+	PVOID SystemInformation,
+	ULONG SystemInformationLength,
+	PULONG ReturnLength
+	);
+
+EXTERN_C NTSTATUS ZwQueryInformationProcess(
+	HANDLE ProcessHandle,
+	DWORD ProcessInformationClass,
+	PVOID ProcessInformation,
+	DWORD ProcessInformationLength,
+	PDWORD ReturnLength
+	);
+
+EXTERN_C NTSTATUS ZwOpenProcess(
+	PHANDLE ProcessHandle, 
+	ACCESS_MASK DesiredAccess, 
+	POBJECT_ATTRIBUTES ObjectAttributes, 
+	PCLIENT_ID ClientId
+	);
+
+EXTERN_C NTSTATUS ZwQueryInformationToken(
+	HANDLE TokenHandle,
+	TOKEN_INFORMATION_CLASS TokenInformationClass,
+	PVOID TokenInformation,
+	ULONG TokenInformationLength,
+	PULONG ReturnLength
+	);
+
+EXTERN_C NTSTATUS ZwAdjustPrivilegesToken(
+	IN HANDLE TokenHandle,
+	IN BOOLEAN DisableAllPrivileges,
+	IN PTOKEN_PRIVILEGES TokenPrivileges,
+	IN ULONG PreviousPrivilegesLength,
+	OUT PTOKEN_PRIVILEGES PreviousPrivileges OPTIONAL,
+	OUT PULONG RequiredLength OPTIONAL
+	);
+
+EXTERN_C NTSTATUS ZwAllocateVirtualMemory(
+	HANDLE ProcessHandle, 
+	PVOID *BaseAddress, 
+	ULONG_PTR ZeroBits, 
+	PSIZE_T RegionSize, 
+	ULONG AllocationType, 
+	ULONG Protect
+	);
+
+EXTERN_C NTSTATUS ZwFreeVirtualMemory(
+	HANDLE ProcessHandle, 
+	PVOID *BaseAddress, 
+	IN OUT PSIZE_T RegionSize, 
+	ULONG FreeType
+	);
+
+EXTERN_C NTSTATUS ZwReadVirtualMemory(
+	HANDLE hProcess, 
+	PVOID lpBaseAddress, 
+	PVOID lpBuffer, 
+	SIZE_T NumberOfBytesToRead, 
+	PSIZE_T NumberOfBytesRead
+	);
+
+EXTERN_C NTSTATUS ZwWriteVirtualMemory(
+	HANDLE hProcess, 
+	PVOID lpBaseAddress, 
+	PVOID lpBuffer, 
+	SIZE_T NumberOfBytesToWrite, 
+	PSIZE_T NumberOfBytesWrite
+	);
+
+EXTERN_C NTSTATUS ZwCreateFile(
+	PHANDLE FileHandle,
+	ACCESS_MASK DesiredAccess,
+	POBJECT_ATTRIBUTES ObjectAttributes,
+	PIO_STATUS_BLOCK IoStatusBlock,
+	PLARGE_INTEGER AllocationSize,
+	ULONG FileAttributes,
+	ULONG ShareAccess,
+	ULONG CreateDisposition,
+	ULONG CreateOptions,
+	PVOID EaBuffer,
+	ULONG EaLength
+);
+
+EXTERN_C NTSTATUS ZwClose(
+	IN HANDLE KeyHandle
+    );
+
+typedef NTSTATUS(NTAPI* _NtOpenProcessToken)(
+	IN HANDLE ProcessHandle,
+	IN ACCESS_MASK DesiredAccess,
+	OUT PHANDLE TokenHandle
+	);
+
+typedef void (WINAPI* _RtlInitUnicodeString)(
+	PUNICODE_STRING DestinationString,
+	PCWSTR SourceString
+	);
+
+typedef void(WINAPI* _RtlFreeUnicodeString)(
+	PUNICODE_STRING UnicodeString
+	);
+
+typedef void (WINAPI* _RtlInitAnsiString)(
+	PANSI_STRING DestinationString,
+	PSTR SourceString
+	);
+
+typedef NTSTATUS(NTAPI* _RtlAnsiStringToUnicodeString)(
+	PUNICODE_STRING DestinationString,
+	PANSI_STRING SourceString,
+	BOOLEAN AllocateDestinationString
+	);
+
+typedef BOOLEAN(NTAPI* _RtlEqualUnicodeString)(
+	PUNICODE_STRING String1,
+	PCUNICODE_STRING String2,
+	BOOLEAN CaseInSensitive
+	);
+
+typedef NTSTATUS(NTAPI *_RtlWow64EnableFsRedirectionEx)(
+	_In_ PVOID DisableFsRedirection,
+	_Out_ PVOID *OldFsRedirectionLevel
+	);
+
+typedef NTSTATUS(NTAPI *_NtWow64QueryInformationProcess64) (
+	IN HANDLE ProcessHandle,
+	IN PROCESSINFOCLASS ProcessInformationClass,
+	OUT PVOID ProcessInformation,
+	IN ULONG ProcessInformationLength,
+	OUT PULONG ReturnLength OPTIONAL
+	);
+
+typedef NTSTATUS(NTAPI *_NtWow64ReadVirtualMemory64)(
+	IN HANDLE ProcessHandle,
+	IN ULONG64 BaseAddress,
+	OUT PVOID Buffer,
+	IN ULONG64 Size,
+	OUT PULONG64 NumberOfBytesRead
+	);
+
+typedef PULONG(NTAPI *_RtlSubAuthoritySid)(
+	PSID  Sid,
+	ULONG SubAuthority
+	);
+
+typedef PUCHAR(NTAPI *_RtlSubAuthorityCountSid)(
+	_In_ PSID Sid
+	);
+
+typedef PWSTR(NTAPI *_RtlIpv4AddressToStringW)(
+	struct in_addr *Addr,
+	PWSTR S
+	);
+
+typedef PWSTR(NTAPI *_RtlIpv6AddressToStringW)(
+	struct in6_addr *Addr,
+	PWSTR S
+	);
 
 
 
@@ -362,6 +637,50 @@ DECLSPEC_IMPORT HRESULT	WINAPI OLEAUT32$SafeArrayGetElement(SAFEARRAY *psa, LONG
 DECLSPEC_IMPORT UINT	WINAPI OLEAUT32$SafeArrayGetElemsize(SAFEARRAY *psa);
 DECLSPEC_IMPORT HRESULT	WINAPI OLEAUT32$SafeArrayAccessData(SAFEARRAY *psa,void HUGEP **ppvData);
 DECLSPEC_IMPORT HRESULT	WINAPI OLEAUT32$SafeArrayUnaccessData(SAFEARRAY *psa);
+
+
+
+
+
+
+
+
+//CERTCLI
+/*
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAEnumFirstCA(IN LPCWSTR wszScope, IN DWORD dwFlags, OUT LPVOID * phCAInfo);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAEnumNextCA(IN LPVOID hPrevCA, OUT LPVOID * phCAInfo);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CACloseCA(IN LPVOID hCA);
+DECLSPEC_IMPORT DWORD WINAPI CERTCLI$CACountCAs(IN LPVOID hCAInfo);
+DECLSPEC_IMPORT LPCWSTR WINAPI CERTCLI$CAGetDN(IN LPVOID hCAInfo);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCAProperty(IN LPVOID hCAInfo, IN LPCWSTR wszPropertyName, OUT PZPWSTR *pawszPropertyValue);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAFreeCAProperty(IN LPVOID hCAInfo, IN PZPWSTR awszPropertyValue);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCAFlags(IN LPVOID hCAInfo, OUT DWORD  *pdwFlags);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCACertificate(IN LPVOID hCAInfo, OUT PCCERT_CONTEXT *ppCert);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCAExpiration(IN LPVOID hCAInfo, OUT DWORD * pdwExpiration, OUT DWORD * pdwUnits);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCASecurity(IN LPVOID hCAInfo, OUT PSECURITY_DESCRIPTOR * ppSD);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetAccessRights(IN LPVOID hCAInfo, IN DWORD dwContext, OUT DWORD *pdwAccessRights);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAEnumCertTypesForCA(IN LPVOID hCAInfo, IN DWORD dwFlags, OUT LPVOID * phCertType);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAEnumCertTypes(IN DWORD dwFlags, OUT LPVOID * phCertType);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAEnumNextCertType(IN LPVOID hPrevCertType, OUT LPVOID * phCertType);
+DECLSPEC_IMPORT DWORD WINAPI CERTCLI$CACountCertTypes(IN LPVOID hCertType);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CACloseCertType(IN LPVOID hCertType);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCertTypeProperty(IN LPVOID hCertType, IN LPCWSTR wszPropertyName, OUT PZPWSTR *pawszPropertyValue);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCertTypePropertyEx(IN LPVOID hCertType, IN LPCWSTR wszPropertyName, OUT LPVOID *pPropertyValue);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAFreeCertTypeProperty(IN LPVOID hCertType, IN PZPWSTR awszPropertyValue);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCertTypeExtensionsEx(IN LPVOID hCertType, IN DWORD dwFlags, IN LPVOID pParam, OUT PCERT_EXTENSIONS * ppCertExtensions);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAFreeCertTypeExtensions(IN LPVOID hCertType, IN PCERT_EXTENSIONS pCertExtensions);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCertTypeFlagsEx(IN LPVOID hCertType, IN DWORD dwOption, OUT DWORD * pdwFlags);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCertTypeExpiration(IN LPVOID hCertType, OUT OPTIONAL FILETIME * pftExpiration, OUT OPTIONAL FILETIME * pftOverlap);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CACertTypeGetSecurity(IN LPVOID hCertType, OUT PSECURITY_DESCRIPTOR * ppSD);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$CAGetCertTypeAccessRights(IN LPVOID hCertType, IN DWORD dwContext, OUT DWORD *pdwAccessRights);
+DECLSPEC_IMPORT HRESULT WINAPI CERTCLI$caTranslateFileTimePeriodToPeriodUnits(IN FILETIME const *pftGMT, IN BOOL Flags, OUT DWORD *pcPeriodUnits, OUT LPVOID*prgPeriodUnits);
+*/
+
+
+
+
+
+
 
 
 
