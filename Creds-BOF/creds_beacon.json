@@ -36,6 +36,16 @@
             "message": "BOF implementation: credman",
             "example": "credman ",
             "exec": "execute bof $EXT_DIR()/_bin/credman.x64.o"
+        },
+        {
+            "type": "command",
+            "agents": ["beacon"],
+
+            "command": "hashdump",
+            "description": "Dump SAM hashes",
+            "message": "BOF implementation: hashdump",
+            "example": "hashdump ",
+            "exec": "execute bof $EXT_DIR()/_bin/hashdump.x64.o"
         }
     ]
 }
