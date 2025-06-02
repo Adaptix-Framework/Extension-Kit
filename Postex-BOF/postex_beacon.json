@@ -10,11 +10,26 @@
       "description": "Alternative screenshot capability that does not do fork n run by @codex_tf2",
       "message": "Task: Screenshot BOF",
       "example": "screenshot screen1 812",
-        "args": [
-          "STRING <-n note> (ScreenshotBOF) {Screenshot caption}",
-          "INT <-p pid> (0) {PID of the application whose window screenshot will be taken. If 0, then a full-screen screenshot}"
-        ],
-        "exec": "execute bof $EXT_DIR()/_bin/Screenshot.$ARCH().o $PACK_BOF(CSTR {note}, INT {pid})"
+      "args": [
+        "STRING <-n note> (ScreenshotBOF) {Screenshot caption}",
+        "INT <-p pid> (0) {PID of the application whose window screenshot will be taken. If 0, then a full-screen screenshot}"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/Screenshot.$ARCH().o $PACK_BOF(CSTR {note}, INT {pid})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "persistence_bof",
+      "description": "Windows persistence techniques with flexible options controlled via command-line arguments",
+      "message": "Task: Persistence BOF",
+      "example": "persistence add reg adaptix C:\\Users\\User\\demon.exe",
+      "args": [
+        "STRING <action> {Action to add or remove persistence 'add'/'rm'}",
+        "STRING <method> {Method to use for persistence 'reg','schtask' or 'startup'}",
+        "STRING <name> {Name identifier for the persistence entry}",
+        "STRING <path> {Full path to executable or script to run}"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/Persistence.$ARCH().o $PACK_BOF(CSTR {action}, CSTR {method}, CSTR {name}, CSTR {path})"
     }
   ]
 }
