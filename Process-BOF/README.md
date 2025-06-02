@@ -19,5 +19,16 @@ findobj <type> <name>
 
 ![](_img/02.png)
 
+
+
+## process
+
+Show detailed information from processes with established TCP and RDP connections.
+
+```
+process conn
+```
+
+
 ## Credits
 * C2-Tool-Collection - https://github.com/outflanknl/C2-Tool-Collection

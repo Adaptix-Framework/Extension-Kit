@@ -29,6 +29,24 @@
                     "exec": "execute bof $EXT_DIR()/_bin/findprochandle.$ARCH().o $PACK_BOF(WSTR {proc})"
                 }
             ]
+        },
+        {
+            "type": "command",
+            "agents": ["beacon"],
+
+            "command": "process",
+            "description": "Shows detailed information from processes",
+            "subcommands":
+            [
+                {
+                    "name": "conn",
+                    "description": "Shows detailed information from processes with established TCP and RDP connections",
+                    "example": "process conn",
+                    "message": "Task: List process connection (BOF)",
+
+                    "exec": "execute bof $EXT_DIR()/_bin/psc.$ARCH().o"
+                }
+            ]
         }
     ]
 }

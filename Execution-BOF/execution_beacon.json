@@ -11,7 +11,7 @@
       "example": "execute-assembly /opt/windows/Seatbelt.exe -group=user",
       "args": [
             "FILE <path>",
-            "STRING <params>"
+            "STRING <params> ()"
       ],
       "exec": "execute bof $EXT_DIR()/_bin/execute-assembly.$ARCH().o $PACK_BOF(BYTES {path}, CSTR {params})"
     }
