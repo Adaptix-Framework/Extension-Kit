@@ -1,0 +1,130 @@
+{
+  "name": "SQL-BOF",
+  "description": "BOFs for MSSQL server interaction",
+  "extensions": [
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-1434udp",
+      "description": "Obtain SQL Server connection information from the SQL Server Browser service (1434/UDP)",
+      "message": "Must provide an IP; hostnames are not accepted",
+      "example": "sql-1434udp [server IP]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-1434udp.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-adsi",
+      "description": "Obtain ADSI creds from ADSI linked server",
+      "message": "Port defaults to 4444. This gets opened on the SQL Server with the ADSI link, not the beaconing host",
+      "example": "sql-adsi [server] [ADSI_linkedserver] [opt: port] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-adsi.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-agentcmd",
+      "description": "Execute a system command using agent jobs",
+      "message": "Output is not returned",
+      "example": "sql-agentcmd [server] [command] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-agentcmd.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-agentstatus",
+      "description": "Enumerate SQL agent status and jobs",
+      "example": "sql-agentstatus [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-agentstatus.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-checkrpc",
+      "description": "Enumerate RPC status of linked servers",
+      "example": "sql-checkrpc [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-checkrpc.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-clr",
+      "description": "Load and execute .NET assembly in a stored procedure",
+      "example": "ql-clr [server] [dll_path] [function] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-clr.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-columns",
+      "description": "Enumerate columns within a table",
+      "example": "sql-columns [server] [table] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-columns.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-databases",
+      "description": "Enumerate databases on a server",
+      "example": "sql-databases [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-databases.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-impersonate",
+      "description": "Enumerate users that can be impersonated",
+      "example": "sql-impersonate [server] [opt: database]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-impersonate.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-info",
+      "description": "Gather information about the SQL server",
+      "example": "sql-info [server] [opt: database]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-info.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-links",
+      "description": "Enumerate linked servers",
+      "example": "sql-links [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-links.$ARCH().o $PACK_BOF(CSTR {params})"
+    }
+  ]
+}
