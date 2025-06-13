@@ -8,12 +8,25 @@
       "command": "execute-assembly",
       "description": "perform in process .NET assembly execution",
       "message": "Task: execute .NET assembly ",
-      "example": "execute-assembly /opt/windows/Seatbelt.exe -group=user",
+      "example": "execute-assembly /opt/windows/Seatbelt.exe AntiVirus AppLocker",
       "args": [
             "FILE <path>",
             "STRING <params> ()"
       ],
       "exec": "execute bof $EXT_DIR()/_bin/execute-assembly.$ARCH().o $PACK_BOF(BYTES {path}, CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "inline-ea",
+      "description": "Execute .NET assemblies in the current beacon process",
+      "message": "Synopsis: inline-ea /path/to/Assembly.exe [arguments...]",
+      "example": "inline-ea /opt/windows/Seatbelt.exe AntiVirus AppLocker",
+      "args": [
+            "FILE <path>",
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/inline-ea.$ARCH().o $PACK_BOF(BYTES {path}, WSTR {params})"
     }
   ]
 }
