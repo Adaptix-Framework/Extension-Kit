@@ -6,6 +6,8 @@
 #include "../_include/sql_modules.c"
 #include "../_include/sql_clr.c"
 
+#define BOF
+
 typedef struct ThreadData {
     SQLHSTMT 	stmt;
     char* 		function;
@@ -393,6 +395,16 @@ VOID go(
 	database = *database == 0 ? "master" : database;
 	link = *link  == 0 ? NULL : link;
 	impersonate = *impersonate == 0 ?  NULL : impersonate;
+
+	/*
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] Target server: %s\n", server);
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] Target database: %s\n", database);
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] Linked server: %s\n", link);	
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] Impersonate: %s\n", impersonate);
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] ADSI server: %s\n", adsiServer);
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] LDAP server port: %s\n", port);
+	return;
+	*/
 
 	if(!bofstart())
 	{
