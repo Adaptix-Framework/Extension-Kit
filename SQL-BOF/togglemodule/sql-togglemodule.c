@@ -3,6 +3,7 @@
 #include "../_include/sql.c"
 #include "../_include/sql_modules.c"
 
+#define BOF
 
 // rpc requires different functions/values than the other modules
 void ToggleRpc(char* server, char* database, char* link, char* impersonate, char* value)
@@ -133,6 +134,16 @@ VOID go(
 	database = *database == 0 ? "master" : database;
 	link = *link  == 0 ? NULL : link;
 	impersonate = *impersonate == 0 ?  NULL : impersonate;
+
+	/*
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] server: %s\n", server);
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] database: %s\n", database);
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] link: %s\n", link);
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] impersonate: %s\n", impersonate);
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] module: %s\n", module);
+	BeaconPrintf(CALLBACK_OUTPUT, "[*] value: %s\n", value);
+	return;
+	*/
 
 	if(!bofstart())
 	{
