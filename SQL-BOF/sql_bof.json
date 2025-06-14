@@ -8,11 +8,11 @@
       "command": "sql-1434udp",
       "description": "Obtain SQL Server connection information from the SQL Server Browser service (1434/UDP)",
       "message": "Must provide an IP; hostnames are not accepted",
-      "example": "sql-1434udp [server IP]",
+      "example": "sql-1434udp <ip>",
       "args": [
-            "STRING <params> ()"
+        "STRING <ip>"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-1434udp.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-1434udp.$ARCH().o $PACK_BOF(CSTR {ip})"
     },
     {
       "type": "command",
@@ -20,11 +20,16 @@
       "command": "sql-adsi",
       "description": "Obtain ADSI creds from ADSI linked server",
       "message": "Port defaults to 4444. This gets opened on the SQL Server with the ADSI link, not the beaconing host",
-      "example": "sql-adsi [server] [ADSI_linkedserver] [opt: port] [opt: database] [opt: linkedserver] [opt: impersonate]",
+      "example": "sql-adsi [server] [database] [linkedserver] [impersonate] [ADSI_linkedserver] [port]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (0)",
+            "STRING <impersonate> (0)",
+            "STRING <ADSI_linkedserver> (0)",
+            "STRING <port> (4444)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-adsi.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-adsi.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate} CSTR {ADSI_linkedserver} CSTR {port} )"
     },
     {
       "type": "command",
@@ -34,9 +39,13 @@
       "message": "Output is not returned",
       "example": "sql-agentcmd [server] [command] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server>",
+            "STRING <command>",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (0)",
+            "STRING <impersonate> (0)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-agentcmd.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-agentcmd.$ARCH().o $PACK_BOF(CSTR {server} CSTR {command} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type": "command",
@@ -45,9 +54,12 @@
       "description": "Enumerate SQL agent status and jobs",
       "example": "sql-agentstatus [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (0)",
+            "STRING <impersonate> (0)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-agentstatus.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-agentstatus.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type": "command",
@@ -56,9 +68,12 @@
       "description": "Enumerate RPC status of linked servers",
       "example": "sql-checkrpc [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (0)",
+            "STRING <impersonate> (0)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-checkrpc.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-checkrpc.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type": "command",
@@ -67,9 +82,14 @@
       "description": "Load and execute .NET assembly in a stored procedure",
       "example": "ql-clr [server] [dll_path] [function] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server>",
+            "STRING <dll_path>",
+            "STRING <function>",
+            "STRING <database> (master)",
+            "STRING <linkedserver> ()",
+            "STRING <impersonate> ()"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-clr.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-clr.$ARCH().o $PACK_BOF(CSTR {server} CSTR {dll_path} CSTR {function} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type": "command",
@@ -78,9 +98,12 @@
       "description": "Enumerate columns within a table",
       "example": "sql-columns [server] [table] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> ()",
+            "STRING <impersonate> ()"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-columns.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-columns.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type": "command",
@@ -89,9 +112,12 @@
       "description": "Enumerate databases on a server",
       "example": "sql-databases [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> ()",
+            "STRING <impersonate> ()"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-databases.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-databases.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type": "command",
@@ -100,20 +126,22 @@
       "description": "Enumerate users that can be impersonated",
       "example": "sql-impersonate [server] [opt: database]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-impersonate.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-impersonate.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database})"
     },
     {
       "type": "command",
       "agents": ["beacon"],
       "command": "sql-info",
       "description": "Gather information about the SQL server",
-      "example": "sql-info [server] [opt: database]",
+      "example": "sql-info [server] [database]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-info.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-info.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database})"
     },
     {
       "type": "command",
@@ -122,9 +150,12 @@
       "description": "Enumerate linked servers",
       "example": "sql-links [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (0)",
+            "STRING <impersonate> (0)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-links.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-links.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type": "command",
@@ -134,9 +165,13 @@
       "example": "sql-olecmd [server] [command] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "message": "Output is not returned",
       "args": [
-            "STRING <params> ()"
+            "STRING <server>",
+            "STRING <command>",
+            "STRING <database>",
+            "STRING <linkedserver> (0)",
+            "STRING <impersonate> (0)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-olecmd.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-olecmd.$ARCH().o $PACK_BOF(CSTR {server} CSTR {command} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
    },
     {
       "type": "command",
@@ -145,9 +180,13 @@
       "description": "Execute a custom SQL query",
       "example": "sql-query [server] [query] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server>",
+            "STRING <query>",
+            "STRING <database> (master)",
+            "STRING <linkedserver> ()",
+            "STRING <impersonate> ()"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-query.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-query.$ARCH().o $PACK_BOF(CSTR {server} CSTR {query} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
    },
     {
       "type": "command",
@@ -156,9 +195,13 @@
       "description": "Get the count of rows in a table",
       "example": "sql-rows [server] [table] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server>",
+            "STRING <table>",
+            "STRING <database> (master)",
+            "STRING <linkedserver> ()",
+            "STRING <impersonate> ()"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-rows.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-rows.$ARCH().o $PACK_BOF(CSTR {server} CSTR {table} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
    },
     {
       "type": "command",
@@ -167,9 +210,13 @@
       "description": "Search a table for a column name",
       "example": "sql-search [server] [keyword] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> ",
+            "STRING <keyword>",
+            "STRING <database> (master)",
+            "STRING <linkedserver> ()",
+            "STRING <impersonate> ()"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-search.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-search.$ARCH().o $PACK_BOF(CSTR {server} CSTR {keyword} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
    },
     {
       "type": "command",
@@ -178,9 +225,13 @@
       "description": "Coerce NetNTLM auth via xp_dirtree",
       "example": "sql-smb [server] [\\\\listener] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> ",
+            "STRING <listener>",
+            "STRING <database> (master)",
+            "STRING <linkedserver> ()",
+            "STRING <impersonate> ()"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-smb.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-smb.$ARCH().o $PACK_BOF(CSTR {server} CSTR {listener} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type": "command",
@@ -189,113 +240,140 @@
       "description": "Enumerate tables within a database",
       "example": "sql-tables [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (0)",
+            "STRING <impersonate> (0)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-tables.$ARCH().o $PACK_BOF(CSTR {params})"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-tables.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type" : "command",
       "agents": ["beacon"],
       "command": "sql-enablerpc",
       "description": "Enable RPC and RPC Out on linked server",
-      "example": "sql-enablerpc [server] [linkedserver] [opt: database] [opt: impersonate]",
+      "example": "sql-enablerpc [server] [opt: linkedserver] [opt: database] [opt: impersonate]",
             "args": [
-            "STRING <module> rpc",
-            "BOOL <value> 1",
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)",
+            "STRING <module> (rpc)",
+            "STRING <value> (TRUE)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate} CSTR {module} CSTR {value})"
     },
     {
       "type" : "command",
       "agents": ["beacon"],
       "command": "sql-disablerpc",
       "description": "Disable RPC and RPC Out on linked server",
-      "example": "sql-disablerpc [server] [linkedserver] [opt: database] [opt: impersonate]",
+      "example": "sql-disablerpc [server] [[opt: linkedserver] [opt: database] [opt: impersonate]",
             "args": [
-            "STRING <module> rpc",
-            "BOOL <value> 0",
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)",
+            "STRING <module> (rpc)",
+            "STRING <value> (FALSE)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate} CSTR {module} CSTR {value})"
     },
     {
       "type" : "command",
       "agents": ["beacon"],
       "command": "sql-enableclr",
       "description": "Enable CLR integration",
-      "example": "sql-enableclr [server] [linkedserver] [opt: database] [opt: impersonate]",
+      "example": "sql-enableclr [server] [opt: linkedserver] [opt: database] [opt: impersonate]",
             "args": [
-            "STRING <module> 'clr enabled'",
-            "BOOL <value> 1",
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)",
+            "STRING <module> (clr enabled)",
+            "STRING <value> (TRUE)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate} CSTR {module} CSTR {value})"
     },
     {
       "type" : "command",
       "agents": ["beacon"],
       "command": "sql-disableclr",
       "description": "Disable CLR integration",
-      "example": "sql-disableclr [server] [linkedserver] [opt: database] [opt: impersonate]",
+      "example": "sql-disableclr [server] [opt: linkedserver] [opt: database] [opt: impersonate]",
             "args": [
-            "STRING <module> 'clr enabled'",
-            "BOOL <value> 0",
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)",
+            "STRING <module> (clr enabled)",
+            "STRING <value> (FALSE)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate} CSTR {module} CSTR {value})"
     },
     {
       "type" : "command",
       "agents": ["beacon"],
       "command": "sql-enablexp",
       "description": "Enable xp_cmdshell",
-      "example": "sql-enablexp [server] [linkedserver] [opt: database] [opt: impersonate]",
+      "example": "sql-enablexp [server] [opt: linkedserver] [opt: database] [opt: impersonate]",
             "args": [
-            "STRING <module> xp_cmdshell",
-            "BOOL <value> 1",
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)",
+            "STRING <module> (xp_cmdshell)",
+            "STRING <value> (TRUE)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate} CSTR {module} CSTR {value})"
     },
     {
       "type" : "command",
       "agents": ["beacon"],
       "command": "sql-disablexp",
       "description": "Disable xp_cmdshell",
-      "example": "sql-disablexp [server] [linkedserver] [opt: database] [opt: impersonate]",
+      "example": "sql-disablexp [server] [opt: linkedserver] [opt: database] [opt: impersonate]",
             "args": [
-            "STRING <module> xp_cmdshell",
-            "BOOL <value> 0",
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)",
+            "STRING <module> (xp_cmdshell)",
+            "STRING <value> (TRUE)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate} CSTR {module} CSTR {value})"
     },
     {
       "type" : "command",
       "agents": ["beacon"],
       "command": "sql-enableole",
       "description": "Enable OLE Automation Procedures",
-      "example": "sql-enableole [server] [linkedserver] [opt: database] [opt: impersonate]",
+      "example": "sql-enableole [server] [opt: linkedserver] [opt: database] [opt: impersonate]",
             "args": [
-            "STRING <module> 'Ole Automation Procedures'",
-            "BOOL <value> 1",
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)",
+            "STRING <module> (Ole Automation Procedures)",
+            "STRING <value> (TRUE)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate} CSTR {module} CSTR {value})"
     },
     {
       "type" : "command",
       "agents": ["beacon"],
       "command": "sql-disableole",
       "description": "Disable OLE Automation Procedures",
-      "example": "sql-disableole [server] [linkedserver] [opt: database] [opt: impersonate]",
+      "example": "sql-disableole [server] [opt: linkedserver] [opt: database] [opt: impersonate]",
       "args": [
-            "STRING <module> 'Ole Automation Procedures'",
-            "BOOL <value> 0",
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)",
+            "STRING <module> (Ole Automation Procedures)",
+            "STRING <value> (FALSE)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {module} BOOL {value} CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-togglemodule.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate} CSTR {module} CSTR {value})"
     },
     {
       "type" : "command",
@@ -304,9 +382,10 @@
       "description": "Enumerate users that can be impersonated",
       "example": "sql-impersonate [server] [opt: database]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-users.$ARCH().o $PACK_BOF(CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-users.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database})"
     },
     {
       "type" : "command",
@@ -315,9 +394,12 @@
       "description": "Gather logged in user, mapped user and roles",
       "example": "sql-whoami [server] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "args": [
-            "STRING <params> ()"
+            "STRING <server> (localhost)",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (0)",
+            "STRING <impersonate> (0)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-whoami.$ARCH().o $PACK_BOF(CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-whoami.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
     {
       "type" : "command",
@@ -327,9 +409,13 @@
       "example": "sql-xpcmd [server] [command] [opt: database] [opt: linkedserver] [opt: impersonate]",
       "message": "Output returned unless using a linked server. WARNING: running a persistent command will cause the beacon to hang",
       "args": [
-            "STRING <params> ()"
+            "STRING <server>",
+            "STRING <command>",
+            "STRING <database> (master)",
+            "STRING <linkedserver> (0)",
+            "STRING <impersonate> (0)"
       ],
-      "exec": "execute bof $EXT_DIR()/_bin/sql-xpcmd.$ARCH().o $PACK_BOF(CSTR {params} )"
+      "exec": "execute bof $EXT_DIR()/_bin/sql-xpcmd.$ARCH().o $PACK_BOF(CSTR {server} CSTR {command} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     }
   ]
 }
