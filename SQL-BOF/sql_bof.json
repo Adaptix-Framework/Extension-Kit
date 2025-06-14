@@ -396,8 +396,8 @@
       "args": [
             "STRING <server> (localhost)",
             "STRING <database> (master)",
-            "STRING <linkedserver> (0)",
-            "STRING <impersonate> (0)"
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)"
       ],
       "exec": "execute bof $EXT_DIR()/_bin/sql-whoami.$ARCH().o $PACK_BOF(CSTR {server} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     },
@@ -412,8 +412,8 @@
             "STRING <server>",
             "STRING <command>",
             "STRING <database> (master)",
-            "STRING <linkedserver> (0)",
-            "STRING <impersonate> (0)"
+            "STRING <linkedserver> (NULL)",
+            "STRING <impersonate> (NULL)"
       ],
       "exec": "execute bof $EXT_DIR()/_bin/sql-xpcmd.$ARCH().o $PACK_BOF(CSTR {server} CSTR {command} CSTR {database} CSTR {linkedserver} CSTR {impersonate})"
     }
