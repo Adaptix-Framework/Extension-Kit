@@ -37,6 +37,14 @@ Inline-EA is a Beacon Object File (BOF) to execute .NET assemblies in  your curr
 inline-ea <binary> [params]
 ```
 
+The defaults are set as follows in `inline-ea/inline-ea.c` to change them, edit and recompile.
+
+```
+	BOOL patchExitflag = false;
+	BOOL patchAmsiflag = true;
+	BOOL patchEtwflag = true;
+```
+
 
 
 ## Credits
