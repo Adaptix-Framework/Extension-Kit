@@ -98,11 +98,12 @@ Situation Awareness Local BOFs. [More details](https://github.com/Adaptix-Framew
 
 ![](./SAR-BOF/_img/01.png)
 
-## SQL-BOF
+## SQL-BOF [More details](https://github.com/Adaptix-Framework/Extension-Kit/blob/main/SQL-BOF/README.md)
+
 
 A library of beacon object files to interact with remote SQL servers and data.
 
-![](./SQL-BOF/_img/0.png)
+![](./SQL-BOF/_img/01.png)
 
 # CONTRIBUTING
 
