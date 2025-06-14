@@ -4,6 +4,7 @@
 #include "../_include/sql_modules.c"
 #include "../_include/sql_agent.c"
 
+#define BOF
 
 void ExecuteAgentCommand(char* server, char* database, char* link, char* impersonate, char* command)
 {
@@ -180,10 +181,10 @@ VOID go(
 	BeaconDataParse(&parser, Buffer, Length);
 	
 	server	 	= BeaconDataExtract(&parser, NULL);
+	command 	= BeaconDataExtract(&parser, NULL);
 	database 	= BeaconDataExtract(&parser, NULL);
 	link 		= BeaconDataExtract(&parser, NULL);
 	impersonate = BeaconDataExtract(&parser, NULL);
-	command 	= BeaconDataExtract(&parser, NULL);
 
 	server = *server == 0 ? "localhost" : server;
 	database = *database == 0 ? "master" : database;
