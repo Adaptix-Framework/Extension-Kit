@@ -4,6 +4,14 @@
 
 /*BOF Defs*/
 #define intAlloc(size) KERNEL32$HeapAlloc(KERNEL32$GetProcessHeap(), HEAP_ZERO_MEMORY, size)
+#define intFree(addr) KERNEL32$HeapFree(KERNEL32$GetProcessHeap(), 0, addr)
+#define intRealloc(ptr, size) (ptr) ? KERNEL32$HeapReAlloc(KERNEL32$GetProcessHeap(), HEAP_ZERO_MEMORY, ptr, size) : KERNEL32$HeapAlloc(KERNEL32$GetProcessHeap(), HEAP_ZERO_MEMORY, size)
+BOOL patchETW(BOOL revertETW);
+
+// Define _TRUNCATE if not already defined
+#ifndef _TRUNCATE
+#define _TRUNCATE ((size_t)-1)
+#endif
 
 //MSVCRT
 WINBASEAPI void* WINAPI MSVCRT$malloc(SIZE_T);
@@ -19,6 +27,7 @@ WINBASEAPI char* WINAPI MSVCRT$strrchr(char * str);
 WINBASEAPI int __cdecl MSVCRT$_open_osfhandle (intptr_t osfhandle, int flags);
 WINBASEAPI int __cdecl MSVCRT$_dup2( int fd1, int fd2 );
 WINBASEAPI int __cdecl MSVCRT$_close(int fd);
+WINBASEAPI void __cdecl MSVCRT$free(void *_Memory);
 //KERNEL32
 WINBASEAPI HANDLE WINAPI KERNEL32$GetProcessHeap();
 WINBASEAPI void * WINAPI KERNEL32$HeapAlloc (HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes);
@@ -31,6 +40,22 @@ WINBASEAPI HANDLE WINAPI KERNEL32$CreateEventA(LPSECURITY_ATTRIBUTES lpEventAttr
 DECLSPEC_IMPORT HGLOBAL KERNEL32$GlobalAlloc(UINT uFlags, SIZE_T dwBytes);
 DECLSPEC_IMPORT HGLOBAL KERNEL32$GlobalFree(HGLOBAL hMem);
 DECLSPEC_IMPORT BOOL WINAPI KERNEL32$VirtualProtect (PVOID, DWORD, DWORD, PDWORD);
+WINBASEAPI BOOL WINAPI KERNEL32$HeapFree (HANDLE, DWORD, PVOID);
+WINBASEAPI LPVOID WINAPI KERNEL32$HeapReAlloc (HANDLE hHeap, DWORD dwFlags, LPVOID lpMem, SIZE_T dwBytes);
+WINBASEAPI DWORD WINAPI KERNEL32$GetLastError (VOID);
+WINBASEAPI DWORD WINAPI KERNEL32$WaitForSingleObject (HANDLE hHandle, DWORD dwMilliseconds);
+WINBASEAPI HANDLE WINAPI KERNEL32$CreateMutexA(LPSECURITY_ATTRIBUTES lpMutexAttributes, BOOL bInitialOwner, LPCSTR lpName);
+WINBASEAPI BOOL WINAPI KERNEL32$ReleaseMutex(HANDLE hMutex);
+WINBASEAPI BOOL WINAPI KERNEL32$CloseHandle(HANDLE hObject);
+
+WINBASEAPI BOOL WINAPI KERNEL32$FreeLibrary(HMODULE hLibModule);
+WINBASEAPI HMODULE WINAPI KERNEL32$LoadLibraryA(LPCSTR lpLibFileName);
+WINBASEAPI HMODULE WINAPI KERNEL32$GetModuleHandleA(LPCSTR lpModuleName);
+WINBASEAPI FARPROC WINAPI KERNEL32$GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
+WINBASEAPI HANDLE WINAPI KERNEL32$GetCurrentProcess(VOID);
+WINBASEAPI VOID WINAPI KERNEL32$GetSystemInfo(LPSYSTEM_INFO lpSystemInfo);
+WINBASEAPI SIZE_T WINAPI KERNEL32$VirtualQuery(LPCVOID lpAddress, PMEMORY_BASIC_INFORMATION lpBuffer, SIZE_T dwLength);
+
 //SHELL32
 WINBASEAPI LPWSTR* WINAPI SHELL32$CommandLineToArgvW(LPCWSTR lpCmdLine, int* pNumArgs);
 //MSCOREE
@@ -48,7 +73,7 @@ WINBASEAPI BSTR WINAPI OLEAUT32$SysAllocString(const OLECHAR* psz);
 #define intZeroMemory(addr,size) memset((addr),0,size)
 #define intAlloc(size) KERNEL32$HeapAlloc(KERNEL32$GetProcessHeap(), HEAP_ZERO_MEMORY, size)
 #define memset MSVCRT$memset
-#define stdout (__acrt_iob_func(1))
+//#define stdout (__acrt_iob_func(1))
 #define STATUS_SUCCESS 0
 #define NtCurrentProcess() ( (HANDLE)(LONG_PTR) -1 )
 
