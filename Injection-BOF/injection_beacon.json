@@ -29,26 +29,6 @@
         "FILE <shellcode>"
       ],
       "exec": "execute bof $EXT_DIR()/_bin/inject_sec.$ARCH().o $PACK_BOF(INT {pid}, BYTES {shellcode})"
-    },
-    {
-      "type": "command",
-      "agents": ["beacon"],
-      "command": "inject-migrate",
-      "description": "Advanced cross-architecture process injection with automatic detection. Supports 32-bit to 64-bit and 64-bit to 32-bit migration. Falls back to process spawning when direct injection fails. Use PID 0 to spawn a new process in the current architecture.",
-      "message": "Task: Cross-architecture injection with automatic target detection and fallback spawning",
-      "example": "inject-migrate 808 /tmp/shellcode.bin",
-      "args": [
-        "INT <pid>",
-        "FILE <shellcode>"
-      ],
-      "notes": [
-        "PID 0: Spawns a new notepad.exe process and injects into it",
-        "Automatic architecture detection for target process",
-        "Fallback to process spawning if cross-architecture injection fails",
-        "Shellcode must match target process architecture (x86 for 32-bit, x64 for 64-bit)",
-        "Enhanced synchronization ensures shellcode executes before process termination"
-      ],
-      "exec": "execute bof $EXT_DIR()/_bin/inject_migrate.$ARCH().o $PACK_BOF(INT {pid}, BYTES {shellcode})"
     }
   ]
 }

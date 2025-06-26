@@ -1,11 +1,6 @@
 all: bof
+
 bof:
-	@(mkdir -p _bin 2>/dev/null) && echo 'creating _bin directory' || echo '_bin directory exists'
-	@(x86_64-w64-mingw32-gcc -I _include -masm=intel -Wall -Os -c inject_cfg/inject_cfg.c -o _bin/inject_cfg.x64.o && x86_64-w64-mingw32-strip --strip-unneeded _bin/inject_cfg.x64.o) && echo '[*] inject_cfg (x64)' || echo '[X] inject_cfg (x64)'
-	@(i686-w64-mingw32-gcc -I _include -masm=intel -Wall -Os -c inject_cfg/inject_cfg.c -o _bin/inject_cfg.x32.o && i686-w64-mingw32-strip --strip-unneeded _bin/inject_cfg.x32.o) && echo '[*] inject_cfg (x86)' || echo '[X] inject_cfg (x86)'
-	@(x86_64-w64-mingw32-gcc -w -Wno-int-conversion -Wno-incompatible-pointer-types -I _include -Os -c inject_sec/inject_sec.c -o _bin/inject_sec.x64.o -DBOF && x86_64-w64-mingw32-strip --strip-unneeded _bin/inject_sec.x64.o) && echo '[*] inject_sec (x64)' || echo '[X] inject_sec (x64)'
-	@(i686-w64-mingw32-gcc -w -Wno-int-conversion -Wno-incompatible-pointer-types -I _include -Os -c inject_sec/inject_sec.c -o _bin/inject_sec.x32.o -DBOF && i686-w64-mingw32-strip --strip-unneeded _bin/inject_sec.x32.o) && echo '[*] inject_sec (x86)' || echo '[X] inject_sec (x86)'
-	@(x86_64-w64-mingw32-gcc -w -Wno-int-conversion -Wno-incompatible-pointer-types -I _include -Os -c inject_migrate/inject_migrate.c -o _bin/inject_migrate.x64.o -DBOF && x86_64-w64-mingw32-strip --strip-unneeded _bin/inject_migrate.x64.o) && echo '[*] inject_migrate (x64)' || echo '[X] inject_migrate (x64)'
-	@(i686-w64-mingw32-gcc -w -Wno-int-conversion -Wno-incompatible-pointer-types -I _include -Os -c inject_migrate/inject_migrate.c -o _bin/inject_migrate.x32.o -DBOF && i686-w64-mingw32-strip --strip-unneeded _bin/inject_migrate.x32.o) && echo '[*] inject_migrate (x86)' || echo '[X] inject_migrate (x86)'
-	@(x86_64-w64-mingw32-gcc -w -Wno-int-conversion -Wno-incompatible-pointer-types -mno-stack-arg-probe -I _include -c inject_dump/inject_dump.c -o _bin/inject_dump.x64.o -DBOF && x86_64-w64-mingw32-strip --strip-unneeded _bin/inject_dump.x64.o) && echo '[*] inject_dump (x64)' || echo '[X] inject_dump (x64)'
-	@(i686-w64-mingw32-gcc -w -Wno-int-conversion -Wno-incompatible-pointer-types -mno-stack-arg-probe -I _include -c inject_dump/inject_dump.c -o _bin/inject_dump.x32.o -DBOF && i686-w64-mingw32-strip --strip-unneeded _bin/inject_dump.x32.o) && echo '[*] inject_dump (x86)' || echo '[X] inject_dump (x86)'
+	@(mkdir _bin 2>/dev/null) && echo 'creating _bin directory' || echo '_bin directory exists'
+	@(x86_64-w64-mingw32-gcc -I _include -masm=intel -Wall -Os -c inject_cfg/inject_cfg.c -o _bin/inject_cfg.x64.o && x86_64-w64-mingw32-strip --strip-unneeded _bin/inject_cfg.x64.o) && echo '[*] inject_cfg' || echo '[X] inject_cfg'
+	@(x86_64-w64-mingw32-gcc -w -Wno-int-conversion -Wno-incompatible-pointer-types -I _include -Os -c inject_sec/inject_sec.c -o _bin/inject_sec.x64.o -DBOF && x86_64-w64-mingw32-strip --strip-unneeded _bin/inject_sec.x64.o) && echo '[*] inject_sec' || echo '[X] inject_sec'
