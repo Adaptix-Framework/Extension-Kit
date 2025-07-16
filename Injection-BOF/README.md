@@ -27,6 +27,15 @@ inject-sec <pid> <shellcode file>
 
 
 
+## inject-apc
+
+Injects desired shellcode into Beacon memory using APC injection
+```
+inject-apc <shellcode file>
+```
+
+
+
 ## Credits
 * secinject - https://github.com/apokryptein/secinject
 * DataInject-BOF - https://github.com/iilegacyyii/DataInject-BOF
