@@ -7,7 +7,7 @@
       "agents": ["beacon"],
 
       "command": "inject-cfg",
-      "description": "Inject shellcode into a target process and hijack execution via overwriting combase.dll!__guard_check_icall_fptr",
+      "description": "Injects desired shellcode into a target process and hijack execution via overwriting combase.dll!__guard_check_icall_fptr",
       "message": "Task: Executing DataInject-BOF by @0xLegacyy",
       "example": "inject-cfg 808 /tmp/shellcode.bin",
       "args": [
@@ -29,6 +29,19 @@
         "FILE <shellcode>"
       ],
       "exec": "execute bof $EXT_DIR()/_bin/inject_sec.$ARCH().o $PACK_BOF(INT {pid}, BYTES {shellcode})"
+    },
+    {
+      "type": "command",
+      "agents": ["beacon"],
+
+      "command": "inject-apc",
+      "description": "Injects desired shellcode into Beacon memory using APC injection",
+      "message": "Task: inject shellcode (APC injection)",
+      "example": "inject-apc /tmp/shellcode.bin",
+      "args": [
+        "FILE <shellcode>"
+      ],
+      "exec": "execute bof $EXT_DIR()/_bin/inject_apc.$ARCH().o $PACK_BOF(BYTES {shellcode})"
     }
   ]
 }
