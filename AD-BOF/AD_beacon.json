@@ -9,7 +9,7 @@
             "command": "ldapsearch",
             "description": "Executes LDAP query",
             "message": "BOF implementation: ldapsearch",
-            "example": "ldapsearch (objectClass=*) -attributes *,ntsecuritydescriptor -count 40 -scope 2 -hostname DC1",
+            "example": "ldapsearch (objectClass=*) --attributes *,ntsecuritydescriptor --count 40 --scope 2 --hostname DC1",
             "args": [
                 "STRING <query>",
                 "STRING <--attributes attributes> (*) {The attributes to retrieve}",
@@ -17,7 +17,7 @@
                 "INT <--scope scope> (3) {The scope to use: 1 = BASE, 2 = LEVEL, 3 = SUBTREE}",
                 "STRING <--dc dc> (automatic DC resolution) {Hostname or IP to perform the LDAP connection on}",
                 "STRING <--dn dn> (automatic DN resolution) {The LDAP query base}",
-                "BOOL <-ldaps> (false) {Using of LDAPS}"
+                "BOOL <--ldaps> (false) {Using of LDAPS}"
             ],
             "exec": "execute bof $EXT_DIR()/_bin/ldapsearch.$ARCH().o $PACK_BOF(WSTR {query}, CSTR {attributes}, INT {count}, INT {scope}, CSTR {dc}, CSTR {dn}, INT {ldaps})"
         }
