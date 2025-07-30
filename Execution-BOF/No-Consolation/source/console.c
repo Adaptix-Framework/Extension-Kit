@@ -65,6 +65,11 @@ BOOL allocate_console(
 BOOL redirect_std_out_err_for_mingw(
     IN PLOADED_PE_INFO peinfo)
 {
+#ifdef _UCRT
+    (void)peinfo;
+    return TRUE;
+#else
+
     FILE* file = NULL;
 
     DPRINT("redirect_std_out_err_for_mingw");
@@ -155,6 +160,7 @@ BOOL redirect_std_out_err_for_mingw(
     }
 
     return TRUE;
+#endif
 }
 
 /*
