@@ -34,6 +34,16 @@ inject-sec <pid> <shellcode file>
 
 
 
+## inject-poolparty
+
+Injects desired shellcode into target process using pool party
+```
+inject-poolparty <pid> <shellcode file> <technique id>
+```
+
+
+
 ## Credits
 * secinject - https://github.com/apokryptein/secinject
 * DataInject-BOF - https://github.com/iilegacyyii/DataInject-BOF
+* PoolParty - https://github.com/SafeBreach-Labs/PoolParty
