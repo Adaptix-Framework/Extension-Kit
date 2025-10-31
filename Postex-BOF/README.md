@@ -36,6 +36,44 @@ The **Screenshot** item will be added to the **Access** menu in the Sessions Tab
 
 
 
+## SauronEyeBOF
+
+A file search tool ported from SauronEye to BOF format. Searches directories for files containing specific keywords:
+- Search files by name patterns (supports wildcards * and ?)
+- Filter by file extensions
+- Filter by file modification date
+- Exclude system directories (Windows, AppData, Program Files)
+- Configurable max file size
+
+```
+sauroneye [-d directories] [-f filetypes] [-k keywords] [-c] [-m maxfilesize] [-s] [-b beforedate] [-a afterdate] [-v]
+```
+
+Options:
+- `-d directories`: Comma-separated list of directories to search (default: C:\)
+- `-f filetypes`: Comma-separated list of file extensions (default: .txt,.docx)
+- `-k keywords`: Comma-separated list of keywords with wildcards (default: none - matches all filenames). Used for searching in filenames and/or file contents
+- `-c`: Search file contents for keywords. When enabled, searches inside files for keywords in addition to searching filenames
+- `-m maxfilesize`: Max file size in KB for content search (default: 1024)
+- `-s`: Search in system directories (default: false)
+- `-b beforedate`: Filter files modified before date (format: dd.MM.yyyy)
+- `-a afterdate`: Filter files modified after date (format: dd.MM.yyyy)
+- `-v`: Check for VBA macros in Office 2003 files (not yet implemented)
+
+Examples:
+```
+# Search only on C:\ drive (default)
+sauroneye -f .docx
+
+# Search on multiple drives
+sauroneye -d C:\,D:\ -f .txt,.docx -k secret*,password*
+
+# Search specific directories
+sauroneye -d C:\Users,D:\Documents,E:\Backup -f .txt,.docx,.xlsx -k pass*,secret* -b 2024-01-01
+```
+
+
+
 ## Credits
 * ScreenshotBOF - https://github.com/CodeXTF2/ScreenshotBOF
 * OperatorsKit - https://github.com/REDMED-X/OperatorsKit
