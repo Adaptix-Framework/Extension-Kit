@@ -69,7 +69,6 @@ cmd_hashdump.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
             ax.credentials_add(match[1], match[2], "", "ntlm", "", "SAM", `${computer} (${address})`);
         }
 
-        if(task.message != "BOF finished" && task.index != 0) { task.message = ""; }
         return task;
     }
     let bof_path = ax.script_dir() + "_bin/hashdump." + ax.arch(id) + ".o";
@@ -77,7 +76,10 @@ cmd_hashdump.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: hashdump", hook);
 });
 
-var group_test = ax.create_commands_group("Creds-BOF", [cmd_askcreds, cmd_autologon, cmd_credman, cmd_get_ntlm, cmd_hashdump, cmd_cookie_monster, cmd_nanodump, cmd_nanodump_ppl_dump, cmd_nanodump_ppl_medic, cmd_nanodump_ssp]);
+var group_test = ax.create_commands_group("Creds-BOF", [
+    cmd_askcreds, cmd_autologon, cmd_credman, cmd_get_ntlm, cmd_hashdump, cmd_cookie_monster,
+    cmd_nanodump, cmd_nanodump_ppl_dump, cmd_nanodump_ppl_medic, cmd_nanodump_ssp
+]);
 ax.register_commands_group(group_test, ["beacon", "gopher"], ["windows"], []);
 
 

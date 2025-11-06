@@ -5,7 +5,7 @@ _cmd_asreproasting.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/asreproasting." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/asreproasting." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus ASREPROASTING");
 });
@@ -16,7 +16,7 @@ _cmd_asktgt.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/asktgt." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/asktgt." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus ASKTGT");
 });
@@ -27,7 +27,7 @@ _cmd_asktgs.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/asktgs." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/asktgs." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus ASKTGS");
 });
@@ -38,7 +38,7 @@ _cmd_changepw.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/changepw." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/changepw." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus CHANGEPW");
 });
@@ -49,7 +49,7 @@ _cmd_describe.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/describe." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/describe." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus DESCRIBE");
 });
@@ -60,7 +60,7 @@ _cmd_dump.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/dump." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/dump." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus DUMP");
 });
@@ -71,7 +71,7 @@ _cmd_hash.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/hash." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/hash." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus HASH");
 });
@@ -82,7 +82,7 @@ _cmd_kerberoasting.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/kerberoasting." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/kerberoasting." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus KERBEROASTING");
 });
@@ -93,7 +93,7 @@ _cmd_klist.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/klist." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/klist." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus KLIST");
 });
@@ -104,7 +104,7 @@ _cmd_ptt.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/ptt." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/ptt." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus PTT");
 });
@@ -115,7 +115,7 @@ _cmd_purge.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/purge." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/purge." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus PURGE");
 });
@@ -126,7 +126,7 @@ _cmd_renew.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/renew." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/renew." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus RENEW");
 });
@@ -137,7 +137,7 @@ _cmd_s4u.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/s4u." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/s4u." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus S4U");
 });
@@ -148,7 +148,7 @@ _cmd_cross_s4u.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/cross_s4u." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/cross_s4u." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus CROSS_S4U");
 });
@@ -159,7 +159,7 @@ _cmd_tgtdeleg.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/tgtdeleg." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/tgtdeleg." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus TGTDELEG");
 });
@@ -170,12 +170,13 @@ _cmd_triage.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
-    let bof_path = ax.script_dir() + "_bin/triage." + ax.arch(id) + ".o";
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/triage." + ax.arch(id) + ".o";
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus TRIAGE");
 });
 
 var cmd_kerbeus = ax.create_command("kerbeus", "Kerberos abuse (kerbeus BOF)");
+
 cmd_kerbeus.addSubCommands([_cmd_asreproasting, _cmd_asktgt, _cmd_asktgs, _cmd_changepw, _cmd_dump, _cmd_hash, _cmd_kerberoasting, _cmd_klist, _cmd_ptt, _cmd_purge, _cmd_describe, _cmd_renew, _cmd_s4u, _cmd_cross_s4u, _cmd_tgtdeleg, _cmd_triage]);
 
 var group_kerbeus = ax.create_commands_group("Kerbeus-BOF", [cmd_kerbeus]);

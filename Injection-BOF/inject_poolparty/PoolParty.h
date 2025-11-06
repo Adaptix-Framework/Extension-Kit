@@ -58,6 +58,8 @@ WINBASEAPI errno_t      __cdecl  MSVCRT$wcscpy_s(wchar_t *_Dst, rsize_t _DstSize
 WINBASEAPI void        *__cdecl  MSVCRT$realloc(void *_Memory, size_t _NewSize);
 WINBASEAPI size_t       __cdecl  MSVCRT$wcslen(const wchar_t *_Str);
 
+// Structs
+
 typedef struct _TP_TASK_CALLBACKS
 {
     void* ExecuteCallback;
@@ -789,6 +791,10 @@ typedef NTSTATUS(NTAPI* _ZwAssociateWaitCompletionPacket)(
     PBOOLEAN AlreadySignaled
     );
 
+// ----------------------------------------------------------------------------------------------------
+
+// Functions
+
 HANDLE hIoCompletion = NULL;
 HANDLE hTpWorkerFactory = NULL;
 HANDLE hIRTimer = NULL;
@@ -861,6 +867,35 @@ WORKER_FACTORY_BASIC_INFORMATION GetWorkerFactoryBasicInformation() {
     return WorkerFactoryInformation;
 }
 
+void RtlInitUnicodeString(PUNICODE_STRING DestinationString, PCWSTR SourceString)
+{
+    if (!DestinationString) return;
+
+    if (!SourceString) {
+        DestinationString->Length = 0;
+        DestinationString->MaximumLength = 0;
+        DestinationString->Buffer = NULL;
+        return;
+    }
+
+    /* Compute character length, then clamp so (len+1)*sizeof(WCHAR) fits in USHORT */
+    size_t cch = MSVCRT$wcslen(SourceString);
+
+    /* Max WCHAR count that allows room for the NUL in USHORT bytes */
+    size_t max_cch_with_nul = (USHRT_MAX / sizeof(wchar_t));
+    if (max_cch_with_nul > 0) {
+        size_t max_cch = max_cch_with_nul - 1; /* leave space for the terminator */
+        if (cch > max_cch) cch = max_cch;
+    }
+
+    /* Set fields (Length/MaximumLength are in BYTES) */
+    DestinationString->Length = (unsigned short)(cch * sizeof(wchar_t));
+    DestinationString->MaximumLength = (unsigned short)((cch + 1) * sizeof(wchar_t));
+
+    /* Official RtlInitUnicodeString stores the caller's pointer (no copy). */
+    DestinationString->Buffer = (PWSTR)SourceString; /* cast matches real API */
+}
+
 char generateRandomLetter() {
     int randomNumber = MSVCRT$rand() % 26;
     char randomLetter = 'A' + randomNumber;
@@ -888,3 +923,5 @@ wchar_t* generateRandomLettersW(int length) {
     randomLetters[length] = L'\0';
     return randomLetters;
 }
+
+// ----------------------------------------------------------------------------------------------------

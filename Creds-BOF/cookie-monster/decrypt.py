@@ -16,14 +16,14 @@ def cookies(key, file_location):
     try:
         conn = sqlite3.connect(file_location)
         cursor = conn.cursor()
-        cursor.execute('select host_key, "TRUE", path, "FALSE", expires_utc, name, CAST(encrypted_value AS BLOB) from cookies')
+        cursor.execute('select host_key, "TRUE", path, "FALSE", expires_utc, has_expires, name, CAST(encrypted_value AS BLOB) from cookies')
         values = cursor.fetchall()
-        for host_key, _, path, _, expires_utc, name, encrypted_value in values:
+        for host_key, _, path, _, expires_utc, has_expires, name, encrypted_value in values:
             print("Host: " + host_key)
             print("Path: " + path)
             print("Name: " + name)
             print("Cookie: " + decrypt_data(encrypted_value,key, False) + ";")
-            print("Expires: " + (datetime(1601, 1, 1) + timedelta(microseconds=expires_utc)).strftime('%b %d %Y %H:%M:%S'))
+            print("Expires: " + (datetime(1601, 1, 1) + timedelta(microseconds=expires_utc)).strftime('%b %d %Y %H:%M:%S')) if has_expires else -1
             print("")
     except sqlite3.Error as e:
         print("Error: Could not connect to database")
@@ -38,11 +38,11 @@ def cookies_for_editor(key, file_location):
     try:
         conn = sqlite3.connect(file_location)
         cursor = conn.cursor()
-        cursor.execute('select host_key, "TRUE", path, "FALSE", expires_utc, name, CAST(encrypted_value AS BLOB) from cookies')
+        cursor.execute('select host_key, "TRUE", path, "FALSE", expires_utc, has_expires, name, CAST(encrypted_value AS BLOB) from cookies')
         values = cursor.fetchall()
-        for host_key, _, path, _, expires_utc, name, encrypted_value in values:
+        for host_key, _, path, _, expires_utc, has_expires, name, encrypted_value in values:
             decrypted_value = decrypt_data(encrypted_value, key, False)
-            expiration_date = (datetime(1601, 1, 1) + timedelta(microseconds=expires_utc)).timestamp()
+            expiration_date = (datetime(1601, 1, 1) + timedelta(microseconds=expires_utc)).timestamp() if has_expires else -1
             cookie = {
                 "domain": host_key,
                 "expirationDate": expiration_date,
@@ -96,15 +96,15 @@ def cookies_for_cuddlephish(key, file_location):
         cursor = conn.cursor()
         cursor.execute('select creation_utc, host_key, top_frame_site_key, name, CAST(encrypted_value AS BLOB), path, expires_utc, is_secure, is_httponly, last_access_utc, has_expires, is_persistent, priority, samesite, source_scheme, source_port, last_update_utc, source_type, has_cross_site_ancestor from cookies')
         values = cursor.fetchall()
-        
+
         for creation_utc, host_key, top_frame_site_key, name, encrypted_value, path, expires_utc, is_secure, is_httponly, last_access_utc, has_expires, is_persistent, priority, samesite, source_scheme, source_port, last_update_utc, source_type, has_cross_site_ancestor in values:
             decrypted_value = decrypt_data(encrypted_value, key)
             expiration_date = (datetime(1601, 1, 1) + timedelta(microseconds=expires_utc)).timestamp() if has_expires else -1
-        
+
             samesite_map = {0: "None", 1: "Lax", 2: "Strict"}
-            
+
             source_scheme_map = {0: "NonSecure", 1: "Secure"}
-            
+
             cookie = {
                 'domain': host_key,
                 'expires': expiration_date,
@@ -112,10 +112,10 @@ def cookies_for_cuddlephish(key, file_location):
                 'name': name,
                 'path': path,
                 'priority': priority_map.get(priority, "Medium"),
-                'sameParty': False, 
+                'sameParty': False,
                 'sameSite': samesite_map.get(samesite, "None"),
                 'secure': bool(is_secure),
-                'session': not bool(is_persistent), 
+                'session': not bool(is_persistent),
                 'size': len(name) + len(decrypted_value),
                 'sourcePort': source_port,
                 'value': decrypted_value
@@ -154,7 +154,7 @@ def decrypt_data(encrypted_junk, key, password=False):
             print("Error: Could not decrypt password")
             print(e)
             return ""
-    if version in (b'v20'):    
+    if version in (b'v20'):
         try:
             nonce = encrypted_junk[3:3 + 12]
             if len(nonce) == 0:
@@ -193,10 +193,10 @@ def main():
     chromeAES = args.chrome_aes_key
     if chromeAES:
         base64ChromeKey = base64.b64encode(chromeAES.encode())
-    
+
     key = bytearray(base64.b64decode(base64_key).decode('utf-8').replace('\\x', ''), 'utf-8')
     # if key len is not 32, then its chrome 127+
-    # https://github.com/runassu/chrome_v20_decryption/issues/14#issuecomment-2708796234 
+    # https://github.com/runassu/chrome_v20_decryption/issues/14#issuecomment-2708796234
     key = binascii.unhexlify(key)
 
     if (chromeAES):
@@ -244,6 +244,6 @@ def main():
     else:
         print("Error: Invalid option")
         sys.exit(1)
-    
+
 if __name__ == "__main__":
     main()

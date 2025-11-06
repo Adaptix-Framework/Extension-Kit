@@ -71,8 +71,8 @@ DECLSPEC_IMPORT SECURITY_STATUS WINAPI NCRYPT$NCryptDecrypt (NCRYPT_KEY_HANDLE h
 DECLSPEC_IMPORT SECURITY_STATUS WINAPI NCRYPT$NCryptOpenKey (NCRYPT_PROV_HANDLE hProvider, NCRYPT_KEY_HANDLE *phKey, LPCWSTR pszKeyName, DWORD dwLegacyKeySpec, DWORD dwFlags);
 DECLSPEC_IMPORT SECURITY_STATUS WINAPI NCRYPT$NCryptOpenStorageProvider (NCRYPT_PROV_HANDLE *phProvider, LPCWSTR pszProviderName, DWORD dwFlags);
 
-#define IMPORT_RESOLVE FARPROC SHGetFolderPath = Resolver("shell32", "SHGetFolderPathA"); \
-    FARPROC PathAppend = Resolver("shlwapi", "PathAppendA"); \
+#define IMPORT_RESOLVE PFN_SHGetFolderPathA SHGetFolderPath = (PFN_SHGetFolderPathA)Resolver("shell32", "SHGetFolderPathA"); \
+    PFN_PathAppendA PathAppend = (PFN_PathAppendA)Resolver("shlwapi", "PathAppendA"); \
     FARPROC srand = Resolver("msvcrt", "srand");\
     FARPROC time = Resolver("msvcrt", "time");\
     FARPROC strnlen = Resolver("msvcrt", "strnlen");\
