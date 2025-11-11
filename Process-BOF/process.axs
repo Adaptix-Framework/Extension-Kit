@@ -14,7 +14,6 @@ _cmd_findobj_module.setPreHook(function (id, cmdline, parsed_json, ...parsed_lin
     let message = `Task: find process with module ${module}`;
 
     let cmd = "execute bof";
-    if (ax.agent_info(id, "type") == "kharon") { cmd = "exec-bof"};
 
     ax.execute_alias(id, cmdline, `${cmd} ${bof_path} ${bof_params}`, message);
 });
@@ -28,7 +27,6 @@ _cmd_findobj_prochandle.setPreHook(function (id, cmdline, parsed_json, ...parsed
     let message = `Task: find processes with open handle ${proc}`;
 
     let cmd = "execute bof";
-    if (ax.agent_info(id, "type") == "kharon") { cmd = "exec-bof"};
 
     ax.execute_alias(id, cmdline, `${cmd} ${bof_path} ${bof_params}`, message);
 });
@@ -43,7 +41,6 @@ _cmd_process_conn.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
     let message = "Task: List process connection (BOF)";
 
     let cmd = "execute bof";
-    if (ax.agent_info(id, "type") == "kharon") { cmd = "exec-bof"};
 
     ax.execute_alias(id, cmdline, `${cmd} ${bof_path}`, message);
 });

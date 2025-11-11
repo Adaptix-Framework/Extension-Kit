@@ -139,7 +139,7 @@ cmd_ldapq.addSubCommands([_cmd_ldapq_computers]);
 
 
 var group_exec = ax.create_commands_group("AD-BOF", [cmd_adwssearch, cmd_badtakeover, cmd_ldapsearch, cmd_ldapq]);
-ax.register_commands_group(group_exec, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_exec, ["beacon", "gopher", "kharon"], ["windows"], []);
 
 
 

@@ -53,7 +53,7 @@ cmd_inject_poolparty.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
 
 
 var group_exec = ax.create_commands_group("Injection-BOF", [cmd_inject_cfg, cmd_inject_sec, cmd_inject_poolparty]);
-ax.register_commands_group(group_exec, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_exec, ["beacon", "gopher", "kharon"], ["windows"], []);
 
 
 
@@ -135,4 +135,4 @@ let inject_action = menu.create_action("Inject shellcode", function(process_list
         break;
     }
 });
-menu.add_processbrowser(inject_action, ["beacon", "gopher"], ["windows"]);
+menu.add_processbrowser(inject_action, ["beacon", "gopher", "kharon"], ["windows"]);
