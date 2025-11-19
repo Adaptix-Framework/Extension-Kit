@@ -6,6 +6,10 @@
 #include "cookie-monster-bof.h"
 #include "adaptix.h"
 
+// Add missing typedef
+typedef HRESULT (WINAPI *PFN_SHGetFolderPathA)(HWND hwndOwner, int nFolder, HANDLE hToken, DWORD dwFlags, LPSTR pszPath);
+typedef BOOL (WINAPI *PFN_PathAppendA)(LPSTR pszPath, LPCSTR pMore);
+
 // Function declarations
 BOOL download_file(IN LPCSTR fileName, IN char fileData[], IN ULONG32 fileLength);
 BOOL GetBrowserFile(DWORD PID, CHAR *browserFile, CHAR *downloadFileName, CHAR * folderPath);
