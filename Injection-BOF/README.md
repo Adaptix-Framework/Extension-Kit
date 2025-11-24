@@ -52,7 +52,26 @@ A collection of process injection techniques abusing Windows Thread Pools. [**Th
 inject-poolparty <technique id> <pid> <shellcode file>
 ```
 
+
+
+## inject-32to64
+
+WOW64 to native x64 process injection. It allows a 32-bit (WOW64) process to inject x64 shellcode into a native 64-bit process by performing a context switch to 64-bit mode.
+
+- Injects x64 shellcode from a WOW64 process into a native 64-bit process
+- Performs context switching from 32-bit to 64-bit mode and back
+- Uses `RtlCreateUserThread` to create a remote thread in the target process
+
+```
+inject-32to64 <pid> <shellcode_file>
+```
+
+
+
+
 ## Credits
 * secinject - https://github.com/apokryptein/secinject
 * DataInject-BOF - https://github.com/iilegacyyii/DataInject-BOF
 * PoolParty - https://github.com/SafeBreach-Labs/PoolParty
+* https://maldevacademy.com/new/modules/64
+* https://github.com/rapid7/metasploit-framework/blob/master/external/source/shellcode/windows/x86/src/migrate/executex64.asm

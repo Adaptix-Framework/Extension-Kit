@@ -53,18 +53,18 @@ cmd_nanodump.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     if(parsed_json["-sd"]) { use_seclogon_duplicate = 1; }
     if(parsed_json["-sc"]) { spoof_callstack = 1; }
 
-    if(parsed_json.hasOwnProperty("PID")) {
+    if("PID" in parsed_json) {
         pid = parsed_json["PID"];
     }
-    if(parsed_json.hasOwnProperty("SPE_DUMP_FOLDER")) {
+    if("SPE_DUMP_FOLDER" in parsed_json) {
         silent_process_exit = parsed_json["SPE_DUMP_FOLDER"];
         use_silent_process_exit = 1;
     }
-    if(parsed_json.hasOwnProperty("SLR_BIN_PATH")) {
+    if("SLR_BIN_PATH" in parsed_json) {
         seclogon_leak_remote_binary = parsed_json["SLR_BIN_PATH"];
         use_seclogon_leak_remote = 1;
     }
-    if(parsed_json.hasOwnProperty("DUMP_PATH")) {
+    if("DUMP_PATH" in parsed_json) {
         dump_path = parsed_json["DUMP_PATH"];
         write_file = 1;
     }
@@ -219,8 +219,8 @@ cmd_nanodump_ssp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     if ( !(/^[A-Za-z]:\\.*/.test(dump_path)) ) { throw new Error("You need to provide the full path: " + dump_path); }
 
     if(parsed_json["--valid"]) { use_valid_sig = 1; }
-    if(parsed_json.hasOwnProperty("WRITE_DLL")) { write_dll_path = parsed_json["WRITE_DLL"]; }
-    if(parsed_json.hasOwnProperty("LOAD_DLL")) { load_dll_path = parsed_json["LOAD_DLL"]; }
+    if("WRITE_DLL" in parsed_json) { write_dll_path = parsed_json["WRITE_DLL"]; }
+    if("LOAD_DLL" in parsed_json) { load_dll_path = parsed_json["LOAD_DLL"]; }
 
     if( load_dll_path.length && write_dll_path.length ) { throw new Error("The options --write-dll and --load-dll cannot be used together"); }
     if( load_dll_path.length && !(/^[A-Za-z]:\\.*/.test(load_dll_path)) ) { throw new Error("You need to provide the full path: " + load_dll_path); }

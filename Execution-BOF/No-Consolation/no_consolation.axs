@@ -65,14 +65,14 @@ cmd_no_consolation.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     if(parsed_json["--dont-unload"]) { dont_unload = 1; }
     if(parsed_json["-lad"]) { load_all_deps = 1; }
 
-    if(parsed_json.hasOwnProperty("EXPORT_NAME")) { timeout = parsed_json["EXPORT_NAME"]; }
-    if(parsed_json.hasOwnProperty("FL_DLLS")) { free_libs = parsed_json["FL_DLLS"]; }
-    if(parsed_json.hasOwnProperty("PE_NAME")) { unload_pe = parsed_json["PE_NAME"]; }
-    if(parsed_json.hasOwnProperty("LADB_DLLS")) { load_all_deps_but = parsed_json["LADB_DLLS"]; }
-    if(parsed_json.hasOwnProperty("LD_DLLS")) { load_deps = parsed_json["LD_DLLS"]; }
-    if(parsed_json.hasOwnProperty("PATHS")) { search_paths = parsed_json["PATHS"]; }
+    if("EXPORT_NAME" in parsed_json) { timeout = parsed_json["EXPORT_NAME"]; }
+    if("FL_DLLS" in parsed_json) { free_libs = parsed_json["FL_DLLS"]; }
+    if("PE_NAME" in parsed_json) { unload_pe = parsed_json["PE_NAME"]; }
+    if("LADB_DLLS" in parsed_json) { load_all_deps_but = parsed_json["LADB_DLLS"]; }
+    if("LD_DLLS" in parsed_json) { load_deps = parsed_json["LD_DLLS"]; }
+    if("PATHS" in parsed_json) { search_paths = parsed_json["PATHS"]; }
 
-    if(parsed_json.hasOwnProperty("NUM_SECONDS")) {
+    if("NUM_SECONDS" in parsed_json) {
         timeout = parsed_json["NUM_SECONDS"];
         timeout_set = 1;
     }
@@ -115,7 +115,7 @@ cmd_no_consolation.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 
     if (path_set || name_set) {
         pecmdline = pename;
-        if(parsed_json.hasOwnProperty("args")) {
+        if("args" in parsed_json) {
             pecmdline += " " + parsed_json["args"];
         }
     }

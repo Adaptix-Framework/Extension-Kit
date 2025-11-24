@@ -38,6 +38,12 @@ badtakeover <target_ou> <new_dmsa_account> <curren sid> <target_user_dn> <domain
 
 
 
+## certi
+
+A library of beacon object files to interact with ADCS servers and certificates. [More details](https://github.com/Adaptix-Framework/Extension-Kit/blob/main/AD-BOF/ADCS-BOF/README.md)
+
+
+
 ## ldapsearch
 
 Execute LDAP searches (NOTE: specify *,ntsecuritydescriptor as attribute parameter if you want all attributes + base64 encoded ACL of the objects, this can then be resolved using BOFHound. Could possibly break pagination, although everything seemed fine during testing.)

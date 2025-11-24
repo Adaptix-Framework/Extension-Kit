@@ -55,7 +55,7 @@ cmd_dcom_potato.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let run_program = "";
 
     if(parsed_json["--token"]) { use_token = 1; }
-    if(parsed_json.hasOwnProperty("program")) { run_program = parsed_json["program"]; }
+    if("program" in parsed_json) { run_program = parsed_json["program"]; }
 
     if( (use_token && run_program.length) || (!use_token && run_program.length == 0) ) { throw new Error("Use only --token or --run"); }
 
