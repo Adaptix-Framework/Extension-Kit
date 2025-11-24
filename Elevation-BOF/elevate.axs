@@ -79,11 +79,11 @@ cmd_dcom_potato.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
 
 
 var group_test = ax.create_commands_group("Elevation-BOF", [cmd_getsystem, cmd_uacbybass, cmd_dcom_potato]);
-ax.register_commands_group(group_test, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_test, ["beacon", "gopher", "kharon"], ["windows"], []);
 
 
 
 /// MENU
 
 let system_access_action = menu.create_action("Get System", function(agents_id) { agents_id.forEach(id => ax.execute_command(id, "getsystem token")) });
-menu.add_session_access(system_access_action, ["beacon", "gopher"], ["windows"]);
+menu.add_session_access(system_access_action, ["beacon", "gopher", "kharon"], ["windows"]);

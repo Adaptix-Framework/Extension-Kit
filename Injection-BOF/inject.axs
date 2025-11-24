@@ -156,4 +156,4 @@ let inject_action = menu.create_action("Inject shellcode", function(process_list
         break;
     }
 });
-menu.add_processbrowser(inject_action, ["beacon", "gopher"], ["windows"]);
+menu.add_processbrowser(inject_action, ["beacon", "gopher", "kharon"], ["windows"]);
