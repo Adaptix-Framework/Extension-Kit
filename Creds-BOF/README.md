@@ -72,8 +72,15 @@ A flexible tool that creates a minidump of the LSASS process. [More details](htt
 
 
 
+## underlaycopy
+
+A low-level file copy tool that copies files using direct NTFS volume access, bypassing file locks and access restrictions. [More details](https://github.com/Adaptix-Framework/Extension-Kit/blob/main/Creds-BOF/UnderlayCopy-BOF/README.md)
+
+
+
 ## Credits
 * C2-Tool-Collection - https://github.com/outflanknl/C2-Tool-Collection
 * PrivCheck - https://github.com/ostrichgolf/PrivCheck
 * nanodump - https://github.com/fortra/nanodump
 * Get-NetNTLM - https://github.com/KingOfTheNOPs/Get-NetNTLM
+* UnderlayCopy-BOF - https://github.com/shashinma/UnderlayCopy-BOF
