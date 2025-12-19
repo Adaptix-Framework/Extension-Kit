@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <tlhelp32.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 WINBASEAPI WINBOOL WINAPI KERNEL32$CloseHandle(HANDLE hObject);
 WINBASEAPI HANDLE  WINAPI KERNEL32$CreateToolhelp32Snapshot(DWORD dwFlags, DWORD th32ProcessID);

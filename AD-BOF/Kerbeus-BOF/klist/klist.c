@@ -1,4 +1,4 @@
-#include "../_include/functions.c"
+#include "_include/functions.c"
 
 SYSTEMTIME ConvertToSystemtime(LARGE_INTEGER li) {
     FILETIME ft;

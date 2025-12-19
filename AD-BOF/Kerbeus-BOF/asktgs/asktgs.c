@@ -1,9 +1,9 @@
-#include "../_include/asn_decode.c"
-#include "../_include/asn_encode.c"
-#include "../_include/crypt_b64.c"
-#include "../_include/crypt_checksum.c"
-#include "../_include/crypt_dec.c"
-#include "../_include/connection.c"
+#include "_include/asn_decode.c"
+#include "_include/asn_encode.c"
+#include "_include/crypt_b64.c"
+#include "_include/crypt_checksum.c"
+#include "_include/crypt_dec.c"
+#include "_include/connection.c"
 
 void DisplayTicket( KRB_CRED cred, int indentLevel ) {
     DateTime starttime = cred.enc_part.ticket_info[0].starttime;

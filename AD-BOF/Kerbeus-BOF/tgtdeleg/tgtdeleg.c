@@ -1,7 +1,7 @@
-#include "../_include/asn_encode.c"
-#include "../_include/asn_decode.c"
-#include "../_include/crypt_b64.c"
-#include "../_include/crypt_dec.c"
+#include "_include/asn_encode.c"
+#include "_include/asn_decode.c"
+#include "_include/crypt_b64.c"
+#include "_include/crypt_dec.c"
 
 BOOL GetLsaHandle( HANDLE* hLsa ) {
     HANDLE hLsaLocal;

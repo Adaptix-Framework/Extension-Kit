@@ -5,7 +5,7 @@
 #include <string.h>
 #include <security.h>
 #include <stdint.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 WINBASEAPI void __cdecl MSVCRT$free(void *_Memory);
 WINBASEAPI size_t __cdecl MSVCRT$strlen(const char *_Str);

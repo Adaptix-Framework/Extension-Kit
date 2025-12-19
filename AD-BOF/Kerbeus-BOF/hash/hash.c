@@ -1,5 +1,5 @@
-#include "../_include/functions.c"
-#include "../_include/crypt_key.c"
+#include "_include/functions.c"
+#include "_include/crypt_key.c"
 
 void GenerateHashes(char* user, char* domain, char* password) {
     PRINT_OUT("[*] Input Password           : %s\n", password);

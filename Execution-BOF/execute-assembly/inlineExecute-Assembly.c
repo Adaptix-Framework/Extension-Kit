@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <evntprov.h>
 
-#include "../_include/beacon.h"
+#include "beacon.h"
 #include "inlineExecute-Assembly.h"
 
 #define CHUNK_SIZE 65535  // Optimal chunk size for transmission

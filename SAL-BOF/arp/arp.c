@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <iphlpapi.h>
-#include "../_include/bofdefs.h"
-#include "../_include/base.c"
+#include "bofdefs.h"
+#include "base.c"
 
 //DECLSPEC_IMPORT ULONG WINAPI IPHLPAPI$GetIpNetTable(PMIB_IPNETTABLE IpNetTable,PULONG SizePointer, BOOL Order);
 

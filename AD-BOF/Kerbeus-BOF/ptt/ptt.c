@@ -1,4 +1,4 @@
-#include "../_include/functions.c"
+#include "_include/functions.c"
 
 int base64_decode_char(char c) {
     if (c >= 'A' && c <= 'Z')

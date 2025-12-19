@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <stdbool.h>
-#include "../_include/beacon.h"
-#include "../_include/bofdefs.h"
+#include "beacon.h"
+#include "bofdefs.h"
 
 void go() {
     HKEY hKey;

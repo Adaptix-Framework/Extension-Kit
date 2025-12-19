@@ -7,6 +7,5 @@ bof:
 	@(x86_64-w64-mingw32-gcc -I _include -Os -c taskhound/taskhound.c -o _bin/taskhound.x64.o -DBOF -mno-stack-arg-probe && x86_64-w64-mingw32-strip --strip-unneeded _bin/taskhound.x64.o) && echo '[+] taskhound' || echo '[!] taskhound'
 	@(x86_64-w64-mingw32-gcc -I _include -Os -c quser/quser.c -o _bin/quser.x64.o -DBOF && x86_64-w64-mingw32-strip --strip-unneeded _bin/quser.x64.o) && echo '[+] quser' || echo '[!] quser'
 
-
 clean:
 	@(rm -rf _bin)

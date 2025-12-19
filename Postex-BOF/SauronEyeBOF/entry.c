@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sauroneye.h"
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 
 static BOOL buffer_contains(const char* buf, DWORD len, const char* pat) {

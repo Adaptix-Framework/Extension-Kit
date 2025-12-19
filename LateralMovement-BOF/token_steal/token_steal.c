@@ -1,7 +1,24 @@
 #include <windows.h>
 #include <ntsecapi.h>
-#include <ntdef.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
+
+typedef struct _OBJECT_ATTRIBUTES {
+	ULONG Length;
+	HANDLE RootDirectory;
+	PUNICODE_STRING ObjectName;
+	ULONG Attributes;
+	PVOID SecurityDescriptor;
+	PVOID SecurityQualityOfService;
+} OBJECT_ATTRIBUTES, *POBJECT_ATTRIBUTES;
+
+#define InitializeObjectAttributes( i, o, a, r, s ) {    \
+      (i)->Length = sizeof( OBJECT_ATTRIBUTES );         \
+      (i)->RootDirectory = r;                            \
+      (i)->Attributes = a;                               \
+      (i)->ObjectName = o;                               \
+      (i)->SecurityDescriptor = s;                       \
+      (i)->SecurityQualityOfService = NULL;              \
+   }
 
 typedef struct _CLIENT_ID
 {

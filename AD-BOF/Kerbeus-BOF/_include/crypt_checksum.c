@@ -1,5 +1,5 @@
 #pragma once
-#include "functions.c"
+#include "_include/functions.c"
 
 BOOL checksum(byte* key, int key_length, byte* data, int data_length, int chksumUsage, int keyUsage, byte** result, DWORD* size) {
     PKERB_CHECKSUM pCheckSum;

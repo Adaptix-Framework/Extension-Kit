@@ -1,4 +1,4 @@
-#include "../_include/functions.c"
+#include "_include/functions.c"
 
 HANDLE GetCurrentToken(DWORD DesiredAccess) {
     HANDLE hCurrentToken = NULL;

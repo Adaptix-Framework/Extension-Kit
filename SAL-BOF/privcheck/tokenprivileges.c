@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <stdio.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 #include "bofdefs.h"
 
 BOOL IsVulnerable(char * privilegeNameBuffer) {

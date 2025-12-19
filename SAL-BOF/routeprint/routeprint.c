@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <iphlpapi.h>
-#include "../_include/bofdefs.h"
-#include "../_include/base.c"
+#include "bofdefs.h"
+#include "base.c"
 
 #define IPBUF 17
 #define IN_ADDR_OF(x) *((struct in_addr *)&(x))

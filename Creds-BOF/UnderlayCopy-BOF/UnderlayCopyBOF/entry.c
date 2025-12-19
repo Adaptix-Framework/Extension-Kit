@@ -1,8 +1,8 @@
 #include <windows.h>
 #include <stdint.h>
-#include "../_include/beacon.h"
-#include "../_include/bofdefs.h"
-#include "../_include/adaptix.h"
+#include "beacon.h"
+#include "bofdefs.h"
+#include "adaptix.h"
 #include "underlaycopy.h"
 
 // Helper function to normalize path for CreateFileW (\\?\ prefix)

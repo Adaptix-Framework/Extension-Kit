@@ -2,7 +2,7 @@
 
 #include <windows.h>
 #include <stdio.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 WINBASEAPI int __cdecl MSVCRT$_snprintf(char * __restrict__ d, size_t n, const char * __restrict__ format, ...);
 DECLSPEC_IMPORT BOOL WINAPI ADVAPI32$OpenProcessToken(HANDLE, DWORD, PHANDLE);

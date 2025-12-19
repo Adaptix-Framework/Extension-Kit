@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 // Constants
 #define MAX_PATH_LENGTH 1024

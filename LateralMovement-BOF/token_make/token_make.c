@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 WINBASEAPI WINBOOL WINAPI ADVAPI32$LogonUserW(LPCWSTR lpszUsername, LPCWSTR lpszDomain, LPCWSTR lpszPassword, DWORD dwLogonType, DWORD dwLogonProvider, PHANDLE phToken );
 WINBASEAPI DWORD   WINAPI KERNEL32$GetLastError(VOID);

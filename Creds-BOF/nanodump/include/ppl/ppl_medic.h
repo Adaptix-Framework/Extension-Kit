@@ -176,7 +176,7 @@ BOOL run_ppl_medic_exploit(
 
 BOOL restart_waa_s_medic_svc();
 
-BOOL find_waa_s_medic_svc_base_named_objects_handle();
+BOOL find_waa_s_medic_svc_base_named_objects_handle(OUT PHANDLE BaseNamedObjectsHandle);
 
 BOOL find_saa_s_medic_svc_pid(
     IN LPDWORD Pid);

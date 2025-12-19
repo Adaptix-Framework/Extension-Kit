@@ -2,7 +2,7 @@
 #include "handle.h"
 #include "dinvoke.h"
 #include "syscalls.h"
-#include "../include/adaptix.h"
+#include "adaptix.h"
 
 #ifndef SSP
 

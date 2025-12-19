@@ -1,8 +1,8 @@
 #include <windows.h>
 #include <winbase.h>
 #include <iphlpapi.h>
-#include "../_include/bofdefs.h"
-#include "../_include/base.c"
+#include "bofdefs.h"
+#include "base.c"
 
 WINBASEAPI DWORD WINAPI IPHLPAPI$GetExtendedTcpTable(PVOID pTcpTable, PDWORD pdwSize, BOOL bOrder, ULONG ulAf, TCP_TABLE_CLASS TableClass, ULONG Reserved);
 WINBASEAPI DWORD WINAPI IPHLPAPI$GetExtendedUdpTable(PVOID pUdpTable, PDWORD pdwSize, BOOL bOrder, ULONG ulAf, UDP_TABLE_CLASS TableClass, ULONG Reserved);

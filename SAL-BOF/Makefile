@@ -15,12 +15,12 @@ bof:
 	@(x86_64-w64-mingw32-gcc -I _include -Os -c useridletime/useridletime.c -o _bin/useridletime.x64.o -DBOF && x86_64-w64-mingw32-strip --strip-unneeded _bin/useridletime.x64.o) && echo '[+] useridletime' || echo '[!] useridletime'
 	@(x86_64-w64-mingw32-gcc -I _include -Os -c whoami/whoami.c -o _bin/whoami.x64.o -DBOF && x86_64-w64-mingw32-strip --strip-unneeded _bin/whoami.x64.o) && echo '[+] whoami' || echo '[!] whoami'
 	@(python3 ./privcheck/download_vulnerable_driver_list.py)
-	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -o _bin/vulndrivers.x64.o privcheck/vulnerabledrivers.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/vulndrivers.x64.o) && echo '[+] vulndrivers' || echo '[!] vulndrivers build failed'
-	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -o _bin/alwayselevated.x64.o privcheck/alwaysinstallelevated.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/alwayselevated.x64.o) && echo '[+] alwayselevated' || echo '[!] alwayselevated build failed'
-	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -o _bin/hijackablepath.x64.o privcheck/hijackablepath.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/hijackablepath.x64.o) && echo '[+] hijackablepath' || echo '[!] hijackablepath build failed'
-	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -o _bin/tokenpriv.x64.o privcheck/tokenprivileges.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/tokenpriv.x64.o) && echo '[+] tokenpriv' || echo '[!] tokenpriv build failed'
-	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -o _bin/unattendfiles.x64.o privcheck/unattendfiles.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/unattendfiles.x64.o) && echo '[+] unattendfiles' || echo '[!] unattendfiles build failed'
-	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -o _bin/unquotedsvc.x64.o privcheck/unquotedsvcpath.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/unquotedsvc.x64.o) && echo '[+] unquotedsvc' || echo '[!] unquotedsvc build failed'
+	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -I _include -o _bin/vulndrivers.x64.o privcheck/vulnerabledrivers.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/vulndrivers.x64.o) && echo '[+] vulndrivers' || echo '[!] vulndrivers build failed'
+	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -I _include -o _bin/alwayselevated.x64.o privcheck/alwaysinstallelevated.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/alwayselevated.x64.o) && echo '[+] alwayselevated' || echo '[!] alwayselevated build failed'
+	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -I _include -o _bin/hijackablepath.x64.o privcheck/hijackablepath.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/hijackablepath.x64.o) && echo '[+] hijackablepath' || echo '[!] hijackablepath build failed'
+	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -I _include -o _bin/tokenpriv.x64.o privcheck/tokenprivileges.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/tokenpriv.x64.o) && echo '[+] tokenpriv' || echo '[!] tokenpriv build failed'
+	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -I _include -o _bin/unattendfiles.x64.o privcheck/unattendfiles.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/unattendfiles.x64.o) && echo '[+] unattendfiles' || echo '[!] unattendfiles build failed'
+	@(x86_64-w64-mingw32-gcc -w -Wno-incompatible-pointer-types -Os -s -c -I _include -o _bin/unquotedsvc.x64.o privcheck/unquotedsvcpath.c && x86_64-w64-mingw32-strip --strip-unneeded _bin/unquotedsvc.x64.o) && echo '[+] unquotedsvc' || echo '[!] unquotedsvc build failed'
 
 clean:
 	@(rm -rf _bin)

@@ -1,5 +1,5 @@
-#include "../_include/asn_decode.c"
-#include "../_include/crypt_b64.c"
+#include "_include/asn_decode.c"
+#include "_include/crypt_b64.c"
 
 void DisplayTicket( KRB_CRED cred, int indentLevel ) {
     DateTime starttime = cred.enc_part.ticket_info[0].starttime;

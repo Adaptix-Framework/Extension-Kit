@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <shlwapi.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 // define required winapi functions
 DECLSPEC_IMPORT WINBASEAPI VOID WINAPI KERNEL32$Sleep(DWORD dwMilliseconds);

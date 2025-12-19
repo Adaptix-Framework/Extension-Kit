@@ -7,7 +7,7 @@
 
 extern "C" {
 
-#include "../_include/beacon.h"
+#include "beacon.h"
 
     void go(char * args, unsigned long length);
 

@@ -2,8 +2,8 @@
 #include <windows.h>
 #include "bofdefs.h"
 #include "hive_parser.c"
-#include "../_include/bofdefs.h"
-#include "../_include/beacon.h"
+#include "bofdefs.h"
+#include "beacon.h"
 
 const BYTE ODD_PARITY[] = {
     1, 1, 2, 2, 4, 4, 7, 7, 8, 8, 11, 11, 13, 13, 14, 14,

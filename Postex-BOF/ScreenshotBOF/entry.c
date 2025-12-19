@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gdiplus.h>
-#include "../_include/adaptix.h"
+#include "adaptix.h"
 
 #pragma comment(lib, "User32.lib")
 #pragma comment(lib, "gdiplus.lib")

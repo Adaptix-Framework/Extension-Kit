@@ -5,7 +5,7 @@
 #include <security.h>
 
 #include "askcreds.h"
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 #define MAX_NAME 8192
 

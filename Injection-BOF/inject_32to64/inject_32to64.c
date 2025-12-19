@@ -5,7 +5,7 @@ References:
 */
 
 #include <windows.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 // Kernel32 Functions
 WINBASEAPI HANDLE WINAPI KERNEL32$OpenProcess(DWORD, BOOL, DWORD);

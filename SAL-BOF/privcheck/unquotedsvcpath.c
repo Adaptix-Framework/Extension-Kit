@@ -2,7 +2,7 @@
 #include <string.h>
 #include <shlwapi.h>
 #include "bofdefs.h"
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 
 void go() {

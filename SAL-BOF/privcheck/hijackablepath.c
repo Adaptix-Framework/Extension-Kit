@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <string.h>
 #include "bofdefs.h"
-#include "../_include/beacon.h"
+#include "beacon.h"
 #include <processthreadsapi.h>
 
 void go() {

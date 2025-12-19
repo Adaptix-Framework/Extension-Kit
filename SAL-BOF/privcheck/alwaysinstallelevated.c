@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <stdio.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 #include "bofdefs.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))

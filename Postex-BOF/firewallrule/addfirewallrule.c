@@ -2,7 +2,7 @@
 #include <windows.h>
 #include <netfw.h>
 #include "firewallrule.h"
-#include "../_include/beacon.h"
+#include "beacon.h"
 
 #pragma comment(lib, "comsuppw.lib")
 #pragma comment(lib, "Ole32.lib")

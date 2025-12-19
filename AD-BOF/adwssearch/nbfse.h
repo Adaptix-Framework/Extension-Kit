@@ -275,11 +275,9 @@ BOOL BuildEnumerateRequest(NBFSE_BUFFER *buf, const char *ldapFilter, const char
     if (!NBFSEBufferAppendByte(buf, DICT_ENVELOPE))
         return FALSE;
 
-    // xmlns:s="..."
     if (!NBFSEWriteDictionaryXmlnsAttribute(buf, "s", 0x04))
         return FALSE;
 
-    // xmlns:a="..."
     if (!NBFSEWriteDictionaryXmlnsAttribute(buf, "a", 0x06))
         return FALSE;
 
@@ -410,7 +408,6 @@ BOOL BuildEnumerateRequest(NBFSE_BUFFER *buf, const char *ldapFilter, const char
     if (!NBFSEWriteElement(buf, "wsen", "Enumerate"))
         return FALSE;
 
-    // <wsen:Filter Dialect="...">
     if (!NBFSEWriteElement(buf, "wsen", "Filter"))
         return FALSE;
     if (!NBFSEWriteShortAttribute(buf, "Dialect"))

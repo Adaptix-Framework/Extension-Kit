@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <windows.h>
-#include "../_include/beacon.h"
+#include "beacon.h"
 #include "bofdefs.h"
 
 void go() {
