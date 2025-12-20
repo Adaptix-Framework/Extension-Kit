@@ -39,7 +39,12 @@ _cmd_certi_req.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
 });
 
-
+var _cmd_certi_enum = ax.create_command("enum", "Enumerate ADCS templates", "certi enum");
+_cmd_certi_enum.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    let bof_path = ax.script_dir() + "_bin/ADCS/certi_enum." + ax.arch(id) + ".o";
+    let message = "Task: Enumerate ADCS templates";
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, message);
+});
 
 var cmd_certi = ax.create_command("certi", "ADCS BOF");
 cmd_certi.addSubCommands([ _cmd_certi_enum, _cmd_certi_req ]);
