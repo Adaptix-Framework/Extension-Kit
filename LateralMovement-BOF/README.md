@@ -44,8 +44,13 @@ Choose services that:
 Use WinRM to execute commands on other systems
 
 ```
-invoke winrm <computer> <command>
+invoke winrm <computer> <command> [-t timeout_ms] [-b]
 ```
+
+* `-t` - Timeout in milliseconds to wait for output (0 = infinite)
+* `-b` - Detach command (cmd.exe /c start /b), no output capture
+
+Note: when using flags and a command with spaces, quote the command and place flags after it.
 
 
 

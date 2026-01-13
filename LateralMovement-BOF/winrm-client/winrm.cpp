@@ -7,6 +7,7 @@ extern "C" {
 
 WINBASEAPI DWORD  WINAPI KERNEL32$GetLastError(VOID);
 WINBASEAPI INT    WINAPI MSVCRT$vsnprintf(PCHAR d, size_t n, PCHAR format, va_list arg);
+WINBASEAPI size_t WINAPI MSVCRT$wcslen(const wchar_t* _Str);
 WINBASEAPI DWORD  WINAPI WsmSvc$WSManInitialize(DWORD flags, WSMAN_API_HANDLE *apiHandle);
 WINBASEAPI DWORD  WINAPI WsmSvc$WSManCreateSession(WSMAN_API_HANDLE apiHandle, PCWSTR connection, DWORD flags, WSMAN_AUTHENTICATION_CREDENTIALS* serverAuthenticationCredentials, WSMAN_PROXY_INFO* proxyInfo, WSMAN_SESSION_HANDLE* session);
 WINBASEAPI HANDLE WINAPI KERNEL32$CreateEventW(LPSECURITY_ATTRIBUTES lpEventAttributes, BOOL bManualReset, BOOL bInitialState, LPCWSTR lpName);
@@ -31,6 +32,7 @@ WINBASEAPI DWORD  WINAPI WsmSvc$WSManCloseOperation(WSMAN_OPERATION_HANDLE opera
 
 #define GetLastError KERNEL32$GetLastError
 #define vsnprintf MSVCRT$vsnprintf
+#define wcslen MSVCRT$wcslen
 #define WSManInitialize WsmSvc$WSManInitialize
 #define WSManCreateSession WsmSvc$WSManCreateSession
 #define CreateEventW KERNEL32$CreateEventW
@@ -56,6 +58,7 @@ WINBASEAPI DWORD  WINAPI WsmSvc$WSManCloseOperation(WSMAN_OPERATION_HANDLE opera
     typedef struct  {
         HANDLE event;
         BOOL hadError;
+        BOOL commandDone;
     } ctxCallback, *PCtxCallback;
 
     void WSManShellCompletionFunction( PVOID operationContext, DWORD flags, WSMAN_ERROR* error, WSMAN_SHELL_HANDLE shell, WSMAN_COMMAND_HANDLE command, WSMAN_OPERATION_HANDLE operationHandle, WSMAN_RECEIVE_DATA_RESULT* data )
@@ -86,46 +89,61 @@ WINBASEAPI DWORD  WINAPI WsmSvc$WSManCloseOperation(WSMAN_OPERATION_HANDLE opera
 
         if (data && data->streamData.type & WSMAN_DATA_TYPE_BINARY && data->streamData.binaryData.dataLength) {
             DWORD bufferLength = data->streamData.binaryData.dataLength;
-            PCHAR buffer = (PCHAR)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, bufferLength);
+            PCHAR buffer = (PCHAR)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, bufferLength + 1);
             if (buffer == NULL) {
                 BeaconPrintf(CALLBACK_ERROR, "error HeapAlloc: %d\n", GetLastError());
                 return;
             }
 
-            DWORD  t_BufferWriteLength = 0;
-            DWORD  bytesRead           = 0;
-            HANDLE hPipeRead           = { 0 };
-            HANDLE hPipeWrite          = { 0 };
-            BOOL ret = CreatePipe(&hPipeRead, &hPipeWrite, NULL, bufferLength);
-            if (ret == ERROR) {
-                BeaconPrintf(CALLBACK_ERROR, "error CreatePipe: %d\n", GetLastError());
-                goto cleanCallback;
-            }
+            for (DWORD i = 0; i < bufferLength; i++)
+                buffer[i] = ((PCHAR)data->streamData.binaryData.data)[i];
+            buffer[bufferLength] = '\0';
+            BeaconPrintf(CALLBACK_OUTPUT, "%s", buffer);
 
-            ret = WriteFile(hPipeWrite, data->streamData.binaryData.data, bufferLength, &t_BufferWriteLength, NULL);
-            if (ret == ERROR) {
-                BeaconPrintf(CALLBACK_ERROR, "error WriteFile: %d\n", GetLastError());
-                goto cleanCallback;
-            }
-
-            ret = ReadFile(hPipeRead, buffer, bufferLength, &bytesRead, FALSE);
-            if (ret == ERROR) {
-                BeaconPrintf(CALLBACK_ERROR, "error ReadFile: %d\n", GetLastError());
-                goto cleanCallback;
-            }
-            BeaconPrintf(CALLBACK_OUTPUT, buffer);
-
-        cleanCallback:
             if (!HeapFree(GetProcessHeap(), NULL, buffer))
                 BeaconPrintf(CALLBACK_ERROR, "error HeapFree: %d\n", GetLastError());
-            if (hPipeRead != NULL)
-                CloseHandle(hPipeRead);
-            if (hPipeWrite != NULL)
-                CloseHandle(hPipeWrite);
         }
 
-        if ((error && 0 != error->code) || (data && data->commandState && wcscmp(data->commandState, WSMAN_COMMAND_STATE_DONE) == 0))
+        if (data && data->commandState && wcscmp(data->commandState, WSMAN_COMMAND_STATE_DONE) == 0)
+            ctxOperation->commandDone = TRUE;
+
+        if ((error && 0 != error->code) || ctxOperation->commandDone)
             SetEvent(ctxOperation->event);
+    }
+
+    static PWCHAR BuildDetachedCommand(PWCHAR cmd)
+    {
+        const wchar_t prefix[] = L"powershell -NoProfile -NonInteractive -WindowStyle Hidden -Command \"$r=Invoke-WmiMethod -Class Win32_Process -Name Create -ArgumentList '";
+        const wchar_t suffix[] = L"'; if ($r -ne $null) { Write-Output ('WMI ReturnValue: ' + $r.ReturnValue + ' PID: ' + $r.ProcessId) } else { Write-Output 'WMI: no result' }\"";
+        size_t prefixLen = wcslen(prefix);
+        size_t suffixLen = wcslen(suffix);
+        size_t cmdLen = wcslen(cmd);
+        size_t escapedCmdLen = 0;
+
+        for (size_t i = 0; i < cmdLen; i++)
+            escapedCmdLen += (cmd[i] == L'\'') ? 2 : 1;
+
+        size_t totalLen = prefixLen + escapedCmdLen + suffixLen;
+        PWCHAR buffer = (PWCHAR)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (totalLen + 1) * sizeof(wchar_t));
+        if (buffer == NULL)
+            return NULL;
+
+        size_t offset = 0;
+        for (size_t i = 0; i < prefixLen; i++)
+            buffer[offset++] = prefix[i];
+        for (size_t i = 0; i < cmdLen; i++) {
+            if (cmd[i] == L'\'') {
+                buffer[offset++] = L'\'';
+                buffer[offset++] = L'\'';
+            }
+            else {
+                buffer[offset++] = cmd[i];
+            }
+        }
+        for (size_t i = 0; i < suffixLen; i++)
+            buffer[offset++] = suffix[i];
+        buffer[offset] = L'\0';
+        return buffer;
     }
 
     void go(char* args, int length) {
@@ -146,6 +164,7 @@ WINBASEAPI DWORD  WINAPI WsmSvc$WSManCloseOperation(WSMAN_OPERATION_HANDLE opera
         ctxCallback ctxCreateShell = { 0 };
         ctxCallback ctxReceiveShell = { 0 };
         WSMAN_OPERATION_HANDLE receiveOperation = { 0 };
+        PWCHAR detachedCmd = NULL;
 
         WSMAN_AUTHENTICATION_CREDENTIALS serverAuthenticationCredentials = { 0 };
         serverAuthenticationCredentials.authenticationMechanism = WSMAN_FLAG_DEFAULT_AUTHENTICATION;
@@ -155,6 +174,22 @@ WINBASEAPI DWORD  WINAPI WsmSvc$WSManCloseOperation(WSMAN_OPERATION_HANDLE opera
         PCWSTR commandLine = cmd;
         PCWSTR connection  = hostname;
         WSMAN_SESSION_HANDLE hSession = { 0 };
+        DWORD timeoutMs = 15000;
+        DWORD receiveWaitMs = timeoutMs;
+        DWORD waitResult = WAIT_OBJECT_0;
+        BOOL background = FALSE;
+
+        if (BeaconDataLength(&parser) >= (int)sizeof(int)) {
+            timeoutMs = (DWORD)BeaconDataInt(&parser);
+            receiveWaitMs = (timeoutMs == 0) ? INFINITE : timeoutMs;
+        }
+        if (BeaconDataLength(&parser) >= (int)sizeof(int))
+            background = BeaconDataInt(&parser) ? TRUE : FALSE;
+        if (background) {
+            const DWORD kBackgroundWaitMs = 5000;
+            if (timeoutMs == 0 || timeoutMs > kBackgroundWaitMs)
+                receiveWaitMs = kBackgroundWaitMs;
+        }
 
         DWORD ret = WSManInitialize(WSMAN_FLAG_REQUESTED_API_VERSION_1_0, &hApi);
         if (ret != NO_ERROR) {
@@ -184,6 +219,15 @@ WINBASEAPI DWORD  WINAPI WsmSvc$WSManCloseOperation(WSMAN_OPERATION_HANDLE opera
         if (ctxCreateShell.hadError)
             goto closeShell;
 
+        if (background) {
+            detachedCmd = BuildDetachedCommand(cmd);
+            if (detachedCmd == NULL) {
+                BeaconPrintf(CALLBACK_ERROR, "error HeapAlloc: %d\n", GetLastError());
+                goto closeShell;
+            }
+            commandLine = detachedCmd;
+        }
+
         WSManRunShellCommand(hShell, 0, commandLine, NULL, NULL, &wsAsync, &hCmd);
         WaitForSingleObject(hEventShellCompl, 15000);
         if (ctxCreateShell.hadError)
@@ -195,14 +239,33 @@ WINBASEAPI DWORD  WINAPI WsmSvc$WSManCloseOperation(WSMAN_OPERATION_HANDLE opera
             goto closeCommand;
         }
         ctxReceiveShell.event = hEventReceive;
+        ctxReceiveShell.commandDone = FALSE;
         wsAsyncShell.operationContext = &ctxReceiveShell;
         wsAsyncShell.completionFunction = &ReceiveCallback;
 
         WSManReceiveShellOutput(hShell, hCmd, 0, NULL, &wsAsyncShell, &receiveOperation);
-        WaitForSingleObject(hEventReceive, 15000);
+        waitResult = WaitForSingleObject(hEventReceive, receiveWaitMs);
+        if (waitResult == WAIT_TIMEOUT) {
+            if (background) {
+                BeaconPrintf(CALLBACK_ERROR, "WinRM receive timeout after %lu ms (WMI call may still be running). Use -t to adjust wait.\n", receiveWaitMs);
+            }
+            else {
+                BeaconPrintf(CALLBACK_ERROR, "WinRM receive timeout after %lu ms (command may still be running). Use -t 0 to wait indefinitely or -b to detach.\n", receiveWaitMs);
+            }
+        }
 
         ret = WSManCloseOperation(receiveOperation, 0);
         if (ret != NO_ERROR) BeaconPrintf(CALLBACK_ERROR, "error WSManCloseOperation: %ld\n", ret);
+
+        if (background) {
+            BeaconPrintf(CALLBACK_OUTPUT, "[+] WinRM command launched in background (WMI)\n");
+        }
+
+    cleanupCommandLine:
+        if (detachedCmd != NULL) {
+            HeapFree(GetProcessHeap(), 0, detachedCmd);
+            detachedCmd = NULL;
+        }
 
     closeCommand:
         WSManCloseCommand(hCmd, 0, &wsAsync);

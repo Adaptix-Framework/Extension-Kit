@@ -67,14 +67,18 @@ cmd_jump.addSubCommands([_cmd_jump_psexec, _cmd_jump_scshell]);
 
 
 
-var _cmd_invoke_winrm = ax.create_command("winrm", "Use WinRM to execute commands on other systems", "invoke winrm 192.168.0.1 whoami /all");
+var _cmd_invoke_winrm = ax.create_command("winrm", "Use WinRM to execute commands on other systems", "invoke winrm 192.168.0.1 \"whoami /all\" -t 60000");
 _cmd_invoke_winrm.addArgString("target", true);
 _cmd_invoke_winrm.addArgString("cmd", true);
+_cmd_invoke_winrm.addArgFlagInt("-t", "timeout", "Timeout in milliseconds to wait for output (0 = infinite)", 0);
+_cmd_invoke_winrm.addArgBool("-b", "background", "Detach command (cmd.exe /c start /b), no output");
 _cmd_invoke_winrm.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let target = parsed_json["target"];
     let cmd = parsed_json["cmd"];
+    let timeout = parsed_json["timeout"];
+    let background = parsed_json["-b"] ? 1 : 0;
 
-    let bof_params = ax.bof_pack("wstr,wstr", [target, cmd]);
+    let bof_params = ax.bof_pack("wstr,wstr,int,int", [target, cmd, timeout, background]);
     let bof_path = ax.script_dir() + "_bin/winrm." + ax.arch(id) + ".o";
     let message = `Task: Invoke to ${target} via WinRM`;
 
