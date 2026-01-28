@@ -179,4 +179,4 @@ var cmd_kerbeus = ax.create_command("kerbeus", "Kerberos abuse (kerbeus BOF)");
 cmd_kerbeus.addSubCommands([_cmd_asreproasting, _cmd_asktgt, _cmd_asktgs, _cmd_changepw, _cmd_dump, _cmd_hash, _cmd_kerberoasting, _cmd_klist, _cmd_ptt, _cmd_describe, _cmd_purge, _cmd_renew, _cmd_s4u, _cmd_cross_s4u, _cmd_tgtdeleg, _cmd_triage]);
 
 var group_kerbeus = ax.create_commands_group("Kerbeus-BOF", [cmd_kerbeus]);
-ax.register_commands_group(group_kerbeus, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_kerbeus, ["beacon", "gopher", "kharon"], ["windows"], []);

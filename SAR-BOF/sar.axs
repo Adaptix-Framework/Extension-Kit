@@ -157,4 +157,4 @@ cmd_nbtscan.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 });
 
 var group_test = ax.create_commands_group("SAR-BOF", [cmd_smartscan, cmd_taskhound, cmd_quser, cmd_nbtscan]);
-ax.register_commands_group(group_test, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_test, ["beacon", "gopher", "kharon"], ["windows"], []);

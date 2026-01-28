@@ -62,4 +62,4 @@ var cmd_informer = ax.create_command("relay-informer", "AD RelayInformer");
 cmd_informer.addSubCommands([ _cmd_informer_http, _cmd_informer_ldap, _cmd_informer_mssql, _cmd_informer_smb ]);
 
 var group_informer = ax.create_commands_group("AD RelayInformer", [cmd_informer]);
-ax.register_commands_group(group_informer, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_informer, ["beacon", "gopher", "kharon"], ["windows"], []);

@@ -364,7 +364,7 @@ cmd_webdav.addSubCommands([_cmd_webdav_status]);
 
 
 var group_exec = ax.create_commands_group("AD-BOF", [cmd_adwssearch, cmd_badtakeover, cmd_dcsync, cmd_ldapsearch, cmd_ldapq, cmd_readlaps, cmd_webdav]);
-ax.register_commands_group(group_exec, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_exec, ["beacon", "gopher", "kharon"], ["windows"], []);
 
 
 

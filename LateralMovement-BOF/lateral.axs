@@ -188,7 +188,7 @@ cmd_runas.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 var group_test = ax.create_commands_group("LateralMovement-BOF", [cmd_jump, cmd_invoke, cmd_token, cmd_runas]);
-ax.register_commands_group(group_test, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_test, ["beacon", "gopher", "kharon"], ["windows"], []);
 
 
 
@@ -200,7 +200,7 @@ let token_steal_action = menu.create_action("Steal token", function(process_list
         ax.execute_command(proc.agent_id, "token steal " + proc.pid);
     }
 });
-menu.add_processbrowser(token_steal_action, ["beacon", "gopher"], ["windows"]);
+menu.add_processbrowser(token_steal_action, ["beacon", "gopher", "kharon"], ["windows"]);
 
 let token_make_action = menu.create_action("Make token", function(agent_list) {
     if (agent_list.length > 0 ) {
@@ -257,7 +257,7 @@ let token_make_action = menu.create_action("Make token", function(agent_list) {
         }
     }
 });
-menu.add_session_access(token_make_action, ["beacon", "gopher"], ["windows"]);
+menu.add_session_access(token_make_action, ["beacon", "gopher", "kharon"], ["windows"]);
 
 
 

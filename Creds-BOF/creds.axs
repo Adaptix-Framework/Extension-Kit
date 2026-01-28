@@ -320,11 +320,11 @@ var group_test = ax.create_commands_group("Creds-BOF", [
     cmd_nanodump, cmd_nanodump_ppl_dump, cmd_nanodump_ppl_medic, cmd_nanodump_ssp, cmd_underlaycopy,
     cmd_lsadump_secrets, cmd_lsadump_sam, cmd_lsadump_cache
 ]);
-ax.register_commands_group(group_test, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_test, ["beacon", "gopher", "kharon"], ["windows"], []);
 
 
 
 /// MENU
 
 let hashdump_access_action = menu.create_action("SAM hashdump", function(agents_id) { agents_id.forEach(id => ax.execute_command(id, "hashdump")) });
-menu.add_session_access(hashdump_access_action, ["beacon", "gopher"], ["windows"]);
+menu.add_session_access(hashdump_access_action, ["beacon", "gopher", "kharon"], ["windows"]);

@@ -43,4 +43,4 @@ cmd_process.addSubCommands([_cmd_process_conn]);
 
 
 var group_test = ax.create_commands_group("Process-BOF", [cmd_findobj, cmd_process]);
-ax.register_commands_group(group_test, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_test, ["beacon", "gopher", "kharon"], ["windows"], []);

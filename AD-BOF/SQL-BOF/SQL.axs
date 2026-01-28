@@ -630,4 +630,4 @@ cmd_mssql.addSubCommands([_cmd_1434udp, _cmd_adsi, _cmd_agentcmd, _cmd_agentstat
 ]);
 
 var group_sql = ax.create_commands_group("SQL-BOF", [cmd_mssql]);
-ax.register_commands_group(group_sql, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_sql, ["beacon", "gopher", "kharon"], ["windows"], []);

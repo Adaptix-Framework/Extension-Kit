@@ -1394,4 +1394,4 @@ cmd_ldap.addSubCommands([_cmd_removeace, _cmd_removeattribute, _cmd_removedelega
 
 
 var group_ldap = ax.create_commands_group("LDAP-BOF", [cmd_ldap]);
-ax.register_commands_group(group_ldap, ["beacon", "gopher"], ["windows"], []);
+ax.register_commands_group(group_ldap, ["beacon", "gopher", "kharon"], ["windows"], []);
