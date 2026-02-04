@@ -5,7 +5,7 @@ var metadata = {
 
 
 var _cmd_findobj_module = ax.create_command("module", "Identify processes which have a certain module loaded", "findobj module clr.dll");
-_cmd_findobj_module.addArgString("module", true);
+_cmd_findobj_module.addArgString("module", true, "Module name to search for (e.g. clr.dll, amsi.dll, winhttp.dll)");
 _cmd_findobj_module.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let module = parsed_json["module"];
 
@@ -16,7 +16,7 @@ _cmd_findobj_module.setPreHook(function (id, cmdline, parsed_json, ...parsed_lin
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
 });
 var _cmd_findobj_prochandle = ax.create_command("prochandle", "Identify processes with a specific process handle in use", "findobj prochandle lsass.exe");
-_cmd_findobj_prochandle.addArgString("proc", true);
+_cmd_findobj_prochandle.addArgString("proc", true, "Process name to search handles for (e.g. lsass.exe)");
 _cmd_findobj_prochandle.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let proc = parsed_json["proc"];
 
@@ -46,8 +46,34 @@ var cmd_process_x = ax.create_command("process-x", "Shows detailed information f
 cmd_process_x.addSubCommands([_cmd_process_conn]);
 
 
-var group_process = ax.create_commands_group("Process-BOF", [cmd_findobj, cmd_process]);
+var _cmd_procfreeze_freeze = ax.create_command("freeze", "Freeze a target process using PPL bypass via WerFaultSecure.exe", "procfreeze freeze 1234");
+_cmd_procfreeze_freeze.addArgInt("pid", true, "Process ID to freeze");
+_cmd_procfreeze_freeze.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    let pid = parsed_json["pid"];
+
+    let bof_params = ax.bof_pack("ii", [1, pid]);
+    let bof_path = ax.script_dir() + "_bin/procfreeze." + ax.arch(id) + ".o";
+    let message = `Task: Freeze process ${pid}`;
+
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+});
+
+var _cmd_procfreeze_unfreeze = ax.create_command("unfreeze", "Unfreeze a previously frozen process", "procfreeze unfreeze");
+_cmd_procfreeze_unfreeze.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+
+    let bof_params = ax.bof_pack("ii", [2, 0]);
+    let bof_path = ax.script_dir() + "_bin/procfreeze." + ax.arch(id) + ".o";
+    let message = "Task: Unfreeze process";
+
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+});
+
+var cmd_procfreeze = ax.create_command("procfreeze", "Process freeze/unfreeze using PPL bypass (WerFaultSecure.exe)");
+cmd_procfreeze.addSubCommands([_cmd_procfreeze_freeze, _cmd_procfreeze_unfreeze]);
+
+
+var group_process = ax.create_commands_group("Process-BOF", [cmd_findobj, cmd_process, cmd_procfreeze]);
 ax.register_commands_group(group_process, ["beacon", "gopher"], ["windows"], []);
 
-var group_process_x = ax.create_commands_group("Process-BOF-X", [cmd_findobj, cmd_process_x]);
+var group_process_x = ax.create_commands_group("Process-BOF-X", [cmd_findobj, cmd_process_x, cmd_procfreeze]);
 ax.register_commands_group(group_process_x, ["kharon"], ["windows"], []);

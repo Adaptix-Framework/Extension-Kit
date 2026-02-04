@@ -30,5 +30,36 @@ process conn
 ```
 
 
+## procfreeze
+
+Process freeze/unfreeze using PPL bypass technique via WerFaultSecure.exe.
+
+```
+procfreeze freeze <pid>
+procfreeze unfreeze
+```
+
+| Command   | Description                           |
+|-----------|---------------------------------------|
+| `freeze`  | Freeze a target process by PID        |
+| `unfreeze`| Unfreeze a previously frozen process |
+
+### WARNING
+
+**Unfreeze may not work on Windows 10**. The target process may remain frozen after running `pf unfreeze`. In such cases, you will need to manually terminate the WerFaultSecure.exe process or reboot the system.
+
+### Requirements
+
+- Elevated privileges (SYSTEM or Administrator)
+- SeDebugPrivilege enabled
+- Windows 10/11 with WerFaultSecure.exe
+
+![](_img/03.png)
+
+![](_img/04.png)
+
 ## Credits
+
 * C2-Tool-Collection - https://github.com/outflanknl/C2-Tool-Collection
+* procfreeze - https://github.com/0xsh3llf1r3/ColdWer
+* https://github.com/TwoSevenOneT/EDR-Freeze

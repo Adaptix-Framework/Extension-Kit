@@ -13,6 +13,7 @@ include_directories(
 set(FINDMODULE_SOURCES findobjects/FindModule.c)
 set(FINDPROCHANDLE_SOURCES findobjects/FindProcHandle.c)
 set(PSC_SOURCES process/psc.c)
+set(PROCFREEZE_SOURCES procfreeze/procfreeze.c)
 
 # Compiler flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os -w -Wno-incompatible-pointer-types -DBOF")
@@ -27,6 +28,9 @@ target_compile_options(findprochandle PRIVATE -masm=intel)
 
 add_library(psc OBJECT ${PSC_SOURCES})
 target_compile_options(psc PRIVATE -masm=intel)
+
+add_library(procfreeze OBJECT ${PROCFREEZE_SOURCES})
+target_compile_options(procfreeze PRIVATE -masm=intel)
 
 # Create _bin directory
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/_bin)
@@ -48,4 +52,10 @@ add_custom_target(copy_psc ALL
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:psc> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/psc.x64.o
     DEPENDS psc
     COMMENT "Copying psc object file"
+)
+
+add_custom_target(copy_procfreeze ALL
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:procfreeze> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/procfreeze.x64.o
+    DEPENDS procfreeze
+    COMMENT "Copying procfreeze object file"
 )

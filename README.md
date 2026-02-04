@@ -88,6 +88,12 @@ BOFs that provide situational awareness of processes, modules, and services. [Mo
 
 ![](./Process-BOF/_img/01.png)
 
+![](./Process-BOF/_img/02.png)
+
+![](./Process-BOF/_img/03.png)
+
+![](./Process-BOF/_img/04.png)
+
 
 
 ## Postex-BOF
