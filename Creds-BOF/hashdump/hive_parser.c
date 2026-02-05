@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <tchar.h>
 #include "bofdefs.h"
+#include "beacon.h"
 #define CALLBACK_ERROR       0x0d
 
 #pragma pack(push, 1)

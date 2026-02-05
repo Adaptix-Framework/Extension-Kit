@@ -7,6 +7,7 @@ CFLAGS = -I ../_include -w -Wno-incompatible-pointer-types -Os -DBOF -c
 all: bof
 
 bof: clean
+	@(mkdir _bin 2>/dev/null) && echo 'creating _bin directory' || echo '_bin directory exists'
 	# 64-bit builds
 	@($(CC64) $(CFLAGS) arp/arp.c -o _bin/arp.x64.o && $(STRIP64) _bin/arp.x64.o) && echo '[+] arp x64' || echo '[!] arp x64'
 	@($(CC64) $(CFLAGS) cacls/cacls.c -o _bin/cacls.x64.o && $(STRIP64) _bin/cacls.x64.o) && echo '[+] cacls x64' || echo '[!] cacls x64'
