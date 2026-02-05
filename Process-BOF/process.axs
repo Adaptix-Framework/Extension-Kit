@@ -46,22 +46,22 @@ var cmd_process_x = ax.create_command("process-x", "Shows detailed information f
 cmd_process_x.addSubCommands([_cmd_process_conn]);
 
 
-var _cmd_procfreeze_freeze = ax.create_command("freeze", "Freeze a target process using PPL bypass via WerFaultSecure.exe", "procfreeze freeze 1234");
+var _cmd_procfreeze_freeze = ax.create_command("freeze", "Freeze a target process using PPL bypass via WerFaultSecure.exe");
 _cmd_procfreeze_freeze.addArgInt("pid", true, "Process ID to freeze");
 _cmd_procfreeze_freeze.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    let pid = parsed_json["pid"];
+    let pid = parseInt(parsed_json["pid"]);
 
-    let bof_params = ax.bof_pack("ii", [1, pid]);
+    let bof_params = ax.bof_pack("int,int", [1, pid]);
     let bof_path = ax.script_dir() + "_bin/procfreeze." + ax.arch(id) + ".o";
     let message = `Task: Freeze process ${pid}`;
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
 });
 
-var _cmd_procfreeze_unfreeze = ax.create_command("unfreeze", "Unfreeze a previously frozen process", "procfreeze unfreeze");
+var _cmd_procfreeze_unfreeze = ax.create_command("unfreeze", "Unfreeze a previously frozen process");
 _cmd_procfreeze_unfreeze.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
-    let bof_params = ax.bof_pack("ii", [2, 0]);
+    let bof_params = ax.bof_pack("int,int", [2, 0]);
     let bof_path = ax.script_dir() + "_bin/procfreeze." + ax.arch(id) + ".o";
     let message = "Task: Unfreeze process";
 
