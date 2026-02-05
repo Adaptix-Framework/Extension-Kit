@@ -2,8 +2,7 @@
 #include "bofdefs.h"
 #include "sql.c"
 
-void CheckLinks(char *server, char *database, char *link, char *impersonate,
-                char *user, char *password) {
+void CheckLinks(char *server, char *database, char *link, char *impersonate, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -21,20 +20,12 @@ void CheckLinks(char *server, char *database, char *link, char *impersonate,
   if (link == NULL) {
     internal_printf("[*] Enumerating linked servers on %s\n\n", server);
   } else {
-    internal_printf("[*] Enumerating linked servers on %s via %s\n\n", link,
-                    server);
+    internal_printf("[*] Enumerating linked servers on %s via %s\n\n", link, server);
   }
 
-  //
-  // allocate statement handle
-  //
   ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
 
-  //
-  // Run the query
-  //
-  SQLCHAR *query = (SQLCHAR *)"SELECT name, product, provider, data_source "
-                              "FROM sys.servers WHERE is_linked = 1;";
+  SQLCHAR *query = (SQLCHAR *)"SELECT name, product, provider, data_source FROM sys.servers WHERE is_linked = 1;";
   if (!HandleQuery(stmt, query, link, impersonate, FALSE)) {
     goto END;
   }
@@ -45,7 +36,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -54,9 +44,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -86,21 +73,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  CheckLinks("castelblack.north.sevenkingdoms.local", "master", NULL, NULL,
-             NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  CheckLinks("castelblack.north.sevenkingdoms.local", "master", NULL, "sa",
-             NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  CheckLinks("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL,
-             NULL, NULL);
-}
-
-#endif

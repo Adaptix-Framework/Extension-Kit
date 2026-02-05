@@ -17,8 +17,7 @@ void PrintMemberStatus(char *roleName, char *status) {
   }
 }
 
-void Whoami(char *server, char *database, char *link, char *impersonate,
-            char *user, char *password) {
+void Whoami(char *server, char *database, char *link, char *impersonate, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -27,11 +26,7 @@ void Whoami(char *server, char *database, char *link, char *impersonate,
   char **dbRoles = NULL;
   SQLRETURN ret;
 
-  //
-  // default server roles
-  //
-  char *roles[] = {"sysadmin",     "setupadmin", "serveradmin", "securityadmin",
-                   "processadmin", "diskadmin",  "dbcreator",   "bulkadmin"};
+  char *roles[] = {"sysadmin",     "setupadmin", "serveradmin", "securityadmin", "processadmin", "diskadmin",  "dbcreator",   "bulkadmin"};
 
   if (link == NULL) {
     dbc = ConnectToSqlServerAuth(&env, server, database, user, password);
@@ -46,22 +41,15 @@ void Whoami(char *server, char *database, char *link, char *impersonate,
   if (link == NULL) {
     internal_printf("[*] Determining user permissions on %s\n", server);
   } else {
-    internal_printf("[*] Determining user permissions on %s via %s\n", link,
-                    server);
+    internal_printf("[*] Determining user permissions on %s via %s\n", link, server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to allocate statement handle\n");
     goto END;
   }
 
-  //
-  // first query
-  //
   SQLCHAR *query = (SQLCHAR *)"SELECT SYSTEM_USER;";
   if (!HandleQuery(stmt, query, link, impersonate, FALSE)) {
     goto END;
@@ -69,14 +57,8 @@ void Whoami(char *server, char *database, char *link, char *impersonate,
   sysUser = GetSingleResult(stmt, FALSE);
   internal_printf("[*] Logged in as %s\n", sysUser);
 
-  //
-  // close the cursor
-  //
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // second query
-  //
   query = (SQLCHAR *)"SELECT USER_NAME();";
   if (!HandleQuery(stmt, query, link, impersonate, FALSE)) {
     goto END;
@@ -84,14 +66,8 @@ void Whoami(char *server, char *database, char *link, char *impersonate,
   mappedUser = GetSingleResult(stmt, FALSE);
   internal_printf("[*] Mapped to the user %s\n", mappedUser);
 
-  //
-  // close the cursor
-  //
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // third query
-  //
   internal_printf("[*] Gathering roles...\n");
   query = (SQLCHAR *)"SELECT [name] from sysusers where issqlrole = 1;";
   if (!HandleQuery(stmt, query, link, impersonate, FALSE)) {
@@ -99,14 +75,8 @@ void Whoami(char *server, char *database, char *link, char *impersonate,
   }
   dbRoles = GetMultipleResults(stmt, FALSE);
 
-  //
-  // close the cursor
-  //
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // fourth query (loop)
-  //
   for (int i = 0; dbRoles[i] != NULL; i++) {
     char *role = dbRoles[i];
     char *query = (char *)intAlloc(MSVCRT$strlen(role) + 32);
@@ -128,9 +98,6 @@ void Whoami(char *server, char *database, char *link, char *impersonate,
     }
   }
 
-  //
-  // fifth query (loop)
-  //
   for (int i = 0; i < sizeof(roles) / sizeof(roles[0]); i++) {
     char *role = roles[i];
     char *query = (char *)intAlloc(MSVCRT$strlen(role) + 32);
@@ -163,11 +130,7 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
-  //
-  // usage: whoami <server> <database> <link> <impersonate> <user> <password>
-  //
   char *server;
   char *database;
   char *link;
@@ -175,9 +138,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -203,7 +163,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
     return;
   }
 
-  // Debug: show what credentials were received
   if (user != NULL) {
     internal_printf("[*] SQL Auth user: %s\n", user);
   } else {
@@ -214,25 +173,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST (Windows Auth) ============\n\n");
-  Whoami("castelblack.north.sevenkingdoms.local", "master", NULL, NULL, NULL,
-         NULL);
-
-  internal_printf("\n============ SQL AUTH TEST ============\n\n");
-  Whoami("castelblack.north.sevenkingdoms.local", "master", NULL, NULL, "sa",
-         "Sup1_sa_P@ssw0rd!");
-
-  internal_printf("\n============ IMPERSONATE TEST ============\n\n");
-  Whoami("castelblack.north.sevenkingdoms.local", "master", NULL, "sa", NULL,
-         NULL);
-
-  internal_printf("\n============ LINK TEST ====\n\n");
-  Whoami("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL,
-         NULL, NULL);
-}
-
-#endif

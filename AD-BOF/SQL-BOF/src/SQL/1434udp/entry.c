@@ -1,7 +1,6 @@
 #include "bofdefs.h"
 #include "base.c"
 
-
 void UdpEnumInfo(char* serverIp)
 {
 	int port = 1434;
@@ -20,9 +19,6 @@ void UdpEnumInfo(char* serverIp)
         return;
     }
 
-	//
-    // Create a UDP socket
-	//
     udpSocket = WS2_32$socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (udpSocket == INVALID_SOCKET) {
         internal_printf("Socket creation failed with error: %d\n", WS2_32$WSAGetLastError());
@@ -47,9 +43,6 @@ void UdpEnumInfo(char* serverIp)
         goto END;
     }
 
-	//
-    // Send the magic 0x02 byte
-	//
     if (WS2_32$sendto(udpSocket, sendBuffer, sizeof(sendBuffer), 0, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
         internal_printf("Failed to send request: %d\n", WS2_32$WSAGetLastError());
         goto END;
@@ -69,9 +62,6 @@ void UdpEnumInfo(char* serverIp)
         goto END;
     }
 
-	//
-	// Convert the response to a printable string
-	//
     int responseIndex = 0;
 	for (int i = 0; i < bytesReceived; ++i) {
 		if (recvBuffer[i] >= 32 && recvBuffer[i] <= 126) {
@@ -88,7 +78,6 @@ void UdpEnumInfo(char* serverIp)
     }
 
 END:
-	// Cleanup
 	if (udpSocket != INVALID_SOCKET) {
     	WS2_32$closesocket(udpSocket);
 	}
@@ -96,17 +85,10 @@ END:
 }
 
 
-#ifdef BOF
-VOID go( 
-	IN PCHAR Buffer, 
-	IN ULONG Length 
-) 
+VOID go( IN PCHAR Buffer, IN ULONG Length )
 {
 	char* ip;
 
-	//
-	// parse beacon args 
-	//
 	datap parser;
 	BeaconDataParse(&parser, Buffer, Length);
 	
@@ -115,9 +97,7 @@ VOID go(
 	ip = *ip == 0 ? NULL : ip;
 	
 	if(!bofstart())
-	{
 		return;
-	}
 
 	if (ip == NULL)
 	{
@@ -130,12 +110,3 @@ VOID go(
 
 	printoutput(TRUE);
 };
-
-#else
-
-int main()
-{
-	UdpEnumInfo("10.5.10.22");
-}
-
-#endif

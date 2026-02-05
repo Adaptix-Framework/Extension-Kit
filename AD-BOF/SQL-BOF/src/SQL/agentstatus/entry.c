@@ -4,8 +4,7 @@
 #include "sql_agent.c"
 #include "sql_modules.c"
 
-void CheckAgentStatus(char *server, char *database, char *link,
-                      char *impersonate, char *user, char *password) {
+void CheckAgentStatus(char *server, char *database, char *link, char *impersonate, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -28,9 +27,6 @@ void CheckAgentStatus(char *server, char *database, char *link,
                     server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to allocate statement handle\n");
@@ -42,9 +38,6 @@ void CheckAgentStatus(char *server, char *database, char *link,
     goto END;
   }
 
-  //
-  // Close the cursor
-  //
   ret = ODBC32$SQLCloseCursor(stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to close cursor\n");
@@ -65,7 +58,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -74,9 +66,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -106,21 +95,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  //
-  // GOAD uses SQLExpress so turning to makeshift lab here
-  //
-  internal_printf("============ BASE TEST ============\n\n");
-  CheckAgentStatus("192.168.0.215", "master", NULL, NULL, NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  CheckAgentStatus("192.168.0.215", "master", NULL, "sa", NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  CheckAgentStatus("192.168.0.215", "master", "TRETOGOR", NULL, NULL, NULL);
-}
-
-#endif

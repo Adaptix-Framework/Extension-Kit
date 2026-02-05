@@ -2,8 +2,7 @@
 #include "bofdefs.h"
 #include "sql.c"
 
-void CheckRpc(char *server, char *database, char *link, char *impersonate,
-              char *user, char *password) {
+void CheckRpc(char *server, char *database, char *link, char *impersonate, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -28,20 +27,13 @@ void CheckRpc(char *server, char *database, char *link, char *impersonate,
         server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Error allocating statement handle\n");
     goto END;
   }
 
-  //
-  // Run the query
-  //
-  SQLCHAR *query =
-      (SQLCHAR *)"SELECT name, is_rpc_out_enabled FROM sys.servers";
+  SQLCHAR *query = (SQLCHAR *)"SELECT name, is_rpc_out_enabled FROM sys.servers";
   if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, FALSE)) {
     goto END;
   }
@@ -52,7 +44,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -61,9 +52,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -93,21 +81,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  CheckRpc("castelblack.north.sevenkingdoms.local", "master", NULL, NULL, NULL,
-           NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  CheckRpc("castelblack.north.sevenkingdoms.local", "master", NULL, "sa", NULL,
-           NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  CheckRpc("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL,
-           NULL, NULL);
-}
-
-#endif

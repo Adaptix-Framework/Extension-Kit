@@ -2,8 +2,7 @@
 #include "bofdefs.h"
 #include "sql.c"
 
-void CustomQuery(char *server, char *database, char *link, char *impersonate,
-                 char *query, char *user, char *password) {
+void CustomQuery(char *server, char *database, char *link, char *impersonate, char *query, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -26,18 +25,12 @@ void CustomQuery(char *server, char *database, char *link, char *impersonate,
                     server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Error allocating statement handle\n");
     goto END;
   }
 
-  //
-  // Run the query
-  //
   if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, FALSE)) {
     goto END;
   }
@@ -48,7 +41,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -58,9 +50,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -94,22 +83,4 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   CustomQuery(server, database, link, impersonate, query, user, password);
 
   printoutput(TRUE);
-};
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  CustomQuery("castelblack.north.sevenkingdoms.local", "master", NULL, NULL,
-              "SELECT name, database_id FROM sys.databases;", NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  CustomQuery("castelblack.north.sevenkingdoms.local", "master", NULL, "sa",
-              "SELECT name, database_id FROM sys.databases;", NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  CustomQuery("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS",
-              NULL, "SELECT name, database_id FROM sys.databases;", NULL, NULL);
 }
-
-#endif

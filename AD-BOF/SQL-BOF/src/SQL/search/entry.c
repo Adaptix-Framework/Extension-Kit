@@ -2,8 +2,7 @@
 #include "bofdefs.h"
 #include "sql.c"
 
-void Search(char *server, char *database, char *link, char *impersonate,
-            char *keyword, char *user, char *password) {
+void Search(char *server, char *database, char *link, char *impersonate, char *keyword, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -21,27 +20,17 @@ void Search(char *server, char *database, char *link, char *impersonate,
   }
 
   if (link == NULL) {
-    internal_printf(
-        "[*] Searching for columns containing \"%s\" in %s on %s\n\n", keyword,
-        database, server);
+    internal_printf( "[*] Searching for columns containing \"%s\" in %s on %s\n\n", keyword, database, server);
   } else {
-    internal_printf(
-        "[*] Searching for columns containing \"%s\" in %s on %s via %s\n\n",
-        keyword, database, link, server);
+    internal_printf( "[*] Searching for columns containing \"%s\" in %s on %s via %s\n\n", keyword, database, link, server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Error allocating statement handle\n");
     goto END;
   }
 
-  //
-  // Construct query
-  //
   char *prefix = "SELECT table_name, column_name FROM ";
   char *middle = ".information_schema.columns WHERE column_name LIKE '%";
   char *suffix = "%';";
@@ -57,9 +46,6 @@ void Search(char *server, char *database, char *link, char *impersonate,
   MSVCRT$strncat(query, keyword, totalSize - MSVCRT$strlen(query) - 1);
   MSVCRT$strncat(query, suffix, totalSize - MSVCRT$strlen(query) - 1);
 
-  //
-  // Run the query
-  //
   if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, TRUE)) {
     goto END;
   }
@@ -73,7 +59,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -83,9 +68,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -116,21 +98,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  Search("castelblack.north.sevenkingdoms.local", "master", NULL, NULL, "idle",
-         NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  Search("castelblack.north.sevenkingdoms.local", "master", NULL, "sa", "idle",
-         NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  Search("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL,
-         "idle", NULL, NULL);
-}
-
-#endif

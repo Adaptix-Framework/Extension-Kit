@@ -73,18 +73,12 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
 
   internal_printf("[*] Extracting SQL server information\n");
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Error allocating statement handle\n");
     goto END;
   }
 
-  //
-  // first query - IsSysAdmin
-  //
   SQLCHAR *query = (SQLCHAR *)"SELECT IS_SRVROLEMEMBER('sysadmin');";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
@@ -99,9 +93,6 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   intFree(result);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // second query - DomainName
-  //
   query = (SQLCHAR *)"SELECT @@SERVERNAME;";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
@@ -109,9 +100,6 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   info.ComputerName = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // third query - DomainName
-  //
   query = (SQLCHAR *)"SELECT default_domain();";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
@@ -119,20 +107,13 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   info.DomainName = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // fourth query - ServicePid
-  //
-  query =
-      (SQLCHAR *)"SELECT CONVERT(VARCHAR(255), SERVERPROPERTY('processid'));";
+  query = (SQLCHAR *)"SELECT CONVERT(VARCHAR(255), SERVERPROPERTY('processid'));";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
   }
   info.ServicePid = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // fifth query - ServiceName
-  //
   query = (SQLCHAR *)"DECLARE @SQLServerServiceName varchar(250)\n"
                      "DECLARE @SQLServerInstance varchar(250)\n"
                      "if @@SERVICENAME = 'MSSQLSERVER'\n"
@@ -156,9 +137,6 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   info.ServiceName = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // sixth query - ServiceAccount
-  //
   query = (SQLCHAR *)"DECLARE @SQLServerInstance varchar(250)\n"
                      "if @@SERVICENAME = 'MSSQLSERVER'\n"
                      "BEGIN\n"
@@ -182,9 +160,6 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   info.ServiceAccount = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // seventh query - AuthenticationMode
-  //
   query =
       (SQLCHAR *)"DECLARE @AuthenticationMode INT\n"
                  "EXEC master.dbo.xp_instance_regread N'HKEY_LOCAL_MACHINE',\n"
@@ -201,9 +176,6 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   info.AuthenticationMode = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // eighth query - ForcedEncryption
-  //
   query =
       (SQLCHAR *)"BEGIN TRY\n"
                  "DECLARE @ForcedEncryption INT\n"
@@ -221,9 +193,6 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   info.ForcedEncryption = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // ninth query - Clustered
-  //
   query = (SQLCHAR *)"SELECT CASE  SERVERPROPERTY('IsClustered')\n"
                      "WHEN 0\n"
                      "THEN 'No'\n"
@@ -235,32 +204,20 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   info.Clustered = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // 10th query - SqlServerVesionNumber
-  //
-  query =
-      (SQLCHAR
-           *)"SELECT CONVERT(VARCHAR(255), SERVERPROPERTY('productversion'));";
+  query = (SQLCHAR *)"SELECT CONVERT(VARCHAR(255), SERVERPROPERTY('productversion'));";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
   }
   info.SqlServerVersionNumber = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // 11th query - SqlServerMajorVersion
-  //
-  query =
-      (SQLCHAR *)"SELECT SUBSTRING(@@VERSION, CHARINDEX('2', @@VERSION), 4);";
+  query = (SQLCHAR *)"SELECT SUBSTRING(@@VERSION, CHARINDEX('2', @@VERSION), 4);";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
   }
   info.SqlServerMajorVersion = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // 12th query - SqlServerEdition
-  //
   query = (SQLCHAR *)"SELECT CONVERT(VARCHAR(255), SERVERPROPERTY('Edition'));";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
@@ -268,32 +225,20 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   info.SqlServerEdition = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // 12th query - SqlServerServicePack
-  //
-  query =
-      (SQLCHAR
-           *)"SELECT CONVERT(VARCHAR(255), SERVERPROPERTY('ProductLevel'));";
+  query = (SQLCHAR *)"SELECT CONVERT(VARCHAR(255), SERVERPROPERTY('ProductLevel'));";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
   }
   info.SqlServerServicePack = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // 13th query - OsArchitecture
-  //
-  query =
-      (SQLCHAR *)"SELECT SUBSTRING(@@VERSION, CHARINDEX('x', @@VERSION), 3);";
+  query = (SQLCHAR *)"SELECT SUBSTRING(@@VERSION, CHARINDEX('x', @@VERSION), 3);";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
   }
   info.OsArchitecture = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // 14th query - OsMachineType
-  //
   if (info.IsSysAdmin) {
     query =
         (SQLCHAR *)"DECLARE @MachineType  SYSNAME\n"
@@ -311,9 +256,6 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
     ODBC32$SQLCloseCursor(stmt);
   }
 
-  //
-  // 15th query - OsVersion
-  //
   if (info.IsSysAdmin) {
     query = (SQLCHAR *)"DECLARE @ProductName  SYSNAME\n"
                        "EXECUTE master.dbo.xp_regread\n"
@@ -330,20 +272,13 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
     ODBC32$SQLCloseCursor(stmt);
   }
 
-  //
-  // 16th query - OsVersionNumber
-  //
-  query = (SQLCHAR *)"SELECT RIGHT(SUBSTRING(@@VERSION, CHARINDEX('Windows "
-                     "Server', @@VERSION), 19), 4);";
+  query = (SQLCHAR *)"SELECT RIGHT(SUBSTRING(@@VERSION, CHARINDEX('Windows Server', @@VERSION), 19), 4);";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
   }
   info.OsVersionNumber = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // 17th query - CurrentLogin
-  //
   query = (SQLCHAR *)"SELECT SYSTEM_USER;";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
@@ -351,37 +286,24 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
   info.CurrentLogin = GetSingleResult(stmt, FALSE);
   ODBC32$SQLCloseCursor(stmt);
 
-  //
-  // 18th query - ActiveSessions
-  //
-  query = (SQLCHAR *)"SELECT COUNT(*) FROM [sys].[dm_exec_sessions] WHERE "
-                     "status = 'running';";
+  query = (SQLCHAR *)"SELECT COUNT(*) FROM [sys].[dm_exec_sessions] WHERE status = 'running';";
   if (!ExecuteQuery(stmt, query)) {
     goto END;
   }
   info.ActiveSessions = GetSingleResult(stmt, FALSE);
 
-  //
-  // print all the results
-  //
   internal_printf("%-30s: %s\n", " |--> ComputerName", info.ComputerName);
   internal_printf("%-30s: %s\n", " |--> DomainName", info.DomainName);
   internal_printf("%-30s: %s\n", " |--> ServicePid", info.ServicePid);
   internal_printf("%-30s: %s\n", " |--> ServiceName", info.ServiceName);
   internal_printf("%-30s: %s\n", " |--> ServiceAccount", info.ServiceAccount);
-  internal_printf("%-30s: %s\n", " |--> AuthenticationMode",
-                  info.AuthenticationMode);
-  internal_printf("%-30s: %s\n", " |--> ForcedEncryption",
-                  info.ForcedEncryption);
+  internal_printf("%-30s: %s\n", " |--> AuthenticationMode", info.AuthenticationMode);
+  internal_printf("%-30s: %s\n", " |--> ForcedEncryption", info.ForcedEncryption);
   internal_printf("%-30s: %s\n", " |--> Clustered", info.Clustered);
-  internal_printf("%-30s: %s\n", " |--> SqlServerVersionNumber",
-                  info.SqlServerVersionNumber);
-  internal_printf("%-30s: %s\n", " |--> SqlServerMajorVersion",
-                  info.SqlServerMajorVersion);
-  internal_printf("%-30s: %s\n", " |--> SqlServerEdition",
-                  info.SqlServerEdition);
-  internal_printf("%-30s: %s\n", " |--> SqlServerServicePack",
-                  info.SqlServerServicePack);
+  internal_printf("%-30s: %s\n", " |--> SqlServerVersionNumber", info.SqlServerVersionNumber);
+  internal_printf("%-30s: %s\n", " |--> SqlServerMajorVersion", info.SqlServerMajorVersion);
+  internal_printf("%-30s: %s\n", " |--> SqlServerEdition", info.SqlServerEdition);
+  internal_printf("%-30s: %s\n", " |--> SqlServerServicePack", info.SqlServerServicePack);
   internal_printf("%-30s: %s\n", " |--> OsArchitecture", info.OsArchitecture);
 
   if (info.IsSysAdmin) {
@@ -391,8 +313,7 @@ void GetSQLInfo(char *server, char *database, char *user, char *password) {
 
   internal_printf("%-30s: %s\n", " |--> OsVersionNumber", info.OsVersionNumber);
   internal_printf("%-30s: %s\n", " |--> CurrentLogin", info.CurrentLogin);
-  internal_printf("%-30s: %s\n", " |--> IsSysAdmin",
-                  info.IsSysAdmin ? "True" : "False");
+  internal_printf("%-30s: %s\n", " |--> IsSysAdmin", info.IsSysAdmin ? "True" : "False");
   internal_printf("%-30s: %s\n", " |--> ActiveSessions", info.ActiveSessions);
 
 END:
@@ -401,16 +322,12 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server = NULL;
   char *database = NULL;
   char *user = NULL;
   char *password = NULL;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
   server = BeaconDataExtract(&parser, NULL);
@@ -431,12 +348,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  GetSQLInfo("castelblack.north.sevenkingdoms.local", "master", NULL, NULL);
-}
-
-#endif

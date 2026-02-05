@@ -2,9 +2,7 @@
 #include "bofdefs.h"
 #include "sql.c"
 
-void CheckTableColumns(char *server, char *database, char *link,
-                       char *impersonate, char *table, char *user,
-                       char *password) {
+void CheckTableColumns(char *server, char *database, char *link, char *impersonate, char *table, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -21,17 +19,11 @@ void CheckTableColumns(char *server, char *database, char *link,
   }
 
   if (link == NULL) {
-    internal_printf("[*] Displaying columns from table %s in %s on %s\n\n",
-                    table, database, server);
+    internal_printf("[*] Displaying columns from table %s in %s on %s\n\n", table, database, server);
   } else {
-    internal_printf(
-        "[*] Displaying columns from table %s in %s on %s via %s\n\n", table,
-        database, link, server);
+    internal_printf( "[*] Displaying columns from table %s in %s on %s via %s\n\n", table, database, link, server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Error allocating statement handle\n");
@@ -39,15 +31,10 @@ void CheckTableColumns(char *server, char *database, char *link,
   }
 
   if (link == NULL) {
-
-    //
-    // Construct USE database statement
-    //
     char *dbPrefix = "USE ";
     char *dbSuffix = ";";
 
-    size_t useStmtSize = MSVCRT$strlen(dbPrefix) + MSVCRT$strlen(database) +
-                         MSVCRT$strlen(dbSuffix) + 1;
+    size_t useStmtSize = MSVCRT$strlen(dbPrefix) + MSVCRT$strlen(database) + MSVCRT$strlen(dbSuffix) + 1;
     char *useStmt = (char *)intAlloc(useStmtSize * sizeof(char));
 
     MSVCRT$strcpy(useStmt, dbPrefix);
@@ -58,24 +45,16 @@ void CheckTableColumns(char *server, char *database, char *link,
       goto END;
     }
 
-    //
-    // Construct query
-    //
-    char *tablePrefix = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS "
-                        "WHERE TABLE_NAME = '";
+    char *tablePrefix = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '";
     char *tableSuffix = "' ORDER BY ORDINAL_POSITION;";
 
-    size_t querySize = MSVCRT$strlen(tablePrefix) + MSVCRT$strlen(table) +
-                       MSVCRT$strlen(tableSuffix) + 1;
+    size_t querySize = MSVCRT$strlen(tablePrefix) + MSVCRT$strlen(table) + MSVCRT$strlen(tableSuffix) + 1;
     char *query = (char *)intAlloc(querySize * sizeof(char));
 
     MSVCRT$strcpy(query, tablePrefix);
     MSVCRT$strncat(query, table, MSVCRT$strlen(query) - 1);
     MSVCRT$strncat(query, tableSuffix, MSVCRT$strlen(query) - 1);
 
-    //
-    // Run the query
-    //
     if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, FALSE)) {
       goto END;
     }
@@ -84,17 +63,11 @@ void CheckTableColumns(char *server, char *database, char *link,
     intFree(query);
     intFree(useStmt);
   } else {
-    //
-    // Construct query
-    //
     char *dbPrefix = "SELECT COLUMN_NAME FROM ";
-    char *tablePrefix = ".INFORMATION_SCHEMA.COLUMNS "
-                        "WHERE TABLE_NAME = '";
+    char *tablePrefix = ".INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '";
     char *tableSuffix = "' ORDER BY ORDINAL_POSITION;";
 
-    size_t querySize = MSVCRT$strlen(dbPrefix) + MSVCRT$strlen(database) +
-                       MSVCRT$strlen(tablePrefix) + MSVCRT$strlen(table) +
-                       MSVCRT$strlen(tableSuffix) + 1;
+    size_t querySize = MSVCRT$strlen(dbPrefix) + MSVCRT$strlen(database) + MSVCRT$strlen(tablePrefix) + MSVCRT$strlen(table) + MSVCRT$strlen(tableSuffix) + 1;
     char *query = (char *)intAlloc(querySize * sizeof(char));
 
     MSVCRT$strcpy(query, dbPrefix);
@@ -103,9 +76,6 @@ void CheckTableColumns(char *server, char *database, char *link,
     MSVCRT$strncat(query, table, querySize - MSVCRT$strlen(query) - 1);
     MSVCRT$strncat(query, tableSuffix, querySize - MSVCRT$strlen(query) - 1);
 
-    //
-    // Run the query
-    //
     if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, FALSE)) {
       goto END;
     }
@@ -119,7 +89,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -129,9 +98,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -169,21 +135,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  CheckTableColumns("castelblack.north.sevenkingdoms.local", "master", NULL,
-                    NULL, "spt_monitor", NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  CheckTableColumns("castelblack.north.sevenkingdoms.local", "master", NULL,
-                    "sa", "spt_monitor", NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  CheckTableColumns("castelblack.north.sevenkingdoms.local", "master",
-                    "BRAAVOS", NULL, "spt_monitor", NULL, NULL);
-}
-
-#endif

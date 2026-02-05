@@ -2,8 +2,7 @@
 #include "bofdefs.h"
 #include "sql.c"
 
-void CheckTableRows(char *server, char *database, char *link, char *impersonate,
-                    char *table, char *user, char *password) {
+void CheckTableRows(char *server, char *database, char *link, char *impersonate, char *table, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -23,37 +22,24 @@ void CheckTableRows(char *server, char *database, char *link, char *impersonate,
   }
 
   if (link == NULL) {
-    internal_printf("[*] Getting row count from table %s in %s on %s\n\n",
-                    table, database, server);
+    internal_printf("[*] Getting row count from table %s in %s on %s\n\n", table, database, server);
   } else {
-    internal_printf(
-        "[*] Getting row count from table %s in %s on %s via %s\n\n", table,
-        database, link, server);
+    internal_printf("[*] Getting row count from table %s in %s on %s via %s\n\n", table, database, link, server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Error allocating statement handle\n");
     goto END;
   }
 
-  //
-  // Construct USE database statement
-  //
   char *dbPrefix = "USE ";
   char *dbSuffix = "; ";
   char *tablePrefix = "SELECT COUNT(*) as row_count FROM ";
   char *tableSuffix = ";";
 
   if (link == NULL) {
-    //
-    // Not using link; need to execute two queries
-    //
-    size_t useStmtSize = MSVCRT$strlen(dbPrefix) + MSVCRT$strlen(database) +
-                         MSVCRT$strlen(dbSuffix) + 1;
+    size_t useStmtSize = MSVCRT$strlen(dbPrefix) + MSVCRT$strlen(database) + MSVCRT$strlen(dbSuffix) + 1;
     useStmt = (char *)intAlloc(useStmtSize * sizeof(char));
 
     MSVCRT$strcpy(useStmt, dbPrefix);
@@ -64,24 +50,13 @@ void CheckTableRows(char *server, char *database, char *link, char *impersonate,
       goto END;
     }
 
-    //
-    // leave cursor open
-    //
-
-    //
-    // Construct query
-    //
-    size_t totalSize = MSVCRT$strlen(tablePrefix) + MSVCRT$strlen(table) +
-                       MSVCRT$strlen(tableSuffix) + 1;
+    size_t totalSize = MSVCRT$strlen(tablePrefix) + MSVCRT$strlen(table) + MSVCRT$strlen(tableSuffix) + 1;
     query = (char *)intAlloc(totalSize * sizeof(char));
 
     MSVCRT$strcpy(query, tablePrefix);
     MSVCRT$strncat(query, table, totalSize - MSVCRT$strlen(query) - 1);
     MSVCRT$strncat(query, tableSuffix, totalSize - MSVCRT$strlen(query) - 1);
 
-    //
-    // Run the query
-    //
     if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, TRUE)) {
       goto END;
     }
@@ -90,9 +65,6 @@ void CheckTableRows(char *server, char *database, char *link, char *impersonate,
   } else {
     char *sep = ".";
 
-    //
-    // linked RPC query funkiness, idk what to do so lets get the table schema
-    //
     if (!GetTableShema(stmt, link, database, table)) {
       internal_printf("[!] Failed to get table schema for %s\n", table);
       goto END;
@@ -101,19 +73,12 @@ void CheckTableRows(char *server, char *database, char *link, char *impersonate,
     schema = GetSingleResult(stmt, FALSE);
     internal_printf("[*] Table schema for %s is: %s\n\n", table, schema);
 
-    //
-    // Close the cursor
-    //
     ret = ODBC32$SQLCloseCursor(stmt);
     if (!SQL_SUCCEEDED(ret)) {
       internal_printf("[!] Error closing cursor\n");
       goto END;
     }
 
-    //
-    // Prep statement for linked RPC query
-    // tableprefix + database + sep + schema + sep + table + suffix
-    //
     size_t totalSize = MSVCRT$strlen(tablePrefix) + MSVCRT$strlen(database) +
                        MSVCRT$strlen(sep) + MSVCRT$strlen(schema) +
                        MSVCRT$strlen(sep) + MSVCRT$strlen(table) +
@@ -145,7 +110,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -155,9 +119,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -195,21 +156,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  CheckTableRows("castelblack.north.sevenkingdoms.local", "master", NULL, NULL,
-                 "spt_monitor", NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  CheckTableRows("castelblack.north.sevenkingdoms.local", "master", NULL, "sa",
-                 "spt_monitor", NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  CheckTableRows("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS",
-                 NULL, "spt_monitor", NULL, NULL);
-}
-
-#endif

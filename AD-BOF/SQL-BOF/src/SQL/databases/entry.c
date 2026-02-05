@@ -2,8 +2,7 @@
 #include "bofdefs.h"
 #include "sql.c"
 
-void CheckDatabases(char *server, char *database, char *link, char *impersonate,
-                    char *user, char *password) {
+void CheckDatabases(char *server, char *database, char *link, char *impersonate, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -25,23 +24,13 @@ void CheckDatabases(char *server, char *database, char *link, char *impersonate,
     internal_printf("[*] Enumerating databases on %s via %s\n\n", link, server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] SQLAllocHandle failed\n");
     goto END;
   }
 
-  //
-  // Run the query
-  //
-  SQLCHAR *query =
-      (SQLCHAR *)"SELECT sd.dbid, sd.name, SUSER_SNAME(sd.sid) AS db_owner, "
-                 "d.is_trustworthy_on, sd.crdate, sd.filename "
-                 "FROM master.dbo.sysdatabases sd "
-                 "LEFT JOIN sys.databases d ON sd.dbid = d.database_id;";
+  SQLCHAR *query = (SQLCHAR *)"SELECT sd.dbid, sd.name, SUSER_SNAME(sd.sid) AS db_owner, d.is_trustworthy_on, sd.crdate, sd.filename FROM master.dbo.sysdatabases sd LEFT JOIN sys.databases d ON sd.dbid = d.database_id;";
   if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, FALSE)) {
     goto END;
   }
@@ -52,7 +41,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -61,9 +49,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -93,21 +78,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  CheckDatabases("castelblack.north.sevenkingdoms.local", "master", NULL, NULL,
-                 NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  CheckDatabases("castelblack.north.sevenkingdoms.local", "master", NULL, "sa",
-                 NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  CheckDatabases("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS",
-                 NULL, NULL, NULL);
-}
-
-#endif

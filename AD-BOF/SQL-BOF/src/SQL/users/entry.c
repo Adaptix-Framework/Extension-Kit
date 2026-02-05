@@ -2,8 +2,7 @@
 #include "bofdefs.h"
 #include "sql.c"
 
-void CheckUsers(char *server, char *database, char *link, char *impersonate,
-                char *user, char *password) {
+void CheckUsers(char *server, char *database, char *link, char *impersonate, char *user, char *password) {
   SQLHENV env = NULL;
   SQLHSTMT stmt = NULL;
   SQLHDBC dbc = NULL;
@@ -21,42 +20,27 @@ void CheckUsers(char *server, char *database, char *link, char *impersonate,
   }
 
   if (link == NULL) {
-    internal_printf("[*] Enumerating users in the %s database on %s\n\n",
-                    database, server);
+    internal_printf("[*] Enumerating users in the %s database on %s\n\n", database, server);
   } else {
-    internal_printf("[*] Enumerating users in the %s database on %s via %s\n\n",
-                    database, link, server);
+    internal_printf("[*] Enumerating users in the %s database on %s via %s\n\n", database, link, server);
   }
 
-  //
-  // allocate statement handle
-  //
   ret = ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
   if (!SQL_SUCCEEDED(ret)) {
     internal_printf("[!] Failed to allocate statement handle\n");
     goto END;
   }
 
-  //
-  // Construct query
-  //
-  char *prefix = "SELECT name AS username, create_date, "
-                 "modify_date, type_desc AS type, authentication_type_desc AS "
-                 "authentication_type FROM ";
-  char *suffix = ".sys.database_principals WHERE type NOT "
-                 "IN ('A', 'R', 'X') AND sid IS NOT null ORDER BY username;";
+  char *prefix = "SELECT name AS username, create_date, modify_date, type_desc AS type, authentication_type_desc AS authentication_type FROM ";
+  char *suffix = ".sys.database_principals WHERE type NOT IN ('A', 'R', 'X') AND sid IS NOT null ORDER BY username;";
 
-  size_t totalSize = MSVCRT$strlen(prefix) + MSVCRT$strlen(database) +
-                     MSVCRT$strlen(suffix) + 1;
+  size_t totalSize = MSVCRT$strlen(prefix) + MSVCRT$strlen(database) + MSVCRT$strlen(suffix) + 1;
   query = (char *)intAlloc(totalSize * sizeof(char));
 
   MSVCRT$strcpy(query, prefix);
   MSVCRT$strncat(query, database, totalSize - MSVCRT$strlen(query) - 1);
   MSVCRT$strncat(query, suffix, totalSize - MSVCRT$strlen(query) - 1);
 
-  //
-  // Run the query
-  //
   if (!HandleQuery(stmt, (SQLCHAR *)query, link, impersonate, FALSE)) {
     goto END;
   }
@@ -70,7 +54,6 @@ END:
   DisconnectSqlServer(env, dbc, stmt);
 }
 
-#ifdef BOF
 VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *server;
   char *database;
@@ -79,9 +62,6 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
   char *user;
   char *password;
 
-  //
-  // parse beacon args
-  //
   datap parser;
   BeaconDataParse(&parser, Buffer, Length);
 
@@ -111,21 +91,3 @@ VOID go(IN PCHAR Buffer, IN ULONG Length) {
 
   printoutput(TRUE);
 };
-
-#else
-
-int main() {
-  internal_printf("============ BASE TEST ============\n\n");
-  CheckUsers("castelblack.north.sevenkingdoms.local", "master", NULL, NULL,
-             NULL, NULL);
-
-  internal_printf("\n\n============ IMPERSONATE TEST ============\n\n");
-  CheckUsers("castelblack.north.sevenkingdoms.local", "master", NULL, "sa",
-             NULL, NULL);
-
-  internal_printf("\n\n============ LINK TEST ============\n\n");
-  CheckUsers("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL,
-             NULL, NULL);
-}
-
-#endif
