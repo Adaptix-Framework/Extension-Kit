@@ -55,7 +55,7 @@ add_custom_target(copy_psc ALL
 )
 
 add_custom_target(copy_procfreeze ALL
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:procfreeze> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/procfreeze.x64.o
-    DEPENDS procfreeze
-    COMMENT "Copying procfreeze object file"
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:procfreeze> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/procfreeze.x64.o
+        DEPENDS procfreeze
+        COMMENT "Copying procfreeze object file"
 )

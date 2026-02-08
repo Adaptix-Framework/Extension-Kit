@@ -533,6 +533,35 @@ bool AsnGetEncryptionKey(AsnElt* a, EncryptionKey* enc_key) {
     return false;
 }
 
+bool AsnGetEncryptionKeySafe(AsnElt* keyElt, EncryptionKey* destKey) {
+    if (!keyElt || !destKey)
+        return true;
+
+    AsnElt* seq = keyElt;
+    if (!(seq->tagClass == 0 && seq->tagValue == 16)) {
+        if (!seq->sub || seq->subCount == 0) return true;
+        seq = &(seq->sub[0]);
+    }
+
+    // Now seq should point to the SEQUENCE with keytype[0] and keyvalue[1]
+    if (!seq->sub || seq->subCount == 0) return true;
+
+    for (int i = 0; i < seq->subCount; i++) {
+        AsnElt* field = &(seq->sub[i]);
+        if (!field->sub || field->subCount == 0) continue;
+
+        if (field->tagValue == 0) { // keytype[0] INTEGER
+            long kt = 0;
+            if (!AsnGetInteger(&(field->sub[0]), &kt))
+                destKey->key_type = (int)kt;
+        }
+        else if (field->tagValue == 1) { // keyvalue[1] OCTET STRING
+            AsnGetOctetString(&(field->sub[0]), &(destKey->key_value), &(destKey->key_size));
+        }
+    }
+    return false;
+}
+
 bool NodeAsnGetSting(AsnElt* a, int type, int* len, byte** ret) {
     if (a->sub != NULL) {
         PRINT_OUT("invalid string (constructed)");
@@ -724,6 +753,55 @@ bool AsnGetEncryptedPAData(AsnElt* body, EncryptedPAData* data) {
         AsnElt ae = { 0 };
         if (BytesToAsnDecode(data->keyvalue, data->keysize, &ae)) return true;
         if (AsnGetEncryptionKey(&ae, &(data->encryptionKey))) return true;
+    }
+    
+    if (data->keytype == 171) { // DMSA_KEY_PACKAGE
+        AsnElt ae = { 0 };
+        if (BytesToAsnDecode(data->keyvalue, data->keysize, &ae)) return false;
+        if (!ae.sub || ae.subCount == 0) return false;
+
+        // current-keys[0] - SEQUENCE OF EncryptionKey
+        if (ae.sub[0].tagValue == 0 && ae.sub[0].sub && ae.sub[0].subCount > 0) {
+            AsnElt* keysSeq = &(ae.sub[0].sub[0]);
+            int keyCount = keysSeq->subCount;
+            if (keyCount > 0 && keysSeq->sub) {
+                data->dmsaKeyPackage.currentKeys = MemAlloc(keyCount * sizeof(EncryptionKey));
+                if (data->dmsaKeyPackage.currentKeys) {
+                    memset(data->dmsaKeyPackage.currentKeys, 0, keyCount * sizeof(EncryptionKey));
+                    data->dmsaKeyPackage.currentKeysCount = keyCount;
+                    for (int i = 0; i < keyCount; i++) {
+                        AsnGetEncryptionKeySafe(&(keysSeq->sub[i]), &(data->dmsaKeyPackage.currentKeys[i]));
+                    }
+                }
+            }
+        }
+
+        // previous-keys[1] is OPTIONAL - check subCount
+        int hasPreviousKeys = (ae.subCount == 4);
+        if (hasPreviousKeys && ae.sub[1].tagValue == 1 && ae.sub[1].sub && ae.sub[1].subCount > 0) {
+            AsnElt* keysSeq = &(ae.sub[1].sub[0]);
+            int keyCount = keysSeq->subCount;
+            if (keyCount > 0 && keysSeq->sub) {
+                data->dmsaKeyPackage.previousKeys = MemAlloc(keyCount * sizeof(EncryptionKey));
+                if (data->dmsaKeyPackage.previousKeys) {
+                    memset(data->dmsaKeyPackage.previousKeys, 0, keyCount * sizeof(EncryptionKey));
+                    data->dmsaKeyPackage.previousKeysCount = keyCount;
+                    for (int i = 0; i < keyCount; i++) {
+                        AsnGetEncryptionKeySafe(&(keysSeq->sub[i]), &(data->dmsaKeyPackage.previousKeys[i]));
+                    }
+                }
+            }
+        }
+
+        // expiration-interval and fetch-interval
+        int expIdx = hasPreviousKeys ? 2 : 1;
+        int fetchIdx = hasPreviousKeys ? 3 : 2;
+        if (ae.subCount > expIdx && ae.sub[expIdx].sub && ae.sub[expIdx].subCount > 0) {
+            AsnGetTime(&(ae.sub[expIdx].sub[0]), &(data->dmsaKeyPackage.expirationInterval));
+        }
+        if (ae.subCount > fetchIdx && ae.sub[fetchIdx].sub && ae.sub[fetchIdx].subCount > 0) {
+            AsnGetTime(&(ae.sub[fetchIdx].sub[0]), &(data->dmsaKeyPackage.fetchInterval));
+        }
     }
     return false;
 }

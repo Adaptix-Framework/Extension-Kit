@@ -11,7 +11,7 @@ _cmd_asreproasting.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 });
 
 let _cmd_asktgt = ax.create_command("asktgt", "Retrieve a TGT", "kerbeus asktgt /user:Admin /password:QWErty /enctype:aes256 /opsec /ptt");
-_cmd_asktgt.addArgString("params", true, "Args: /user:USER /password:PASSWORD [/domain:DOMAIN] [/dc:DC] [/enctype:(rc4|aes256)] [/ptt] [/nopac] [/opsec]\n                              /user:USER /aes256:HASH [/domain:DOMAIN] [/dc:DC] [/ptt] [/nopac] [/opsec]\n                              /user:USER /rc4:HASH [/domain:DOMAIN] [/dc:DC] [/ptt] [/nopac]\n                              /user:USER /nopreauth [/domain:DOMAIN] [/dc:DC] [/ptt]");
+_cmd_asktgt.addArgString("params", true, "Args: /user:USER /password:PASSWORD [/domain:DOMAIN] [/dc:DC] [/enctype:(rc4|aes256)] [/service:SPN] [/ptt] [/nopac] [/opsec]\n                              /user:USER /aes256:HASH [/domain:DOMAIN] [/dc:DC] [/service:SPN] [/ptt] [/nopac] [/opsec]\n                              /user:USER /rc4:HASH [/domain:DOMAIN] [/dc:DC] [/service:SPN] [/ptt] [/nopac]\n                              /user:USER /nopreauth [/domain:DOMAIN] [/dc:DC]");
 _cmd_asktgt.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
@@ -22,7 +22,7 @@ _cmd_asktgt.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
 });
 
 let _cmd_asktgs = ax.create_command("asktgs", "Retrieve a TGS", "kerbeus asktgs /service:CIFS/dc.domain.local /ticket:doIF8DCCBey... /opsec");
-_cmd_asktgs.addArgString("params", true, "Args: /ticket:BASE64 /service:SPN1,SPN2,... [/domain:DOMAIN] [/dc:DC] [/tgs:BASE64] [/targetdomain:DOMAIN] [/targetuser:USER] [/enctype:(rc4|aes256)] [/ptt] [/keylist] [/u2u] [/opsec]");
+_cmd_asktgs.addArgString("params", true, "Args: /ticket:BASE64 /service:SPN1,SPN2,... [/domain:DOMAIN] [/dc:DC] [/tgs:BASE64] [/targetdomain:DOMAIN] [/targetuser:USER] [/enctype:(rc4|aes256)] [/ptt] [/keylist] [/u2u] [/opsec] [/enterprise] [/dmsa]");
 _cmd_asktgs.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
