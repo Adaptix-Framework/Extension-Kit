@@ -238,6 +238,11 @@ void go(char* args, int len) {
         return;
     }
 
+    char* targetName = BeaconDataExtract(&parser, NULL);
+    if (targetName && targetName[0] != '\0') {
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Target: %s", targetName);
+    }
+
     if (!searchLdap(domainController, 389, rootDN, searchFilter, (char**)&output, &length, &isEncrypted)) {
         return;
     }
