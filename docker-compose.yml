@@ -1,0 +1,8 @@
+services:
+  bof-build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/src
+    working_dir: /src
