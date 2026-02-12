@@ -67,20 +67,29 @@ cmd_jump.addSubCommands([_cmd_jump_psexec, _cmd_jump_scshell]);
 
 
 
-var _cmd_invoke_winrm = ax.create_command("winrm", "Use WinRM to execute commands on other systems", "invoke winrm 192.168.0.1 \"whoami /all\" -t 60000");
+var _cmd_invoke_winrm = ax.create_command("winrm", "Use WinRM to execute commands on other systems", "invoke winrm 192.168.0.1 \"whoami /all\" -t 60000 -u DOMAIN\\\\user -p P@ssw0rd");
 _cmd_invoke_winrm.addArgString("target", true);
 _cmd_invoke_winrm.addArgString("cmd", true);
 _cmd_invoke_winrm.addArgFlagInt("-t", "timeout", "Timeout in milliseconds to wait for output (0 = infinite)", 0);
 _cmd_invoke_winrm.addArgBool("-b", "background", "Keep WinRM shell open for background execution, no output");
+_cmd_invoke_winrm.addArgFlagString("-u", "username", "Username for authentication (DOMAIN\\\\user)", "");
+_cmd_invoke_winrm.addArgFlagString("-p", "password", "Password for authentication", "");
 _cmd_invoke_winrm.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let target = parsed_json["target"];
     let cmd = parsed_json["cmd"];
     let timeout = parsed_json["timeout"];
     let background = parsed_json["-b"] ? 1 : 0;
+    let username = parsed_json["username"];
+    let password = parsed_json["password"];
 
-    let bof_params = ax.bof_pack("wstr,wstr,int,int", [target, cmd, timeout, background]);
+    if (username.length > 0 && password.length == 0)
+        throw new Error("Password is required when username is specified (-u requires -p)");
+
+    let bof_params = ax.bof_pack("wstr,wstr,int,int,wstr,wstr", [target, cmd, timeout, background, username, password]);
     let bof_path = ax.script_dir() + "_bin/winrm." + ax.arch(id) + ".o";
-    let message = `Task: Invoke to ${target} via WinRM`;
+    let message = username.length > 0
+        ? `Task: Invoke to ${target} via WinRM as ${username}`
+        : `Task: Invoke to ${target} via WinRM`;
 
     ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
 });
@@ -411,6 +420,9 @@ let winrm_action = menu.create_action("WinRM", function(targets_id) {
     let agents_selector = form.create_selector_agents(["id", "type", "computer", "username", "process", "pid", "tags"]);
     agents_selector.setSize(1000, 400);
 
+    let creds_selector = form.create_selector_credentials(["username", "password", "realm", "tag"]);
+    creds_selector.setSize(800, 400);
+
     let label_format = form.create_label("Target format:");
     let combo_format = form.create_combo();
     combo_format.addItems(["FQDN", "IP address"]);
@@ -422,14 +434,30 @@ let winrm_action = menu.create_action("WinRM", function(targets_id) {
     let agent_text    = form.create_textline();
     let select_button = form.create_button("...");
 
+    let hline = form.create_hline();
+
+    let username_label  = form.create_label("Username:");
+    let username_text   = form.create_textline();
+    username_text.setPlaceholder("DOMAIN\\\\user (empty = current context)");
+    let creds_button    = form.create_button("...");
+
+    let password_label  = form.create_label("Password:");
+    let password_text   = form.create_textline();
+
     let layout = form.create_gridlayout();
-    layout.addWidget(label_format,  0, 0, 1, 1);
-    layout.addWidget(combo_format,  0, 1, 1, 2);
-    layout.addWidget(label_command, 1, 0, 1, 1);
-    layout.addWidget(text_command,  1, 1, 1, 2);
-    layout.addWidget(agent_label,   2, 0, 1, 1);
-    layout.addWidget(agent_text,    2, 1, 1, 1);
-    layout.addWidget(select_button, 2, 2, 1, 1);
+    layout.addWidget(label_format,   0, 0, 1, 1);
+    layout.addWidget(combo_format,   0, 1, 1, 2);
+    layout.addWidget(label_command,  1, 0, 1, 1);
+    layout.addWidget(text_command,   1, 1, 1, 2);
+    layout.addWidget(agent_label,    2, 0, 1, 1);
+    layout.addWidget(agent_text,     2, 1, 1, 1);
+    layout.addWidget(select_button,  2, 2, 1, 1);
+    layout.addWidget(hline,          3, 0, 1, 3);
+    layout.addWidget(username_label, 4, 0, 1, 1);
+    layout.addWidget(username_text,  4, 1, 1, 1);
+    layout.addWidget(creds_button,   4, 2, 1, 1);
+    layout.addWidget(password_label, 5, 0, 1, 1);
+    layout.addWidget(password_text,  5, 1, 1, 2);
 
     form.connect(select_button, "clicked", function(){
         let agents = agents_selector.exec();
@@ -439,8 +467,19 @@ let winrm_action = menu.create_action("WinRM", function(targets_id) {
         }
     });
 
+    form.connect(creds_button, "clicked", function(){
+        let cred_list = creds_selector.exec();
+        if (cred_list.length > 0) {
+            let cred = cred_list[0];
+            let user = cred["username"];
+            if (cred["realm"].length > 0) { user = cred["realm"] + "\\" + user; }
+            username_text.setText(user);
+            password_text.setText(cred["password"]);
+        }
+    });
+
     let dialog = form.create_dialog("Invoke using WinRM");
-    dialog.setSize(400, 180);
+    dialog.setSize(500, 280);
     dialog.setLayout(layout);
     dialog.setButtonsText("Execute", "Cancel");
     while ( dialog.exec() == true )  {
@@ -451,6 +490,12 @@ let winrm_action = menu.create_action("WinRM", function(targets_id) {
         let format = combo_format.currentText();
         let agent_id = agent_text.text();
 
+        let cred_params = "";
+        if (username_text.text().length > 0) {
+            if (password_text.text().length == 0) { ax.show_message("Error", "Password required when username is specified"); continue; }
+            cred_params = ` -u "${username_text.text()}" -p "${password_text.text()}"`;
+        }
+
         let targets = ax.targets()
         targets_id.forEach((id) => {
             let addr = targets[id].address;
@@ -459,7 +504,7 @@ let winrm_action = menu.create_action("WinRM", function(targets_id) {
                 ax.show_message("Error", "Target is empty!");
             }
             else {
-                let command = `invoke winrm ${addr} ${target_cmd}`;
+                let command = `invoke winrm ${addr} "${target_cmd}"` + cred_params;
                 ax.execute_command(agent_id, command);
             }
         });
