@@ -7,7 +7,7 @@ var metadata = {
 var cmd_arp = ax.create_command("arp", "List ARP table", "arp");
 cmd_arp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/arp." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: arp");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: arp");
 });
 
 var cmd_cacls = ax.create_command("cacls", "List user permissions for the specified file or directory, wildcards supported", "cacls C:\\test.txt");
@@ -18,7 +18,7 @@ cmd_cacls.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("wstr", [path]);
     let bof_path = ax.script_dir() + "_bin/cacls." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF implementation: cacls");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: cacls");
 });
 
 var cmd_dir = ax.create_command("dir", "Lists files in a specified directory. Supports wildcards (e.g. \"C:\\Windows\\S*\"). Optionally, it can perform a recursive list with the /s argument", "dir C:\\Users /s");
@@ -33,31 +33,31 @@ cmd_dir.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("wstr,int", [directory, recursive]);
     let bof_path = ax.script_dir() + "_bin/dir." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF implementation: dir");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: dir");
 });
 
 var cmd_env = ax.create_command("env", "List process environment variables", "env");
 cmd_env.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/env." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "List process environment variables (BOF)");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "List process environment variables (BOF)");
 });
 
 var cmd_ipconfig = ax.create_command("ipconfig", "List IPv4 address, hostname, and DNS server", "ipconfig");
 cmd_ipconfig.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/ipconfig." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: ipconfig");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: ipconfig");
 });
 
 var cmd_listdns = ax.create_command("listdns", "List DNS cache entries. Attempt to query and resolve each", "listdns");
 cmd_listdns.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/listdns." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: ipconfig /displaydns");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: ipconfig /displaydns");
 });
 
 var cmd_netstat = ax.create_command("netstat", "Executes the netstat command to display network connections", "netstat");
 cmd_netstat.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/netstat." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: netstat");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: netstat");
 });
 
 var cmd_nslookup = ax.create_command("nslookup", "Make a DNS query", "nslookup google.com -s 8.8.8.8 -t A");
@@ -72,73 +72,73 @@ cmd_nslookup.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("cstr,cstr,cstr", [domain, type, server]);
     let bof_path = ax.script_dir() + "_bin/nslookup." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF implementation: nslookup");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: nslookup");
 });
 
 var _cmd_privcheck_alwayselevated = ax.create_command("alwayselevated", "Checks if Always Install Elevated is enabled using the registry", "privcheck alwayselevated");
 _cmd_privcheck_alwayselevated.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/alwayselevated." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks AlwaysInstallElevated");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks AlwaysInstallElevated");
 });
 var _cmd_privcheck_hijackablepath = ax.create_command("hijackablepath", "Checks the path environment variable for writable directories (FILE_ADD_FILE) that can be exploited to elevate privileges", "privcheck hijackablepath");
 _cmd_privcheck_hijackablepath.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/hijackablepath." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks HijackablePath");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks HijackablePath");
 });
 var _cmd_privcheck_tokenpriv = ax.create_command("tokenpriv", "Lists the current token privileges and highlights known vulnerable ones", "privcheck tokenpriv");
 _cmd_privcheck_tokenpriv.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/tokenpriv." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks TokenPrivileges");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks TokenPrivileges");
 });
 var _cmd_privcheck_unattendfiles = ax.create_command("unattendfiles", "Checks for leftover unattend files that might contain sensitive information", "privcheck unattendfiles");
 _cmd_privcheck_unattendfiles.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/unattendfiles." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks UnattendFiles");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks UnattendFiles");
 });
 var _cmd_privcheck_unquotedsvc = ax.create_command("unquotedsvc", "Checks for unquoted service paths", "privcheck unquotedsvc");
 _cmd_privcheck_unquotedsvc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/unquotedsvc." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks Unquoted Service Path");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks Unquoted Service Path");
 });
 var _cmd_privcheck_vulndrivers = ax.create_command("vulndrivers", "Checks if any service on the system uses a known vulnerable driver (based on loldrivers.io)", "privcheck vulndrivers");
 _cmd_privcheck_vulndrivers.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/vulndrivers." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks Vulnerable Drivers");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks Vulnerable Drivers");
 });
 var _cmd_privcheck_autologon = ax.create_command("autologon", "Checks for stored Autologon credentials in the Winlogon registry key", "privcheck autologon");
 _cmd_privcheck_autologon.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/autologon." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks Autologon Credentials");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks Autologon Credentials");
 });
 var _cmd_privcheck_credmanager = ax.create_command("credmanager", "Enumerates credentials stored in Windows Credential Manager", "privcheck credmanager");
 _cmd_privcheck_credmanager.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/credmanager." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks Credential Manager");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks Credential Manager");
 });
 var _cmd_privcheck_modautorun = ax.create_command("modautorun", "Checks for modifiable autorun executables in Run/RunOnce registry keys", "privcheck modautorun");
 _cmd_privcheck_modautorun.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/modautorun." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks Modifiable Autoruns");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks Modifiable Autoruns");
 });
 var _cmd_privcheck_modsvc = ax.create_command("modsvc", "Checks for services with modifiable permissions (DACL) that can be exploited for privilege escalation", "privcheck modsvc");
 _cmd_privcheck_modsvc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/modsvc." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks Modifiable Services");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks Modifiable Services");
 });
 var _cmd_privcheck_pshistory = ax.create_command("pshistory", "Checks for PowerShell PSReadLine history file that may contain sensitive commands or credentials", "privcheck pshistory");
 _cmd_privcheck_pshistory.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/pshistory." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks PowerShell History");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks PowerShell History");
 });
 var _cmd_privcheck_uacstatus = ax.create_command("uacstatus", "Checks UAC status, integrity level, and local administrator group membership", "privcheck uacstatus");
 _cmd_privcheck_uacstatus.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/uacstatus." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Checks UAC Status");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Checks UAC Status");
 });
 var _cmd_privcheck_all = ax.create_command("all", "Run all privilege escalation checks sequentially", "privcheck all");
 _cmd_privcheck_all.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/privcheck_all." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "PrivCheck: all checks");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "PrivCheck: all checks");
 });
 var cmd_privcheck = ax.create_command("privcheck", "Perform privilege escalation checks");
 cmd_privcheck.addSubCommands([_cmd_privcheck_all, _cmd_privcheck_alwayselevated, _cmd_privcheck_autologon, _cmd_privcheck_credmanager, _cmd_privcheck_hijackablepath, _cmd_privcheck_modautorun, _cmd_privcheck_modsvc, _cmd_privcheck_tokenpriv, _cmd_privcheck_unattendfiles, _cmd_privcheck_unquotedsvc, _cmd_privcheck_pshistory, _cmd_privcheck_uacstatus, _cmd_privcheck_vulndrivers]);
@@ -146,25 +146,25 @@ cmd_privcheck.addSubCommands([_cmd_privcheck_all, _cmd_privcheck_alwayselevated,
 var cmd_routeprint = ax.create_command("routeprint", "List IPv4 routes", "routeprint");
 cmd_routeprint.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/routeprint." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: route");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: route");
 });
 
 var cmd_uptime = ax.create_command("uptime", "List system boot time and how long it has been running", "uptime");
 cmd_uptime.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/uptime." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: uptime");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: uptime");
 });
 
 var cmd_useridletime = ax.create_command("useridletime", "Shows how long the user as been idle, displayed in seconds, minutes, hours and days", "useridletime");
 cmd_useridletime.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/useridletime." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: useridletime");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: useridletime");
 });
 
 var cmd_whoami = ax.create_command("whoami", "List whoami /all, hours and days", "whoami");
 cmd_whoami.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/whoami." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: whoami /all");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: whoami /all");
 });
 
 var group_test = ax.create_commands_group("SAL-BOF", [cmd_arp, cmd_cacls, cmd_dir, cmd_env, cmd_ipconfig, cmd_listdns, cmd_netstat, cmd_nslookup, cmd_privcheck, cmd_routeprint, cmd_uptime, cmd_useridletime, cmd_whoami]);

@@ -16,7 +16,7 @@ cmd_inject_cfg.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/inject_cfg." + ax.arch(id) + ".o";
     let message = "Task: Executing DataInject-BOF by @0xLegacyy";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -31,7 +31,7 @@ cmd_inject_sec.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/inject_sec." + ax.arch(id) + ".o";
     let message = "Task: inject shellcode (section mapping)";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -48,7 +48,7 @@ cmd_inject_poolparty.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
     let bof_path = ax.script_dir() + "_bin/inject_poolparty." + ax.arch(id) + ".o";
     let message = "Task: inject shellcode (pool party " + "technique " + technique +")";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -69,7 +69,7 @@ cmd_inject_32to64.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
     let bof_path = ax.script_dir() + "_bin/inject_32to64.x86.o";
     let message = "Task: inject x64 shellcode (32-bit WOW64 -> native x64)";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 

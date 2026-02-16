@@ -20,7 +20,7 @@ cmd_execute_assembly.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
     let bof_path = ax.script_dir() + "_bin/execute-assembly." + ax.arch(id) + ".o";
     let message = "Task: execute .NET assembly " + ax.file_basename(parsed_json["path"]);
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 var group_exec = ax.create_commands_group("Execution-BOF", [cmd_execute_assembly, cmd_no_consolation]);

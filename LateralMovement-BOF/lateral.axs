@@ -28,7 +28,7 @@ _cmd_jump_psexec.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     let bof_path = ax.script_dir() + "_bin/psexec." + ax.arch(id) + ".o";
     let message = `Task: Jump to ${target} via PsExec (${binary_name})`;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -57,7 +57,7 @@ _cmd_jump_scshell.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
     let bof_path = ax.script_dir() + "_bin/scshell." + ax.arch(id) + ".o";
     let message = `Task: Jump to ${target} via SCShell (service: ${svc_name}, binary: ${binary_name})`;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -91,7 +91,7 @@ _cmd_invoke_winrm.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
         ? `Task: Invoke to ${target} via WinRM as ${username}`
         : `Task: Invoke to ${target} via WinRM`;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -109,7 +109,7 @@ _cmd_invoke_scshell.setPreHook(function (id, cmdline, parsed_json, ...parsed_lin
     let bof_path = ax.script_dir() + "_bin/scshell." + ax.arch(id) + ".o";
     let message = `Task: Invoke SCShell on ${target} (service: ${service})`;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -150,7 +150,7 @@ _cmd_token_make.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let bof_path = ax.script_dir() + "_bin/token_make." + ax.arch(id) + ".o";
     let message = `Task: make access token for ${domain}\\${username}`;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message, hook_impersonate);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message, hook_impersonate);
 });
 
 var _cmd_token_steal = ax.create_command("steal", "Steal access token from a process", "token steal 608");
@@ -160,7 +160,7 @@ _cmd_token_steal.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     let bof_params = ax.bof_pack("int", [pid]);
     let bof_path = ax.script_dir() + "_bin/token_steal." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: steal access token", hook_impersonate);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: steal access token", hook_impersonate);
 });
 
 var cmd_token = ax.create_command("token", "Impersonate token");
@@ -194,7 +194,7 @@ cmd_runas_user.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/runas." + ax.arch(id) + ".o";
     let message = `Task: runas ${domain}\\${username} -> '${command}'`;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -215,7 +215,7 @@ cmd_runas_session.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
     let bof_path = ax.script_dir() + "_bin/runas_sess_ihxexec." + ax.arch(id) + ".o";
     let message = `Task: Cross-Sessions executeion ${path}`;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 

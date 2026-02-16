@@ -125,5 +125,5 @@ cmd_no_consolation.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let bof_path = ax.script_dir() + "_bin/NoConsolation." + ax.arch(id) + ".o";
     let bof_params = ax.bof_pack("wstr,cstr,wstr,bytes,cstr,int,int,int,wstr,cstr,wstr,int,int,int,int,cstr,int,int,cstr,cstr,int,int,int,cstr,cstr,cstr,int", [pename, pename, pepath, pebytes, path, local, timeout, headers, pecmdline, pecmdline, method, use_unicode, nooutput, alloc_console, close_handles, free_libs, dont_save, list_pes, unload_pe, timestamp, link_to_peb, dont_unload, load_all_deps, load_all_deps_but, load_deps, search_paths, inthread ]);
     let message = `Task: execute ${pename} via No-Consolation BOF`;
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });

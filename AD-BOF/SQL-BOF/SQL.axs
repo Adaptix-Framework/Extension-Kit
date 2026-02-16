@@ -7,7 +7,7 @@ _cmd_1434udp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/1434udp." + ax.arch(id) + ".o";
     let message = "Task: Obtain SQL Server connection information";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -35,7 +35,7 @@ _cmd_adsi.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/adsi." + ax.arch(id) + ".o";
     let message = "Task: Obtain ADSI credentials";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -61,7 +61,7 @@ _cmd_agentcmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/agentcmd." + ax.arch(id) + ".o";
     let message = "Task: Execute system command via SQL Agent";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -85,7 +85,7 @@ _cmd_agentstatus.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     let bof_path = ax.script_dir() + "_bin/SQL/agentstatus." + ax.arch(id) + ".o";
     let message = "Task: Enumerate SQL Agent status and jobs";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -109,7 +109,7 @@ _cmd_checkrpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/checkrpc." + ax.arch(id) + ".o";
     let message = "Task: Enumerate RPC status on linked servers";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -191,7 +191,7 @@ _cmd_clr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/clr." + ax.arch(id) + ".o";
     let message = "Task: execute CLR assembly " + ax.file_basename(dllPath);
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -218,7 +218,7 @@ _cmd_columns.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/columns." + ax.arch(id) + ".o";
     let message = "Task: Enumerate columns in table";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -242,7 +242,7 @@ _cmd_databases.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/databases." + ax.arch(id) + ".o";
     let message = "Task: SQL Server whoami BOF";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -266,7 +266,7 @@ _cmd_disableclr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Disable CLR integration";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -290,7 +290,7 @@ _cmd_disableole.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Disable OLE Automation";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -314,7 +314,7 @@ _cmd_disablerpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Disable RPC on linked server";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -338,7 +338,7 @@ _cmd_disablexp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Disable xp_cmdshell";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -362,7 +362,7 @@ _cmd_enableclr.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Enable CLR integration";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -386,7 +386,7 @@ _cmd_enableole.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Enable OLE Automation Procedures";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -410,7 +410,7 @@ _cmd_enablerpc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Enable RPC on linked server";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -434,7 +434,7 @@ _cmd_enablexp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/togglemodule." + ax.arch(id) + ".o";
     let message = "Task: Enable xp_cmdshell";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -454,7 +454,7 @@ _cmd_impersonate.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     let bof_path = ax.script_dir() + "_bin/SQL/impersonate." + ax.arch(id) + ".o";
     let message = "Task: SQL Server impersonation enumeration";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -474,7 +474,7 @@ _cmd_info.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/info." + ax.arch(id) + ".o";
     let message = "Task: SQL Server impersonation enumeration";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -498,7 +498,7 @@ _cmd_links.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/links." + ax.arch(id) + ".o";
     let message = "Task: Enumerate linked servers";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -524,7 +524,7 @@ _cmd_olecmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/olecmd." + ax.arch(id) + ".o";
     let message = "Task: Execute command via OLE automation";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -550,7 +550,7 @@ _cmd_query.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/query." + ax.arch(id) + ".o";
     let message = "Task: SQL Server custom query execution";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -576,7 +576,7 @@ _cmd_rows.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/rows." + ax.arch(id) + ".o";
     let message =  "Task: Count rows in table";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -602,7 +602,7 @@ _cmd_search.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/search." + ax.arch(id) + ".o";
     let message =  "Task: Search for column names";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -628,7 +628,7 @@ _cmd_smb.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/smb." + ax.arch(id) + ".o";
     let message = "Task: SQL Server SMB relay via xp_dirtree";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -652,7 +652,7 @@ _cmd_tables.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/tables." + ax.arch(id) + ".o";
     let message = "Task: Enumerate Tables";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -676,7 +676,7 @@ _cmd_users.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/users." + ax.arch(id) + ".o";
     let message = "Task: Enumerate users with database access";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -700,7 +700,7 @@ _cmd_whoami.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/whoami." + ax.arch(id) + ".o";
     let message = "Task: SQL Server whoami BOF";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -726,7 +726,7 @@ _cmd_xpcmd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/SQL/xpcmd." + ax.arch(id) + ".o";
     let message = "Task: SQL Server xp_cmdshell execution";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 

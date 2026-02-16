@@ -8,7 +8,7 @@ _cmd_informer_http.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let bof_path = ax.script_dir() + "_bin/RelayInformer/http." + ax.arch(id) + ".o";
     let message = "Task: Inform on HTTP(S) service binding enforcement";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -22,7 +22,7 @@ _cmd_informer_ldap.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let bof_path = ax.script_dir() + "_bin/RelayInformer/ldap." + ax.arch(id) + ".o";
     let message = "Task: Inform on LDAP signing enforcement";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -40,7 +40,7 @@ _cmd_informer_mssql.setPreHook(function (id, cmdline, parsed_json, ...parsed_lin
     let bof_path = ax.script_dir() + "_bin/RelayInformer/mssql." + ax.arch(id) + ".o";
     let message = "Task: Inform on MSSQL service binding and channel binding enforcement";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -54,7 +54,7 @@ _cmd_informer_smb.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
     let bof_path = ax.script_dir() + "_bin/RelayInformer/smb." + ax.arch(id) + ".o";
     let message = "Task: Inform on SMB2 signing enforcement";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 

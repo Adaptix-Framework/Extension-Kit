@@ -20,7 +20,7 @@ cmd_askcreds.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("wstr,wstr,int", [prompt, note, wait_time]);
     let bof_path = ax.script_dir() + "_bin/askcreds." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF implementation: askcreds");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: askcreds");
 });
 
 
@@ -34,7 +34,7 @@ cmd_get_ntlm.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("int", [no_ess]);
     let bof_path = ax.script_dir() + "_bin/get-netntlm." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF implementation: Internal Monologue");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: Internal Monologue");
 });
 
 
@@ -57,7 +57,7 @@ cmd_hashdump.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     }
     let bof_path = ax.script_dir() + "_bin/hashdump." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: hashdump", hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: hashdump", hook);
 });
 
 
@@ -217,7 +217,7 @@ cmd_lsadump_secrets.setPreHook(function (id, cmdline, parsed_json, ...parsed_lin
         return task;
     }
     let bof_path = ax.script_dir() + "_bin/lsadump_secrets." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF: lsadump::secrets", hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF: lsadump::secrets", hook);
 });
 
 
@@ -236,7 +236,7 @@ cmd_lsadump_sam.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
         return task;
     }
     let bof_path = ax.script_dir() + "_bin/lsadump_sam." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF: lsadump::sam", hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF: lsadump::sam", hook);
 });
 
 
@@ -259,7 +259,7 @@ cmd_lsadump_cache.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
         return task;
     }
     let bof_path = ax.script_dir() + "_bin/lsadump_cache." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF: lsadump::cache", hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF: lsadump::cache", hook);
 });
 
 
@@ -294,7 +294,7 @@ cmd_underlaycopy.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     let bof_path = ax.script_dir() + "_bin/underlaycopy." + ax.arch(id) + ".o";
 
     let task_desc = download ? "Task: UnderlayCopy file copy and download to server" : "Task: UnderlayCopy file copy";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, task_desc);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, task_desc);
 });
 
 

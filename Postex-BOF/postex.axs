@@ -21,7 +21,7 @@ _cmd_fw_add.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("cstr,wstr,wstr,wstr,wstr", [direction, port, rulename, rulegroup, description]);
     let bof_path = ax.script_dir() + "_bin/addfirewallrule." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Add firewall rule (BOF)");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Add firewall rule (BOF)");
 });
 var cmd_fw = ax.create_command("firewallrule", "Managing firewall rules");
 cmd_fw.addSubCommands([_cmd_fw_add]);
@@ -42,7 +42,7 @@ cmd_screenshot.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("cstr,int", [note, pid]);
     let bof_path = ax.script_dir() + "_bin/Screenshot." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Screenshot BOF");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Screenshot BOF");
 });
 
 
@@ -79,7 +79,7 @@ cmd_sauroneye.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,int,int,int,cstr,cstr,int,int,int,int,int", [cmdline, directories, filetypes, keywords, search_contents, max_filesize, system_dirs, before_date, after_date, check_macro, show_date, wildcard_attempts, wildcard_size, wildcard_backtrack]);
     let bof_path = ax.script_dir() + "_bin/sauroneye." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: SauronEye file search");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: SauronEye file search");
 });
 
 

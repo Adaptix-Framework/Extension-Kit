@@ -18,7 +18,7 @@ _cmd_certi_auth.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let bof_path = ax.script_dir() + "_bin/ADCS/certi_auth." + ax.arch(id) + ".o";
     let message = "Task: Authenticate with certificate (PKINIT)";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -29,7 +29,7 @@ _cmd_certi_enum.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let bof_path = ax.script_dir() + "_bin/ADCS/certi_enum." + ax.arch(id) + ".o";
     let message = "Task: Enumerate CAs and templates";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}"`, message );
 });
 
 
@@ -76,7 +76,7 @@ _cmd_certi_req.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/ADCS/certi_req." + ax.arch(id) + ".o";
     let message = "Task: Request certificate";
 
-    ax.execute_alias( id, cmdline, `execute bof ${bof_path} ${bof_params}`, message );
+    ax.execute_alias( id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message );
 });
 
 
@@ -103,7 +103,7 @@ _cmd_certi_req_onbehalf.setPreHook(function (id, cmdline, parsed_json, ...parsed
     let bof_path = ax.script_dir() + "_bin/ADCS/certi_req_onbehalf." + ax.arch(id) + ".o";
     let message = "Task: Request certificate on behalf of " + target;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -124,7 +124,7 @@ _cmd_certi_shadow.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
     let message = clear ? "Task: Clear Shadow Credentials from " + target + "@" + domain 
                         : "Task: Shadow Credentials attack on " + target + "@" + domain;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
