@@ -22,7 +22,7 @@ _cmd_asktgt.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
 });
 
 let _cmd_asktgs = ax.create_command("asktgs", "Retrieve a TGS", "kerbeus asktgs /service:CIFS/dc.domain.local /ticket:doIF8DCCBey... /opsec");
-_cmd_asktgs.addArgString("params", true, "Args: /ticket:BASE64 /service:SPN1,SPN2,... [/domain:DOMAIN] [/dc:DC] [/tgs:BASE64] [/targetdomain:DOMAIN] [/targetuser:USER] [/enctype:(rc4|aes256)] [/ptt] [/keylist] [/u2u] [/opsec] [/enterprise] [/dmsa]");
+_cmd_asktgs.addArgString("params", true, "Args: /ticket:BASE64 /service:SPN1,SPN2,... [/domain:DOMAIN] [/dc:DC] [/tgs:BASE64] [/targetdomain:DOMAIN] [/targetuser:USER] [/enctype:(rc4|aes256)] [/ptt] [/keylist] [/u2u] [/opsec] [/dmsa]");
 _cmd_asktgs.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
     let params = parsed_json["params"];
 

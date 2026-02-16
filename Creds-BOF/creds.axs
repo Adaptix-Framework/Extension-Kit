@@ -25,22 +25,6 @@ cmd_askcreds.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var cmd_autologon = ax.create_command("autologon", "Checks the registry for autologon information", "autologon");
-cmd_autologon.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    let bof_path = ax.script_dir() + "_bin/autologon." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: autologon");
-});
-
-
-
-var cmd_credman = ax.create_command("credman", "Checks the current user's Windows Credential Manager for saved web passwords", "credman");
-cmd_credman.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    let bof_path = ax.script_dir() + "_bin/credman." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: credman");
-});
-
-
-
 var cmd_get_ntlm = ax.create_command("get-netntlm", "Retrieve NetNTLM hash for the current user", "get-netntlm --no-ess");
 cmd_get_ntlm.addArgBool( "--no-ess", "The option can be utilized and if you would like the attempt to disable session security in NetNTLMv1");
 cmd_get_ntlm.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -316,7 +300,7 @@ cmd_underlaycopy.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
 
 
 var group_test = ax.create_commands_group("Creds-BOF", [
-    cmd_askcreds, cmd_autologon, cmd_credman, cmd_get_ntlm, cmd_hashdump, cmd_cookie_monster,
+    cmd_askcreds, cmd_get_ntlm, cmd_hashdump, cmd_cookie_monster,
     cmd_nanodump, cmd_nanodump_ppl_dump, cmd_nanodump_ppl_medic, cmd_nanodump_ssp, cmd_underlaycopy,
     cmd_lsadump_secrets, cmd_lsadump_sam, cmd_lsadump_cache
 ]);

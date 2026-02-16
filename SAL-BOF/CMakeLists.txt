@@ -25,6 +25,13 @@ set(HIJACKABLEPATH_SOURCES privcheck/hijackablepath.c)
 set(TOKENPRIV_SOURCES privcheck/tokenprivileges.c)
 set(UNATTENDFILES_SOURCES privcheck/unattendfiles.c)
 set(UNQUOTEDSVC_SOURCES privcheck/unquotedsvcpath.c)
+set(AUTOLOGON_SOURCES privcheck/autologon.c)
+set(CREDMANAGER_SOURCES privcheck/credentialmanager.c)
+set(MODAUTORUN_SOURCES privcheck/modifiableautorun.c)
+set(MODSVC_SOURCES privcheck/modifiablesvc.c)
+set(PSHISTORY_SOURCES privcheck/pshistory.c)
+set(UACSTATUS_SOURCES privcheck/uacstatus.c)
+set(PRIVCHECK_ALL_SOURCES privcheck/privcheck_all.c)
 
 # Compiler flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os -DBOF")
@@ -65,6 +72,27 @@ target_compile_options(unattendfiles PRIVATE -w -Wno-incompatible-pointer-types)
 
 add_library(unquotedsvc OBJECT ${UNQUOTEDSVC_SOURCES})
 target_compile_options(unquotedsvc PRIVATE -w -Wno-incompatible-pointer-types)
+
+add_library(autologon OBJECT ${AUTOLOGON_SOURCES})
+target_compile_options(autologon PRIVATE -w -Wno-incompatible-pointer-types)
+
+add_library(credmanager OBJECT ${CREDMANAGER_SOURCES})
+target_compile_options(credmanager PRIVATE -w -Wno-incompatible-pointer-types)
+
+add_library(modautorun OBJECT ${MODAUTORUN_SOURCES})
+target_compile_options(modautorun PRIVATE -w -Wno-incompatible-pointer-types)
+
+add_library(modsvc OBJECT ${MODSVC_SOURCES})
+target_compile_options(modsvc PRIVATE -w -Wno-incompatible-pointer-types)
+
+add_library(pshistory OBJECT ${PSHISTORY_SOURCES})
+target_compile_options(pshistory PRIVATE -w -Wno-incompatible-pointer-types)
+
+add_library(uacstatus OBJECT ${UACSTATUS_SOURCES})
+target_compile_options(uacstatus PRIVATE -w -Wno-incompatible-pointer-types)
+
+add_library(privcheck_all OBJECT ${PRIVCHECK_ALL_SOURCES})
+target_compile_options(privcheck_all PRIVATE -w -Wno-incompatible-pointer-types)
 
 # Custom command to download vulnerable driver list
 add_custom_target(download_vulnerable_driver_list
@@ -185,4 +213,46 @@ add_custom_target(copy_unquotedsvc ALL
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:unquotedsvc> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/unquotedsvc.x64.o
     DEPENDS unquotedsvc
     COMMENT "Copying unquotedsvc object file"
+)
+
+add_custom_target(copy_autologon ALL
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:autologon> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/autologon.x64.o
+    DEPENDS autologon
+    COMMENT "Copying autologon object file"
+)
+
+add_custom_target(copy_credmanager ALL
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:credmanager> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/credmanager.x64.o
+    DEPENDS credmanager
+    COMMENT "Copying credmanager object file"
+)
+
+add_custom_target(copy_modautorun ALL
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:modautorun> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/modautorun.x64.o
+    DEPENDS modautorun
+    COMMENT "Copying modautorun object file"
+)
+
+add_custom_target(copy_modsvc ALL
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:modsvc> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/modsvc.x64.o
+    DEPENDS modsvc
+    COMMENT "Copying modsvc object file"
+)
+
+add_custom_target(copy_pshistory ALL
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:pshistory> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/pshistory.x64.o
+    DEPENDS pshistory
+    COMMENT "Copying pshistory object file"
+)
+
+add_custom_target(copy_uacstatus ALL
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:uacstatus> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/uacstatus.x64.o
+    DEPENDS uacstatus
+    COMMENT "Copying uacstatus object file"
+)
+
+add_custom_target(copy_privcheck_all ALL
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:privcheck_all> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/privcheck_all.x64.o
+    DEPENDS privcheck_all
+    COMMENT "Copying privcheck_all object file"
 )
