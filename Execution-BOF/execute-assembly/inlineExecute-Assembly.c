@@ -659,15 +659,12 @@ void go(IN PCHAR buffer, IN ULONG blength)
     memset(ctx.returnData, 0, ctx.returnDataSize);
 
     //Determine .NET assembly version
-    wchar_t* wNetVersion = NULL;
-    if(FindVersion((void*)assemblyBytes, assemblyByteLen))
-    {
-        wNetVersion = L"v4.0.30319";
-    }
-    else
-    {
-        wNetVersion = L"v2.0.50727";
-    }
+    //FindVersion() scans raw assembly bytes for CLR version strings but fails
+    //when the PE metadata format doesn't contain them as plain text, causing
+    //a fallback to CLR v2.0 which breaks all modern .NET 4.x tools (Rubeus,
+    //Seatbelt, SafetyKatz, SharpHound, etc.). Since .NET 2.0 assemblies are
+    //effectively extinct in offensive tooling, default to CLR v4.0.
+    wchar_t* wNetVersion = L"v4.0.30319";
 
     //Handle argument conversion based on whether we have valid arguments
     if (hasArguments) {
