@@ -17,24 +17,14 @@ bof: clean
 	@($(CC64) $(CFLAGS) -fno-asynchronous-unwind-tables -nostdlib -fno-ident -fpack-struct=8 -falign-functions=1 -s -ffunction-sections -falign-jumps=1 -w -Wall -shared -Wl,--no-seh -Wl,--enable-stdcall-fixup badtakeover/BadTakeover.c -o _bin/badtakeover.x64.o -DBOF && $(STRIP64) _bin/badtakeover.x64.o) && echo '[+] badtakeover' || echo '[!] badtakeover'
 
 
-
-	@$(MAKE) --no-print-directory -C RelayInformer
-	@mv RelayInformer/_bin/RelayInformer _bin/
-
 	@$(MAKE) --no-print-directory -C DCSync-BOF
 	@mv DCSync-BOF/_bin/* _bin/
 
+	@$(MAKE) --no-print-directory -C RelayInformer
 	@$(MAKE) --no-print-directory -C ADCS-BOF
-	@mv ADCS-BOF/_bin/ADCS _bin/
-
 	@$(MAKE) --no-print-directory -C Kerbeus-BOF
-	@mv Kerbeus-BOF/_bin/Kerbeus-BOF _bin/
-
 	@$(MAKE) --no-print-directory -C SQL-BOF
-	@mv SQL-BOF/_bin/SQL _bin/
-
 	@$(MAKE) --no-print-directory -C LDAP-BOF
-	@mv LDAP-BOF/_bin/LDAP _bin/
 
 clean:
 	@(rm -rf _bin)

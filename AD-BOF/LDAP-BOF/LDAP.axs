@@ -1,3 +1,7 @@
+var metadata = {
+    name: "LDAP-BOF",
+    description: "LDAP Exploitation BOFs"
+};
 
 // ============================================================================
 // Helper function to determine if input is a username or a distinguished name

@@ -298,40 +298,40 @@ BOOL ReadSlotHybrid(char* output, size_t outputSize, HANDLE* mailHandle, HANDLE*
     return !chunkingMode;  // Return FALSE if chunking was used
 }
 
-/*Improved version detection for .NET 4.x*/
-BOOL FindVersion(void * assembly, int length) {
-    char* assembly_c = (char*)assembly;
-
-    // Check for various .NET 4.x versions
-    char* v4_versions[] = {
-        "v4.0.30319",
-        "v4.5",
-        "v4.6",
-        "v4.7",
-        "v4.8"
-    };
-
-    int num_versions = sizeof(v4_versions) / sizeof(v4_versions[0]);
-
-    for (int v = 0; v < num_versions; v++) {
-        int version_len = MSVCRT$strlen(v4_versions[v]);
-
-        for (int i = 0; i < length - version_len; i++) {
-            BOOL found = TRUE;
-            for (int j = 0; j < version_len; j++) {
-                if (v4_versions[v][j] != assembly_c[i + j]) {
-                    found = FALSE;
-                    break;
-                }
-            }
-            if (found) {
-                return 1;  // .NET 4.x found
-            }
-        }
-    }
-
-    return 0;  // .NET 2.0
-}
+// /*Improved version detection for .NET 4.x*/
+// BOOL FindVersion(void * assembly, int length) {
+//     char* assembly_c = (char*)assembly;
+//
+//     // Check for various .NET 4.x versions
+//     char* v4_versions[] = {
+//         "v4.0.30319",
+//         "v4.5",
+//         "v4.6",
+//         "v4.7",
+//         "v4.8"
+//     };
+//
+//     int num_versions = sizeof(v4_versions) / sizeof(v4_versions[0]);
+//
+//     for (int v = 0; v < num_versions; v++) {
+//         int version_len = MSVCRT$strlen(v4_versions[v]);
+//
+//         for (int i = 0; i < length - version_len; i++) {
+//             BOOL found = TRUE;
+//             for (int j = 0; j < version_len; j++) {
+//                 if (v4_versions[v][j] != assembly_c[i + j]) {
+//                     found = FALSE;
+//                     break;
+//                 }
+//             }
+//             if (found) {
+//                 return 1;  // .NET 4.x found
+//             }
+//         }
+//     }
+//
+//     return 0;  // .NET 2.0
+// }
 
 /*Patch ETW - Fixed*/
 BOOL patchETW(BOOL revertETW)

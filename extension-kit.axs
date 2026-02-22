@@ -6,6 +6,7 @@ var metadata = {
 
 var path = ax.script_dir();
 ax.script_load(path + "AD-BOF/ad.axs");
+ax.script_load(path + "AD-BOF/ad-services.axs");
 ax.script_load(path + "Creds-BOF/creds.axs");
 ax.script_load(path + "Elevation-BOF/elevate.axs");
 ax.script_load(path + "Execution-BOF/execution.axs");

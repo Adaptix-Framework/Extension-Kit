@@ -1,3 +1,7 @@
+var metadata = {
+    name: "RelayInformer-BOF",
+    description: "RelayInformer BOFs"
+};
 
 let _cmd_informer_http = ax.create_command("http", "Inform on HTTP(S) service binding enforcement and HTTPS channel binding enforcement", "relay-informer http https://test.dom.local");
 _cmd_informer_http.addArgString("url", true);

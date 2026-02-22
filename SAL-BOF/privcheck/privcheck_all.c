@@ -25,6 +25,7 @@ void CheckAlwaysInstallElevated() {
     const TCHAR* subkeys[] = {
         TEXT("HKEY_CURRENT_USER"),
         TEXT("HKEY_LOCAL_MACHINE")
+    };
 
     BeaconPrintf(CALLBACK_OUTPUT, "=== AlwaysInstallElevated Check ===\n");
 

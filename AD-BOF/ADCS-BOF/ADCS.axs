@@ -1,3 +1,7 @@
+var metadata = {
+    name: "ADCS-BOF",
+    description: "Active Directory Certificate Services Exploitation BOFs"
+};
 
 let _cmd_certi_auth = ax.create_command("auth", "Authenticate with certificate (PKINIT + UnPAC-the-hash)", "certi auth --cert MIIMcAIBAzCCDCwG....");
 _cmd_certi_auth.addArgFlagString("--cert", "cert", "Base64 encoded PFX certificate", "");

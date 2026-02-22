@@ -330,12 +330,10 @@ cmd_readlaps.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
     if (!target && !target_dn) {
         throw new Error("Either -target (sAMAccountName) or -target-dn (Distinguished Name) must be specified");
-        return;
     }
 
     if (target && target_dn) {
         throw new Error("Cannot specify both -target and -target-dn");
-        return;
     }
 
     // If -dn not specified, derive from agent domain
@@ -346,7 +344,6 @@ cmd_readlaps.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
             dn = parts.map(part => "DC=" + part).join(",");
         } else {
             throw new Error("Could not auto-detect DN. Agent domain not available. Please specify -dn manually.");
-            return;
         }
     }
 
@@ -415,11 +412,3 @@ cmd_webdav.addSubCommands([_cmd_webdav_status]);
 
 var group_exec = ax.create_commands_group("AD-BOF", [cmd_adwssearch, cmd_badtakeover, cmd_dcsync, cmd_ldapsearch, cmd_ldapq, cmd_readlaps, cmd_webdav]);
 ax.register_commands_group(group_exec, ["beacon", "gopher", "kharon"], ["windows"], []);
-
-
-
-ax.script_import(ax.script_dir() + "ADCS-BOF/ADCS.axs")
-ax.script_import(ax.script_dir() + "Kerbeus-BOF/kerbeus.axs")
-ax.script_import(ax.script_dir() + "SQL-BOF/SQL.axs")
-ax.script_import(ax.script_dir() + "LDAP-BOF/LDAP.axs")
-ax.script_import(ax.script_dir() + "RelayInformer/RelayInformer.axs")

@@ -1,3 +1,7 @@
+var metadata = {
+    name: "Kerbeus-BOF",
+    description: "Kerberos Exploitation BOFs"
+};
 
 let _cmd_asreproasting = ax.create_command("asreproasting", "Perform AS-REP roasting", "kerbeus asreproasting /user:pre_user");
 _cmd_asreproasting.addArgString("params", true, "Args: /user:USER [/dc:DC] [/domain:DOMAIN]");

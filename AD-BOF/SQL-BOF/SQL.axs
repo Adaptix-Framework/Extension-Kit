@@ -1,3 +1,8 @@
+var metadata = {
+    name: "MSSQL-BOF",
+    description: "Microsof SQL Server Exploitation BOFs"
+};
+
 var _cmd_1434udp = ax.create_command("1434udp", "Obtain SQL Server connection information from 1434/UDP", "mssql 1434udp 192.168.10.10");
 _cmd_1434udp.addArgString("serverIP", true, "SQL Server IP");
 _cmd_1434udp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
