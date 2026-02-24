@@ -5,12 +5,17 @@ var metadata = {
 
 ax.script_import(ax.script_dir() + "No-Consolation/no_consolation.axs")
 
+
+
 var cmd_execute_assembly = ax.create_command("execute-assembly", "Perform in process .NET assembly execution", "execute-assembly /opt/windows/Seatbelt.exe -group=user");
+cmd_execute_assembly.addArgBool("--async", "Use Async BOF");
 cmd_execute_assembly.addArgFile("path", true, "Path to .NET assembly");
 cmd_execute_assembly.addArgString("params", ".NET assembly parameters", "");
 cmd_execute_assembly.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let assembly_content = parsed_json["path"];
     let assembly_params  = parsed_json["params"];
+    let async = "";
+    if (parsed_json["--async"]) async = "-a ";
 
     if(assembly_content.length == 0) {
         throw new Error(`file ${parsed_json["path"]} not readed`);
@@ -19,7 +24,7 @@ cmd_execute_assembly.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
     let bof_params = ax.bof_pack("bytes,cstr", [assembly_content, assembly_params]);
     let bof_path = ax.script_dir() + "_bin/execute-assembly." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: execute .NET assembly");
+    ax.execute_alias(id, cmdline, `execute bof ${async}"${bof_path}" ${bof_params}`, "Task: execute .NET assembly");
 });
 
 var group_exec = ax.create_commands_group("Execution-BOF", [cmd_execute_assembly, cmd_no_consolation]);

