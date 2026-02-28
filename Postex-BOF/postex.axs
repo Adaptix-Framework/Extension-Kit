@@ -21,7 +21,7 @@ _cmd_fw_add.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("cstr,wstr,wstr,wstr,wstr", [direction, port, rulename, rulegroup, description]);
     let bof_path = ax.script_dir() + "_bin/addfirewallrule." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Add firewall rule (BOF)");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Add firewall rule (BOF)");
 });
 var cmd_fw = ax.create_command("firewallrule", "Managing firewall rules");
 cmd_fw.addSubCommands([_cmd_fw_add]);
@@ -42,12 +42,13 @@ cmd_screenshot.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("cstr,int", [note, pid]);
     let bof_path = ax.script_dir() + "_bin/Screenshot." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: Screenshot BOF");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Screenshot BOF");
 });
 
 
 
 var cmd_sauroneye = ax.create_command("sauroneye", "Search directories for files containing specific keywords (SauronEye ported to BOF by @shashinma)", "sauroneye -d C:\\Users -f .txt,.docx -k pass*,secret*");
+cmd_sauroneye.addArgBool("--async", "Use Async BOF");
 cmd_sauroneye.addArgFlagString("-d", "directories", "Comma-separated list of directories to search (default: C:\\)", "C:\\");
 cmd_sauroneye.addArgFlagString("-f", "filetypes", "Comma-separated list of file extensions to search (default: .txt,.docx)", ".txt,.docx");
 cmd_sauroneye.addArgFlagString("-k", "keywords", "Comma-separated list of keywords (supports wildcards * ). If not specified, matches all filenames", "");
@@ -75,12 +76,15 @@ cmd_sauroneye.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let wildcard_attempts = parsed_json["wildcardattempts"];
     let wildcard_size = parsed_json["wildcardsize"];
     let wildcard_backtrack = parsed_json["wildcardbacktrack"];
+    let async = "";
+    if (parsed_json["--async"]) async = "-a ";
 
     let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,int,int,int,cstr,cstr,int,int,int,int,int", [cmdline, directories, filetypes, keywords, search_contents, max_filesize, system_dirs, before_date, after_date, check_macro, show_date, wildcard_attempts, wildcard_size, wildcard_backtrack]);
     let bof_path = ax.script_dir() + "_bin/sauroneye." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: SauronEye file search");
+    ax.execute_alias(id, cmdline, `execute bof ${async}"${bof_path}" ${bof_params}`, "Task: SauronEye file search");
 });
+
 
 
 var b_group_test = ax.create_commands_group("PostEx-BOF", [cmd_fw, cmd_screenshot, cmd_sauroneye]);

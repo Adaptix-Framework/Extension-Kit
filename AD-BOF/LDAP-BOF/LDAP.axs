@@ -1,3 +1,7 @@
+var metadata = {
+    name: "LDAP-BOF",
+    description: "LDAP Exploitation BOFs"
+};
 
 // ============================================================================
 // Helper function to determine if input is a username or a distinguished name
@@ -35,7 +39,7 @@ _cmd_getusers.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,cstr,int,cstr", [ou_path, dc_fqdn, use_ldaps, attributes]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-users." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Enumerating domain users...");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Enumerating domain users...");
 });
 
 
@@ -57,7 +61,7 @@ _cmd_getcomputers.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
 
     let bof_params = ax.bof_pack("cstr,cstr,int,cstr", [ou_path, dc_fqdn, use_ldaps, attributes]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-computers." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Enumerating domain computers...");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Enumerating domain computers...");
 });
 
 
@@ -79,7 +83,7 @@ _cmd_getgroups.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,cstr,int,cstr", [ou_path, dc_fqdn, use_ldaps, attributes]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-groups." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Enumerating domain groups...");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Enumerating domain groups...");
 });
 
 
@@ -102,7 +106,7 @@ _cmd_getusergroups.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int", [user, is_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-usergroups." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Querying groups for ${user}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying groups for ${user}...`);
 });
 
 
@@ -123,7 +127,7 @@ _cmd_getgroupmembers.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr", [group, is_dn, ou_path, dc_fqdn]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-groupmembers." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Querying members of ${group}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying members of ${group}...`);
 });
 
 
@@ -146,7 +150,7 @@ _cmd_getobject.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int", [target, is_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-object." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Querying object ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying object ${target}...`);
 });
 
 
@@ -164,7 +168,7 @@ _cmd_getdomaininfo.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 
     let bof_params = ax.bof_pack("cstr,int", [dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-domaininfo." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Querying domain information...");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Querying domain information...");
 });
 
 
@@ -182,7 +186,7 @@ _cmd_getmaq.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int", [dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-maq." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Querying machine account quota...");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Querying machine account quota...");
 });
 
 
@@ -204,7 +208,7 @@ _cmd_getwritable.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
 
     let bof_params = ax.bof_pack("cstr,cstr,int,int", [ou_path, dc_fqdn, use_ldaps, detailed]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-writable." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Finding writable objects...");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Finding writable objects...");
 });
 
 
@@ -227,7 +231,7 @@ _cmd_getdelegation.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int", [target, is_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-delegation." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Querying delegation for ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying delegation for ${target}...`);
 });
 
 
@@ -250,7 +254,7 @@ _cmd_getuac.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int", [target, is_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-uac." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Querying UAC for ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying UAC for ${target}...`);
 });
 
 
@@ -275,7 +279,7 @@ _cmd_getattribute.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, attributes, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-attribute." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Querying ${attributes} for ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying ${attributes} for ${target}...`);
 });
 
 
@@ -298,7 +302,7 @@ _cmd_getspn.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int", [target, is_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-spn." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Querying SPNs for ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying SPNs for ${target}...`);
 });
 
 
@@ -323,7 +327,7 @@ _cmd_getacl.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int,int", [target, is_dn, ou_path, dc_fqdn, use_ldaps, resolve]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-acl." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Querying ACL for ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying ACL for ${target}...`);
 });
 
 
@@ -346,7 +350,7 @@ _cmd_getrbcd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int", [target, is_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-rbcd." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Querying RBCD for ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying RBCD for ${target}...`);
 });
 
 
@@ -384,7 +388,7 @@ _cmd_adduser.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,cstr,int,cstr,cstr,int",
         [username, is_dn, password, firstname, lastname, email, disabled, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-user." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding user ${username}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding user ${username}...`);
 });
 
 
@@ -412,7 +416,7 @@ _cmd_addcomputer.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int,int",
         [computer, is_dn, password, ou_path, dc_fqdn, disabled, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-computer." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding computer ${computer}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding computer ${computer}...`);
 });
 
 
@@ -442,7 +446,7 @@ _cmd_addgroup.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,cstr,cstr,int",
         [groupname, is_dn, description, type, scope, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-group." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding group ${groupname}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding group ${groupname}...`);
 });
 
 
@@ -469,7 +473,7 @@ _cmd_addgroupmember.setPreHook(function (id, cmdline, parsed_json, ...parsed_lin
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int",
         [group, is_group_dn, member, is_member_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-groupmember." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding ${member} to ${group}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding ${member} to ${group}...`);
 });
 
 
@@ -495,7 +499,7 @@ _cmd_addou.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int",
         [ou_name, is_dn, description, parent_ou, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-ou." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding OU ${ou_name}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding OU ${ou_name}...`);
 });
 
 
@@ -521,7 +525,7 @@ _cmd_addsidhistory.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int",
         [target, is_target_dn, sid_source, is_sid_source_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-sidhistory." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding SID to ${target}'s sidHistory...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding SID to ${target}'s sidHistory...`);
 });
 
 
@@ -546,7 +550,7 @@ _cmd_addspn.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, spn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-spn." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding SPN ${spn} to ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding SPN ${spn} to ${target}...`);
 });
 
 
@@ -574,7 +578,7 @@ _cmd_addattribute.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,cstr,int",
         [target, is_dn, attribute, value, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-attribute." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding ${attribute} value to ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding ${attribute} value to ${target}...`);
 });
 
 
@@ -599,7 +603,7 @@ _cmd_adduac.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, flags, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-uac." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding UAC flags to ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding UAC flags to ${target}...`);
 });
 
 
@@ -624,7 +628,7 @@ _cmd_adddelegation.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, spn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-delegation." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding delegation SPN to ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding delegation SPN to ${target}...`);
 });
 
 
@@ -661,7 +665,7 @@ _cmd_addace.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,cstr,cstr,cstr,cstr,cstr,int",
         [target, is_target_dn, trustee, is_trustee_dn, rights, ace_type, flags, guid, inherit_guid, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-ace." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding ACE to ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding ACE to ${target}...`);
 });
 
 
@@ -688,7 +692,7 @@ _cmd_addrbcd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int",
         [target, is_target_dn, delegate, is_delegate_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-rbcd." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding RBCD delegation to ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding RBCD delegation to ${target}...`);
 });
 
 
@@ -718,7 +722,7 @@ _cmd_setpassword.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,cstr,int", [target, is_dn, password, old_password, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/set-password." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Setting password for ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Setting password for ${target}...`);
 });
 
 
@@ -743,7 +747,7 @@ _cmd_setspn.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, spn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/set-spn." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Setting SPN on ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Setting SPN on ${target}...`);
 });
 
 
@@ -768,7 +772,7 @@ _cmd_setdelegation.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, spn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/set-delegation." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Setting delegation on ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Setting delegation on ${target}...`);
 });
 
 
@@ -796,7 +800,7 @@ _cmd_setattribute.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,cstr,int",
         [target, is_dn, attribute, value, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/set-attribute." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Setting ${attribute} on ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Setting ${attribute} on ${target}...`);
 });
 
 
@@ -822,7 +826,7 @@ _cmd_setuac.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, flags, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/set-uac." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Setting UAC flags on ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Setting UAC flags on ${target}...`);
 });
 
 
@@ -849,7 +853,7 @@ _cmd_setowner.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int",
         [target, is_target_dn, owner, is_owner_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/set-owner." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Setting owner of ${target} to ${owner}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Setting owner of ${target} to ${owner}...`);
 });
 
 
@@ -881,7 +885,7 @@ _cmd_moveobject.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,cstr,int", [object, is_dn, destination, newname, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/move-object." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Moving ${object} to ${destination}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Moving ${object} to ${destination}...`);
 });
 
 
@@ -912,7 +916,7 @@ _cmd_removegroupmember.setPreHook(function (id, cmdline, parsed_json, ...parsed_
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int",
         [group, is_group_dn, member, is_member_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-groupmember." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing ${member} from ${group}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing ${member} from ${group}...`);
 });
 
 
@@ -935,7 +939,7 @@ _cmd_removeobject.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int", [object, is_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-object." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing ${object}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing ${object}...`);
 });
 
 
@@ -960,7 +964,7 @@ _cmd_removespn.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, spn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-spn." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing SPN ${spn} from ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing SPN ${spn} from ${target}...`);
 });
 
 
@@ -985,7 +989,7 @@ _cmd_removedelegation.setPreHook(function (id, cmdline, parsed_json, ...parsed_l
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, spn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-delegation." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing delegation SPN from ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing delegation SPN from ${target}...`);
 });
 
 
@@ -1013,7 +1017,7 @@ _cmd_removeattribute.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,cstr,int",
         [target, is_dn, attribute, value, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-attribute." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing ${attribute} from ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing ${attribute} from ${target}...`);
 });
 
 
@@ -1038,7 +1042,7 @@ _cmd_removeuac.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, flags, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-uac." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing UAC flags from ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing UAC flags from ${target}...`);
 });
 
 
@@ -1072,7 +1076,7 @@ _cmd_removeace.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int,cstr,cstr,int",
         [target, is_dn, trustee, is_trustee_dn, rights, ace_type, ace_index, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-ace." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing ACE from ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing ACE from ${target}...`);
 });
 
 
@@ -1099,7 +1103,7 @@ _cmd_removerbcd.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int",
         [target, is_target_dn, delegate, is_delegate_dn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-rbcd." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing RBCD delegation from ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing RBCD delegation from ${target}...`);
 });
 
 
@@ -1139,7 +1143,7 @@ _cmd_addgenericall.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,cstr,cstr,cstr,cstr,cstr,int",
         [target, is_target_dn, trustee, is_trustee_dn, rights, ace_type, flags, guid, inherit_guid, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-ace." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding ACE to ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding ACE to ${target}...`);
 });
 
 
@@ -1175,7 +1179,7 @@ _cmd_addgenericwrite.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,cstr,cstr,cstr,cstr,cstr,int",
         [target, is_target_dn, trustee, is_trustee_dn, rights, ace_type, flags, guid, inherit_guid, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-ace." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding ACE to ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding ACE to ${target}...`);
 });
 
 
@@ -1211,7 +1215,7 @@ _cmd_adddcsync.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,cstr,cstr,cstr,cstr,cstr,int",
         [target, is_target_dn, trustee, is_trustee_dn, rights, ace_type, flags, guid, inherit_guid, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-ace." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Adding ACE to ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Adding ACE to ${target}...`);
 });
 
 
@@ -1234,7 +1238,7 @@ _cmd_addasreproastable.setPreHook(function (id, cmdline, parsed_json, ...parsed_
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, "DONT_REQ_PREAUTH", ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-uac." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Making ${target} AS-REP roastable...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Making ${target} AS-REP roastable...`);
 });
 
 
@@ -1257,7 +1261,7 @@ _cmd_addunconstrained.setPreHook(function (id, cmdline, parsed_json, ...parsed_l
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, "TRUSTED_FOR_DELEGATION", ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-uac." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Enabling unconstrained delegation on ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Enabling unconstrained delegation on ${target}...`);
 });
 
 var _cmd_addconstrained = ax.create_command(
@@ -1280,7 +1284,7 @@ _cmd_addconstrained.setPreHook(function (id, cmdline, parsed_json, ...parsed_lin
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int", [target, is_dn, spn, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/add-delegation." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Setting delegation on ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Setting delegation on ${target}...`);
 });
 
 
@@ -1312,7 +1316,7 @@ _cmd_removedcsync.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int,cstr,cstr,int",
         [target, is_dn, trustee, is_trustee_dn, rights, ace_type, ace_index, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-ace." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing DCSync from ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing DCSync from ${target}...`);
 });
 
 
@@ -1344,7 +1348,7 @@ _cmd_removegenericwrite.setPreHook(function (id, cmdline, parsed_json, ...parsed
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int,cstr,cstr,int",
         [target, is_dn, trustee, is_trustee_dn, rights, ace_type, ace_index, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-ace." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing GenericWrite from ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing GenericWrite from ${target}...`);
 });
 
 
@@ -1376,7 +1380,7 @@ _cmd_removegenericall.setPreHook(function (id, cmdline, parsed_json, ...parsed_l
     let bof_params = ax.bof_pack("cstr,int,cstr,int,cstr,cstr,int,cstr,cstr,int",
         [target, is_dn, trustee, is_trustee_dn, rights, ace_type, ace_index, ou_path, dc_fqdn, use_ldaps]);
     let bof_path = ax.script_dir() + "_bin/LDAP/remove-ace." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `Removing GenericAll from ${target}...`);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing GenericAll from ${target}...`);
 });
 
 

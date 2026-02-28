@@ -298,40 +298,40 @@ BOOL ReadSlotHybrid(char* output, size_t outputSize, HANDLE* mailHandle, HANDLE*
     return !chunkingMode;  // Return FALSE if chunking was used
 }
 
-/*Improved version detection for .NET 4.x*/
-BOOL FindVersion(void * assembly, int length) {
-    char* assembly_c = (char*)assembly;
-
-    // Check for various .NET 4.x versions
-    char* v4_versions[] = {
-        "v4.0.30319",
-        "v4.5",
-        "v4.6",
-        "v4.7",
-        "v4.8"
-    };
-
-    int num_versions = sizeof(v4_versions) / sizeof(v4_versions[0]);
-
-    for (int v = 0; v < num_versions; v++) {
-        int version_len = MSVCRT$strlen(v4_versions[v]);
-
-        for (int i = 0; i < length - version_len; i++) {
-            BOOL found = TRUE;
-            for (int j = 0; j < version_len; j++) {
-                if (v4_versions[v][j] != assembly_c[i + j]) {
-                    found = FALSE;
-                    break;
-                }
-            }
-            if (found) {
-                return 1;  // .NET 4.x found
-            }
-        }
-    }
-
-    return 0;  // .NET 2.0
-}
+// /*Improved version detection for .NET 4.x*/
+// BOOL FindVersion(void * assembly, int length) {
+//     char* assembly_c = (char*)assembly;
+//
+//     // Check for various .NET 4.x versions
+//     char* v4_versions[] = {
+//         "v4.0.30319",
+//         "v4.5",
+//         "v4.6",
+//         "v4.7",
+//         "v4.8"
+//     };
+//
+//     int num_versions = sizeof(v4_versions) / sizeof(v4_versions[0]);
+//
+//     for (int v = 0; v < num_versions; v++) {
+//         int version_len = MSVCRT$strlen(v4_versions[v]);
+//
+//         for (int i = 0; i < length - version_len; i++) {
+//             BOOL found = TRUE;
+//             for (int j = 0; j < version_len; j++) {
+//                 if (v4_versions[v][j] != assembly_c[i + j]) {
+//                     found = FALSE;
+//                     break;
+//                 }
+//             }
+//             if (found) {
+//                 return 1;  // .NET 4.x found
+//             }
+//         }
+//     }
+//
+//     return 0;  // .NET 2.0
+// }
 
 /*Patch ETW - Fixed*/
 BOOL patchETW(BOOL revertETW)
@@ -659,15 +659,12 @@ void go(IN PCHAR buffer, IN ULONG blength)
     memset(ctx.returnData, 0, ctx.returnDataSize);
 
     //Determine .NET assembly version
-    wchar_t* wNetVersion = NULL;
-    if(FindVersion((void*)assemblyBytes, assemblyByteLen))
-    {
-        wNetVersion = L"v4.0.30319";
-    }
-    else
-    {
-        wNetVersion = L"v2.0.50727";
-    }
+    //FindVersion() scans raw assembly bytes for CLR version strings but fails
+    //when the PE metadata format doesn't contain them as plain text, causing
+    //a fallback to CLR v2.0 which breaks all modern .NET 4.x tools (Rubeus,
+    //Seatbelt, SafetyKatz, SharpHound, etc.). Since .NET 2.0 assemblies are
+    //effectively extinct in offensive tooling, default to CLR v4.0.
+    wchar_t* wNetVersion = L"v4.0.30319";
 
     //Handle argument conversion based on whether we have valid arguments
     if (hasArguments) {

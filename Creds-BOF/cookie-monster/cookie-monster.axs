@@ -47,5 +47,5 @@ cmd_cookie_monster.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 
     let bof_path = ax.script_dir() + "_bin/cookie-monster-bof." + ax.arch(id) + ".o";
     let bof_params = ax.bof_pack("cstr,cstr,int,int,int,int,int,int", [ browser, profile, browserPid, dumpCookie, dumpPassword, dumpKey, cookiePid, passwordPid]);
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Running Cookie-Monster BOF");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Running Cookie-Monster BOF");
 });

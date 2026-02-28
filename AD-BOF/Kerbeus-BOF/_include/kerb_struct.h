@@ -536,11 +536,21 @@ typedef struct _EncryptionKey {
 	byte* key_value;
 } EncryptionKey;
 
+typedef struct _DmsaKeyPackage {
+	int           currentKeysCount;
+	EncryptionKey* currentKeys;
+	int           previousKeysCount;
+	EncryptionKey* previousKeys;
+	DateTime      expirationInterval;
+	DateTime      fetchInterval;
+} DmsaKeyPackage;
+
 typedef struct _EncryptedPAData {
 	int			  keytype;
 	int           keysize;
 	byte*         keyvalue;
 	EncryptionKey encryptionKey;
+	DmsaKeyPackage dmsaKeyPackage;
 } EncryptedPAData;
 
 typedef struct _EncKDCRepPart {

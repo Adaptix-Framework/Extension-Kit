@@ -48,7 +48,7 @@ add_custom_target(build-all-bofs
         inject_cfg inject_sec inject_poolparty inject_32to64
         psexec scshell token_make token_steal winrm
         Screenshot addfirewallrule sauroneye
-        findmodule findprochandle psc
+        findmodule findprochandle psc procfreeze
         arp cacls dir env ipconfig listdns netstat nslookup routeprint uptime useridletime whoami
         vulndrivers alwayselevated hijackablepath tokenpriv unattendfiles unquotedsvc
         smartscan nbtscan taskhound quser

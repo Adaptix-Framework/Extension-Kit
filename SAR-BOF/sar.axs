@@ -29,7 +29,7 @@ cmd_smartscan.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("cstr,int,cstr", [target, scan_level, custom_ports]);
     let bof_path = ax.script_dir() + "_bin/smartscan." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Scan Target: " + target);
+    ax.execute_alias(id, cmdline, `execute bof -a "${bof_path}" ${bof_params}`, "Scan Target: " + target);
 });
 
 
@@ -60,7 +60,7 @@ cmd_taskhound.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/taskhound." + ax.arch(id) + ".o";
     let message = `Taskhound from ${target}`;
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
 });
 
 
@@ -73,7 +73,7 @@ cmd_quser.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_params = ax.bof_pack("cstr", [host]);
     let bof_path = ax.script_dir() + "_bin/quser." + ax.arch(id) + ".o";
 
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "BOF implementation: quser");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: quser");
 });
 
 
@@ -110,7 +110,7 @@ cmd_nbtscan.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let message = "NBTscan: " + target;
 
     if(no_targets == 1) {
-        ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message);
+        ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message);
     }
     else {
         let targets_handler = function (task) {
@@ -152,7 +152,7 @@ cmd_nbtscan.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
             return task;
         }
 
-        ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, message, targets_handler);
+        ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, message, targets_handler);
     }
 });
 

@@ -121,7 +121,7 @@ cmd_nanodump.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
 
     let bof_path = ax.script_dir() + "_bin/nanodump." + ax.arch(id) + ".o";
     let bof_params = ax.bof_pack("int,cstr,int,int,int,int,int,int,int,int,int,int,int,cstr,int,int,int,cstr,int", [pid, dump_path, write_file, chunk_size, use_valid_sig, fork, snapshot, dup, elevate_handle, duplicate_elevate, get_pid, use_seclogon_leak_local, use_seclogon_leak_remote, seclogon_leak_remote_binary, use_seclogon_duplicate, spoof_callstack, use_silent_process_exit, silent_process_exit, use_lsass_shtinkering ]);
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Running NanoDump BOF");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Running NanoDump BOF");
 });
 
 
@@ -156,7 +156,7 @@ cmd_nanodump_ppl_dump.setPreHook(function (id, cmdline, parsed_json, ...parsed_l
 
     let bof_path = ax.script_dir() + "_bin/nanodump_ppl_dump." + ax.arch(id) + ".o";
     let bof_params = ax.bof_pack("cstr,int,int,bytes", [dump_path, use_valid_sig, dup, dll]);
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Running NanoDumpPPLDump BOF");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Running NanoDumpPPLDump BOF");
 });
 
 
@@ -191,7 +191,7 @@ cmd_nanodump_ppl_medic.setPreHook(function (id, cmdline, parsed_json, ...parsed_
 
     let bof_path = ax.script_dir() + "_bin/nanodump_ppl_medic." + ax.arch(id) + ".o";
     let bof_params = ax.bof_pack("bytes,cstr,int,int", [dll, dump_path, use_valid_sig, elevate_handle]);
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Running NanoDumpPPLMedic BOF");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Running NanoDumpPPLMedic BOF");
 });
 
 
@@ -235,5 +235,5 @@ cmd_nanodump_ssp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
 
     let bof_path = ax.script_dir() + "_bin/nanodump_ssp." + ax.arch(id) + ".o";
     let bof_params = ax.bof_pack("bytes,cstr,cstr,cstr,int", [dll, write_dll_path, load_dll_path, dump_path, use_valid_sig]);
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Running nanodump_ssp BOF");
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Running nanodump_ssp BOF");
 });

@@ -10,8 +10,6 @@ bof: clean
 	# 64-bit builds
 	@(mkdir _bin 2>/dev/null) && echo 'creating _bin directory' || echo '_bin directory exists'
 	@($(CC64) $(CFLAGS) askcreds/askcreds.c -o _bin/askcreds.x64.o   && $(STRIP64) _bin/askcreds.x64.o) && echo '[+] askcreds' || echo '[!] askcreds'
-	@($(CC64) $(CFLAGS) autologon/autologon.c -o _bin/autologon.x64.o && $(STRIP64) _bin/autologon.x64.o)  && echo '[+] autologon' || echo '[!] autologon'
-	@($(CC64) $(CFLAGS) credman/credentialmanager.c -o _bin/credman.x64.o && $(STRIP64) _bin/credman.x64.o)  && echo '[+] credman' || echo '[!] credman'
 	@($(CC64) $(CFLAGS) cookie-monster/cookie-monster-bof.c -o _bin/cookie-monster-bof.x64.o && $(STRIP64) _bin/cookie-monster-bof.x64.o)  && echo '[+] cookie-monster-bof' || echo '[!] cookie-monster-bof'
 	@($(CC64) $(CFLAGS) hashdump/hashdump.c -o _bin/hashdump.x64.o && $(STRIP64) _bin/hashdump.x64.o)  && echo '[+] hashdump' || echo '[!] hashdump'
 	@($(CC64) $(CFLAGS) get-netntlm/get-netntlm.c -o _bin/get-netntlm.x64.o && $(STRIP64) _bin/get-netntlm.x64.o)  && echo '[+] get-netntlm' || echo '[!] get-netntlm'
@@ -22,8 +20,6 @@ bof: clean
 
 	# 32-bit builds
 	@#($(CC86) $(CFLAGS) askcreds/askcreds.c -o _bin/askcreds.x32.o   && $(STRIP86) _bin/askcreds.x32.o) && echo '[+] askcreds (x32)' || echo '[!] askcreds (x32)'
-	@($(CC86) $(CFLAGS) autologon/autologon.c -o _bin/autologon.x32.o && $(STRIP86) _bin/autologon.x32.o)  && echo '[+] autologon (x32)' || echo '[!] autologon (x32)'
-	@($(CC86) $(CFLAGS) credman/credentialmanager.c -o _bin/credman.x32.o && $(STRIP86) _bin/credman.x32.o)  && echo '[+] credman (x32)' || echo '[!] credman (x32)'
 	@($(CC86) $(CFLAGS) cookie-monster/cookie-monster-bof.c -o _bin/cookie-monster-bof.x32.o && $(STRIP86) _bin/cookie-monster-bof.x32.o)  && echo '[+] cookie-monster-bof (x32)' || echo '[!] cookie-monster-bof (x32)'
 	@($(CC86) $(CFLAGS) hashdump/hashdump.c -o _bin/hashdump.x32.o && $(STRIP86) _bin/hashdump.x32.o)  && echo '[+] hashdump (x32)' || echo '[!] hashdump (x32)'
 	@($(CC86) $(CFLAGS) get-netntlm/get-netntlm.c -o _bin/get-netntlm.x32.o && $(STRIP86) _bin/get-netntlm.x32.o)  && echo '[+] get-netntlm (x32)' || echo '[!] get-netntlm (x32)'

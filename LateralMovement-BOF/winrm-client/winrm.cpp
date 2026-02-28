@@ -129,9 +129,6 @@ WINBASEAPI DWORD  WINAPI WsmSvc$WSManCloseOperation(WSMAN_OPERATION_HANDLE opera
         WSMAN_OPERATION_HANDLE receiveOperation = { 0 };
 
         WSMAN_AUTHENTICATION_CREDENTIALS serverAuthenticationCredentials = { 0 };
-        serverAuthenticationCredentials.authenticationMechanism = WSMAN_FLAG_DEFAULT_AUTHENTICATION;
-        //        serverAuthenticationCredentials.userAccount.username = L"domain\\user";
-        //        serverAuthenticationCredentials.userAccount.password = L"password";
 
         PCWSTR commandLine = cmd;
         PCWSTR connection  = hostname;
@@ -147,6 +144,22 @@ WINBASEAPI DWORD  WINAPI WsmSvc$WSManCloseOperation(WSMAN_OPERATION_HANDLE opera
         }
         if (BeaconDataLength(&parser) >= (int)sizeof(int))
             background = BeaconDataInt(&parser) ? TRUE : FALSE;
+
+        PWCHAR username = NULL;
+        PWCHAR password = NULL;
+        if (BeaconDataLength(&parser) > 0)
+            username = (PWCHAR)BeaconDataExtract(&parser, NULL);
+        if (BeaconDataLength(&parser) > 0)
+            password = (PWCHAR)BeaconDataExtract(&parser, NULL);
+
+        if (username && username[0] != L'\0') {
+            serverAuthenticationCredentials.authenticationMechanism = WSMAN_FLAG_AUTH_NEGOTIATE;
+            serverAuthenticationCredentials.userAccount.username = username;
+            serverAuthenticationCredentials.userAccount.password = password;
+            BeaconPrintf(CALLBACK_OUTPUT, "[*] Using explicit credentials: %S\n", username);
+        } else {
+            serverAuthenticationCredentials.authenticationMechanism = WSMAN_FLAG_DEFAULT_AUTHENTICATION;
+        }
 
         DWORD ret = WSManInitialize(WSMAN_FLAG_REQUESTED_API_VERSION_1_0, &hApi);
         if (ret != NO_ERROR) {

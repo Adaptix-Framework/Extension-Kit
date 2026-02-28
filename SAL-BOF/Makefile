@@ -28,6 +28,13 @@ bof: clean
 	@($(CC64) $(CFLAGS) privcheck/tokenprivileges.c -o _bin/tokenpriv.x64.o && $(STRIP64) _bin/tokenpriv.x64.o) && echo '[+] tokenpriv x64' || echo '[!] tokenpriv x64'
 	@($(CC64) $(CFLAGS) privcheck/unattendfiles.c -o _bin/unattendfiles.x64.o && $(STRIP64) _bin/unattendfiles.x64.o) && echo '[+] unattendfiles x64' || echo '[!] unattendfiles x64'
 	@($(CC64) $(CFLAGS) privcheck/unquotedsvcpath.c -o _bin/unquotedsvc.x64.o && $(STRIP64) _bin/unquotedsvc.x64.o) && echo '[+] unquotedsvc x64' || echo '[!] unquotedsvc x64'
+	@($(CC64) $(CFLAGS) privcheck/autologon.c -o _bin/autologon.x64.o && $(STRIP64) _bin/autologon.x64.o) && echo '[+] autologon x64' || echo '[!] autologon x64'
+	@($(CC64) $(CFLAGS) privcheck/credentialmanager.c -o _bin/credmanager.x64.o && $(STRIP64) _bin/credmanager.x64.o) && echo '[+] credmanager x64' || echo '[!] credmanager x64'
+	@($(CC64) $(CFLAGS) privcheck/modifiableautorun.c -o _bin/modautorun.x64.o && $(STRIP64) _bin/modautorun.x64.o) && echo '[+] modautorun x64' || echo '[!] modautorun x64'
+	@($(CC64) $(CFLAGS) privcheck/modifiablesvc.c -o _bin/modsvc.x64.o && $(STRIP64) _bin/modsvc.x64.o) && echo '[+] modsvc x64' || echo '[!] modsvc x64'
+	@($(CC64) $(CFLAGS) privcheck/pshistory.c -o _bin/pshistory.x64.o && $(STRIP64) _bin/pshistory.x64.o) && echo '[+] pshistory x64' || echo '[!] pshistory x64'
+	@($(CC64) $(CFLAGS) privcheck/uacstatus.c -o _bin/uacstatus.x64.o && $(STRIP64) _bin/uacstatus.x64.o) && echo '[+] uacstatus x64' || echo '[!] uacstatus x64'
+	@($(CC64) $(CFLAGS) privcheck/privcheck_all.c -o _bin/privcheck_all.x64.o && $(STRIP64) _bin/privcheck_all.x64.o) && echo '[+] privcheck_all x64' || echo '[!] privcheck_all x64'
 
 	# 32-bit builds
 	@($(CC86) $(CFLAGS) arp/arp.c -o _bin/arp.x32.o && $(STRIP86) _bin/arp.x32.o) && echo '[+] arp x32' || echo '[!] arp x32'
@@ -48,5 +55,12 @@ bof: clean
 	@($(CC86) $(CFLAGS) privcheck/tokenprivileges.c -o _bin/tokenpriv.x32.o && $(STRIP86) _bin/tokenpriv.x32.o) && echo '[+] tokenpriv x32' || echo '[!] tokenpriv x32'
 	@($(CC86) $(CFLAGS) privcheck/unattendfiles.c -o _bin/unattendfiles.x32.o && $(STRIP86) _bin/unattendfiles.x32.o) && echo '[+] unattendfiles x32' || echo '[!] unattendfiles x32'
 	@($(CC86) $(CFLAGS) privcheck/unquotedsvcpath.c -o _bin/unquotedsvc.x32.o && $(STRIP86) _bin/unquotedsvc.x32.o) && echo '[+] unquotedsvc x32' || echo '[!] unquotedsvc x32'
+	@($(CC86) $(CFLAGS) privcheck/autologon.c -o _bin/autologon.x32.o && $(STRIP86) _bin/autologon.x32.o) && echo '[+] autologon x32' || echo '[!] autologon x32'
+	@($(CC86) $(CFLAGS) privcheck/credentialmanager.c -o _bin/credmanager.x32.o && $(STRIP86) _bin/credmanager.x32.o) && echo '[+] credmanager x32' || echo '[!] credmanager x32'
+	@($(CC86) $(CFLAGS) privcheck/modifiableautorun.c -o _bin/modautorun.x32.o && $(STRIP86) _bin/modautorun.x32.o) && echo '[+] modautorun x32' || echo '[!] modautorun x32'
+	@($(CC86) $(CFLAGS) privcheck/modifiablesvc.c -o _bin/modsvc.x32.o && $(STRIP86) _bin/modsvc.x32.o) && echo '[+] modsvc x32' || echo '[!] modsvc x32'
+	@($(CC86) $(CFLAGS) privcheck/pshistory.c -o _bin/pshistory.x32.o && $(STRIP86) _bin/pshistory.x32.o) && echo '[+] pshistory x32' || echo '[!] pshistory x32'
+	@($(CC86) $(CFLAGS) privcheck/uacstatus.c -o _bin/uacstatus.x32.o && $(STRIP86) _bin/uacstatus.x32.o) && echo '[+] uacstatus x32' || echo '[!] uacstatus x32'
+	@($(CC86) $(CFLAGS) privcheck/privcheck_all.c -o _bin/privcheck_all.x32.o && $(STRIP86) _bin/privcheck_all.x32.o) && echo '[+] privcheck_all x32' || echo '[!] privcheck_all x32'
 clean:
 	@(rm -rf _bin)

