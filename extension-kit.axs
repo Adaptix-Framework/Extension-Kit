@@ -18,3 +18,4 @@ ax.script_load(path + "SAL-BOF/sal.axs");
 ax.script_load(path + "SAR-BOF/sar.axs");
 ax.script_load(path + "EdrEnum-BOF/edr.axs");
 ax.script_load(path + "Keylogger-BOF/keylog.axs");
+ax.script_load(path + "kernel/extension-kernel.axs");
