@@ -7,3 +7,8 @@ Creds-BOF/nanodump/dist/
 # macOS
 .DS_Store
 **/.DS_Store
+
+*.o
+*.swp
+*.exe
+*.pdb
