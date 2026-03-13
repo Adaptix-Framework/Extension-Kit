@@ -8,7 +8,7 @@ var cmd_keylog_start = ax.create_command("keylog_start",
     "Start async keylogger (WH_KEYBOARD_LL). Captures keystrokes with window context and timestamps. Use keylog_dump to retrieve. [NOISE: medium]",
     "keylog_start\nkeylog_start 256");
 
-cmd_keylog_start.addArgInt("buffer_kb", false, "Buffer size in KB (default: 64, max: 4096)", 64);
+cmd_keylog_start.addArgInt("buffer_kb", false, "Buffer size in KB (default: 64, max: 4096)")
 
 cmd_keylog_start.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     var buf_kb   = parsed_json["buffer_kb"] || 64;
