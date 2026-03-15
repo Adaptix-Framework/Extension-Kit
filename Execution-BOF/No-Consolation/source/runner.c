@@ -1,6 +1,35 @@
 
 #include "runner.h"
 
+static void send_pipe_output(const char* buffer)
+{
+    int wLen = KERNEL32$MultiByteToWideChar(CP_ACP, 0, buffer, -1, NULL, 0);
+    if (wLen > 0)
+    {
+        wchar_t* wBuf = (wchar_t*)intAlloc(wLen * sizeof(wchar_t));
+        if (wBuf)
+        {
+            KERNEL32$MultiByteToWideChar(CP_ACP, 0, buffer, -1, wBuf, wLen);
+            int uLen = KERNEL32$WideCharToMultiByte(CP_UTF8, 0, wBuf, -1, NULL, 0, NULL, NULL);
+            if (uLen > 0)
+            {
+                char* uBuf = (char*)intAlloc(uLen);
+                if (uBuf)
+                {
+                    KERNEL32$WideCharToMultiByte(CP_UTF8, 0, wBuf, -1, uBuf, uLen, NULL, NULL);
+                    PRINT_UTF8("%s", uBuf);
+                    intFree(uBuf);
+                    intFree(wBuf);
+                    return;
+                }
+            }
+            intFree(wBuf);
+        }
+    }
+    // fallback: send raw output if conversion failed
+    PRINT("%s", buffer);
+}
+
 BOOL exec_entrypoint_inthread(
     IN PVOID EntryPoint,
     IN PVOID Param1,
@@ -362,8 +391,8 @@ BOOL read_output_from_thread(
 
                 if (ReadFile((PVOID)peinfo->Handles->hRead, recv_buffer, BUFFER_SIZE - 1, NULL, NULL))
                 {
-                    // Send output back
-                    PRINT("%s", recv_buffer);
+                    // Send output back (OEM -> UTF-8)
+                    send_pipe_output(recv_buffer);
                 }
                 else
                 {
@@ -413,8 +442,8 @@ BOOL read_output_inthread(
 
             if (ReadFile((PVOID)peinfo->Handles->hRead, recv_buffer, BUFFER_SIZE - 1, NULL, NULL))
             {
-                // Send output back
-                PRINT("%s", recv_buffer);
+                // Send output back (OEM -> UTF-8)
+                send_pipe_output(recv_buffer);
             }
             else
             {

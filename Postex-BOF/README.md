@@ -16,6 +16,31 @@ firewallrule add <port> <rulename> [direction] [-g rulegroup] [-d description]
 
 
 
+## Keylogger-BOF
+
+An async keylogger implemented as a BOF. Captures keystrokes system-wide via a low-level keyboard hook (`WH_KEYBOARD_LL`) without spawning any additional processes. All captured data lives in named shared memory — never touches disk.
+
+`keylog start` runs as an **async BOF** (`-a` flag), installing a `WH_KEYBOARD_LL` hook and entering a `MsgWaitForMultipleObjects` loop in the background. The beacon remains fully operational while the keylogger runs.
+
+Captured keystrokes are written to a named `FileMapping` object (`Global\keylog_buf`) — a fixed circular buffer in RAM. A named `Event` (`Global\keylog_stop`) and `Mutex` (`Global\keylog_mutex`) coordinate between the async BOF and the sync dump/stop BOFs.
+
+- **No process spawn** — hook runs inside the beacon process
+- **No disk I/O** — all data in named shared memory (RAM only)
+- **Window context** — each window change is tagged with timestamp and title
+- **Smart title normalization** — ignores dirty markers (`*`, `#`) used by editors to avoid spurious window-change headers mid-word
+- **Special key capture** — `[ENTER]`, `[BACK]`, `[TAB]`, `[F1-F12]`, `[DEL]`, `[ESC]`, etc.
+- **AltGr support** — correct character translation for non-US keyboard layouts
+- **Configurable buffer** — 64KB default, up to 4096KB
+- **Crash-safe** — if the beacon dies, shared memory is released by the OS automatically
+
+```
+keylog start [buffer_kb]    Start keylogger (default: 64KB buffer)
+keylog dump                 Flush captured keystrokes to C2 and reset buffer
+keylog stop                 Final dump + stop + cleanup
+```
+
+
+
 ## ScreenshotBOF
 
 An alternative screenshot capability that uses WinAPI and does not perform a fork & run:
@@ -78,5 +103,6 @@ sauroneye -d C:\Users,D:\Documents,E:\Backup -f .txt,.docx,.xlsx -k pass*,secret
 
 ## Credits
 * ScreenshotBOF - https://github.com/CodeXTF2/ScreenshotBOF
+* Keylogger-BOF - https://github.com/DarksBlackSk/Keylogger-BOF
 * OperatorsKit - https://github.com/REDMED-X/OperatorsKit
 * SauronEye-BOF - https://github.com/shashinma/SauronEye-BOF

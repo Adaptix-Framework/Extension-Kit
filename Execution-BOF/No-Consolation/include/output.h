@@ -5,6 +5,9 @@
  #define PRINT(...) { \
      BeaconPrintf(CALLBACK_OUTPUT_OEM, __VA_ARGS__); \
  }
+ #define PRINT_UTF8(...) { \
+     BeaconPrintf(CALLBACK_OUTPUT_UTF8, __VA_ARGS__); \
+ }
  #define PRINT_ERR(...) { \
      BeaconPrintf(CALLBACK_ERROR, __VA_ARGS__); \
  }

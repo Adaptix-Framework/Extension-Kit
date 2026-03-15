@@ -21,5 +21,9 @@ bof: clean
 	@#($(CC86) $(CFLAGS) taskhound/taskhound.c          -o _bin/taskhound.x32.o   && $(STRIP86) _bin/taskhound.x32.o)   && echo '[+] taskhound (x32)'   || echo '[!] taskhound (x32)'
 	@($(CC86) $(CFLAGS) quser/quser.c                  -o _bin/quser.x32.o       && $(STRIP86) _bin/quser.x32.o)       && echo '[+] quser (x32)'       || echo '[!] quser (x32)'
 
+
+	@$(MAKE) --no-print-directory -C EdrEnum-BOF
+	@cp EdrEnum-BOF/_bin/*.o _bin/
+
 clean:
 	@(rm -rf _bin)

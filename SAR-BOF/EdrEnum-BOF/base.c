@@ -5,7 +5,6 @@
 #define bufsize 8192
 #endif
 
-
 char * output __attribute__((section (".data"))) = 0;  // this is just done so its we don't go into .bss which isn't handled properly
 WORD currentoutsize __attribute__((section (".data"))) = 0;
 HANDLE trash __attribute__((section (".data"))) = NULL; // Needed for x64 to not give relocation error
@@ -57,15 +56,11 @@ void internal_printf(const char* format, ...){
         {
             transfersize = bufsize - currentoutsize; // what is the max we could transfer this request
             if(buffersize < transfersize) //if I have less then that, lets just transfer what's left
-            {
                 transfersize = buffersize;
-            }
             MSVCRT$memcpy(output+currentoutsize, curloc, transfersize); // copy data into our transfer buffer
             currentoutsize += transfersize;
             if(currentoutsize == bufsize)
-            {
-            printoutput(FALSE); // sets currentoutsize to 0 and prints
-            }
+                printoutput(FALSE); // sets currentoutsize to 0 and prints
             MSVCRT$memset(transferBuffer, 0, transfersize); // reset our transfer buffer
             curloc += transfersize; // increment by how much data we just wrote
             buffersize -= transfersize; // subtract how much we just wrote from how much we are writing overall

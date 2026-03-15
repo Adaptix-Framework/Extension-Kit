@@ -3,6 +3,10 @@ var metadata = {
     description: "Situation Awareness Remote BOFs"
 };
 
+ax.script_import(ax.script_dir() + "EdrEnum-BOF/edr.axs")
+
+
+
 var cmd_smartscan = ax.create_command("smartscan", "Smart port scan", "smartscan 192.168.1.1 -p 80,443,22-25");
 cmd_smartscan.addArgString("target", true, "Destination IP address, range or CIDR format (for example: '192.168.1.1' , '192.168.1.1-192.168.1.10' , '192.168.1.1,192.168.1.3' or '192.168.1.1/24')");
 cmd_smartscan.addArgFlagString("-p", "ports", "Port range: 'fast', 'standart', 'full', or custom ports (e.g. 80,443,22-25,3389)", "standart");
@@ -156,5 +160,5 @@ cmd_nbtscan.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     }
 });
 
-var group_test = ax.create_commands_group("SAR-BOF", [cmd_smartscan, cmd_taskhound, cmd_quser, cmd_nbtscan]);
+var group_test = ax.create_commands_group("SAR-BOF", [cmd_enum_edr, cmd_smartscan, cmd_taskhound, cmd_quser, cmd_nbtscan]);
 ax.register_commands_group(group_test, ["beacon", "gopher", "kharon"], ["windows"], []);

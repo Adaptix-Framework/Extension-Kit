@@ -1,8 +1,3 @@
-var metadata = {
-    name: "EDR-BOF",
-    description: "EDR/AV/EPP enumeration BOF suite — local (services + drivers + processes) and remote (LsarLookupNames + SCM). 444 signatures, 48 vendors."
-};
-
 
 // Signature databases
 
@@ -496,16 +491,16 @@ function matchSigs(names, db, tag) {
 function threatLevel(hits) {
     var cats = {};
     for (var i = 0; i < hits.length; i++) cats[hits[i].cat] = true;
-    if (cats["EDR"])                                   return "[!] THREAT LEVEL: HIGH     - EDR detected (kernel callbacks/hooks likely active)";
+    if (cats["EDR"])                                    return "[!] THREAT LEVEL: HIGH     - EDR detected (kernel callbacks/hooks likely active)";
     if (cats["AV"] && (cats["EPP"] || hits.length > 1)) return "[~] THREAT LEVEL: MODERATE - AV + Telemetry";
-    if (cats["AV"])                                    return "[~] THREAT LEVEL: LOW-MOD  - AV only";
-    if (cats["EPP"])                                   return "[-] THREAT LEVEL: LOW      - EPP / non-EDR";
-    if (hits.length === 0)                             return "[?] THREAT LEVEL: UNKNOWN  - no matches";
+    if (cats["AV"])                                     return "[~] THREAT LEVEL: LOW-MOD  - AV only";
+    if (cats["EPP"])                                    return "[-] THREAT LEVEL: LOW      - EPP / non-EDR";
+    if (hits.length === 0)                              return "[?] THREAT LEVEL: UNKNOWN  - no matches";
     return "[-] THREAT LEVEL: LOW";
 }
 
-function formatResults(svcHits, drvHits, nSvcs, nDrvs) {
-    var all = svcHits.concat(drvHits);
+function formatResults(svcHits, drvHits, procHits, nSvcs, nDrvs, nProcs) {
+    var all = svcHits.concat(drvHits).concat(procHits);
     var out = "\n====================================================\n";
     out += "  " + threatLevel(all) + "\n";
     out += "====================================================\n";
@@ -523,14 +518,21 @@ function formatResults(svcHits, drvHits, nSvcs, nDrvs) {
             out += "  [" + h.cat + "] " + h.vendor + " - " + h.product + "  (" + h.name + ")\n";
         }
     }
+    if (procHits.length > 0) {
+        out += "\nProcesses matched (" + procHits.length + "):\n";
+        for (var i = 0; i < procHits.length; i++) {
+            var h = procHits[i];
+            out += "  [" + h.cat + "] " + h.vendor + " - " + h.product + "  (" + h.name + ")\n";
+        }
+    }
     if (all.length === 0) out += "\n  No signatures matched.\n";
-    out += "\n" + nSvcs + " services + " + nDrvs + " drivers enumerated  |  ";
-    out += svcHits.length + " svc + " + drvHits.length + " drv hits\n";
+    out += "\n" + nSvcs + " services + " + nDrvs + " drivers + " + nProcs + " processes enumerated  |  ";
+    out += svcHits.length + " svc + " + drvHits.length + " drv + " + procHits.length + " proc hits\n";
     return out;
 }
 
 function parseBofOutput(text) {
-    var svcs = [], drvs = [];
+    var svcs = [], drvs = [], procs = [];
     var lines = text.split("\n");
     for (var i = 0; i < lines.length; i++) {
         var l = lines[i].trim();
@@ -538,94 +540,59 @@ function parseBofOutput(text) {
             svcs.push(l.substring("SERVICE_NAME:".length).trim());
         else if (l.indexOf("DRIVER_NAME:") === 0)
             drvs.push(l.substring("DRIVER_NAME:".length).trim());
+        else if (l.indexOf("PROCESS_NAME:") === 0)
+            procs.push(l.substring("PROCESS_NAME:".length).trim());
     }
-    return { svcs: svcs, drvs: drvs };
+    return { svcs: svcs, drvs: drvs, procs: procs };
 }
 
+function edr_handler(mode) {
+    return function (task) {
+        const p = parseBofOutput(task.text);
 
-// LOCAL BOF commands
-var cmd_edr_both = ax.create_command("edr_both",
-    "Local EDR enum: services + drivers [NOISE: low]",
-    "edr_both");
-cmd_edr_both.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    let bof_path   = ax.script_dir() + "_bin/edrenum." + ax.arch(id) + ".o";
-    var bof_params = ax.bof_pack("short", [0]);
-    var fired = false;
-    let hook = function (task) {
-        if (fired) return task;
-        var p = parseBofOutput(task.text);
-        if (p.svcs.length === 0 && p.drvs.length === 0) return task;
-        fired = true;
-        task.text += formatResults(matchSigs(p.svcs, SVC_SIGS, "svc"), matchSigs(p.drvs, DRV_SIGS, "drv"), p.svcs.length, p.drvs.length);
+        if (p.svcs.length === 0 && p.drvs.length === 0 && p.procs.length === 0)
+            return task;
+
+        const sH = (mode === 0 || mode === 1) ? matchSigs(p.svcs, SVC_SIGS, "svc") : [];
+        const dH = (mode === 0 || mode === 2) ? matchSigs(p.drvs, DRV_SIGS, "drv") : [];
+        const rH = (mode === 0 || mode === 3) ? matchSigs(p.procs, PROC_SIGS, "proc") : [];
+
+        task.text = formatResults(sH, dH, rH, p.svcs.length, p.drvs.length, p.procs.length);
         return task;
     };
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: EDR enum (services + drivers)", hook);
-});
+}
 
-var cmd_edr_svc = ax.create_command("edr_svc",
-    "Local EDR enum: Win32 services only [NOISE: low]",
-    "edr_svc");
-cmd_edr_svc.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    let bof_path   = ax.script_dir() + "_bin/edrenum." + ax.arch(id) + ".o";
-    var bof_params = ax.bof_pack("short", [1]);
-    var fired = false;
-    let hook = function (task) {
-        if (fired) return task;
-        var p = parseBofOutput(task.text);
-        if (p.svcs.length === 0) return task;
-        fired = true;
-        task.text += formatResults(matchSigs(p.svcs, SVC_SIGS, "svc"), [], p.svcs.length, 0);
-        return task;
+function edrPreHook(mode, subcmdName) {
+    return function (id, cmdline, parsed_json, ...parsed_lines) {
+        var target = parsed_json["target"] || "";
+        var unc_target = "";
+        if (target.length > 0) {
+            unc_target = target.startsWith("\\\\") ? target : "\\\\" + target;
+        }
+
+        let bof_path   = ax.script_dir() + "_bin/edrenum." + ax.arch(id) + ".o";
+        var bof_params = ax.bof_pack("short,wstr", [mode, unc_target]);
+
+        let label = target.length > 0 ? "Task: EDR enum (" + subcmdName + ") on " + target : "Task: EDR enum (" + subcmdName + ")";
+        ax.execute_alias_hook(id, cmdline, `execute bof ${bof_path} ${bof_params}`, label, edr_handler(mode));
     };
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: EDR enum (services only)", hook);
-});
+}
 
-var cmd_edr_drv = ax.create_command("edr_drv",
-    "Local EDR enum: kernel drivers only [NOISE: low]",
-    "edr_drv");
-cmd_edr_drv.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    let bof_path   = ax.script_dir() + "_bin/edrenum." + ax.arch(id) + ".o";
-    var bof_params = ax.bof_pack("short", [2]);
-    var fired = false;
-    let hook = function (task) {
-        if (fired) return task;
-        var p = parseBofOutput(task.text);
-        if (p.drvs.length === 0) return task;
-        fired = true;
-        task.text += formatResults([], matchSigs(p.drvs, DRV_SIGS, "drv"), 0, p.drvs.length);
-        return task;
-    };
-    ax.execute_alias(id, cmdline, `execute bof ${bof_path} ${bof_params}`, "Task: EDR enum (drivers only)", hook);
-});
+var _cmd_edr_all = ax.create_command("all", "Enumerate services + drivers + processes", "enum_edr all\nenum_edr all 192.168.1.10");
+_cmd_edr_all.addArgString("target", "", "");
+_cmd_edr_all.setPreHook(edrPreHook(0, "all"));
 
-// REMOTE BOF command
+var _cmd_edr_service = ax.create_command("service", "Enumerate Win32 services only", "enum_edr service\nenum_edr service 192.168.1.10");
+_cmd_edr_service.addArgString("target", "", "");
+_cmd_edr_service.setPreHook(edrPreHook(1, "service"));
 
-var cmd_edr_remote = ax.create_command("edr_remote",
-    "Remote EDR enum via LsarLookupNames + SCM (services + kernel drivers) [NOISE: low-medium]",
-    "edr_remote 192.168.1.10\nedr_remote 192.168.1.10 -u DOMAIN\\\\user -p password");
+var _cmd_edr_driver = ax.create_command("driver", "Enumerate kernel drivers only", "enum_edr driver\nenum_edr driver 192.168.1.10");
+_cmd_edr_driver.addArgString("target", "", "");
+_cmd_edr_driver.setPreHook(edrPreHook(2, "driver"));
 
-cmd_edr_remote.addArgString("target", true, "Target IP or hostname (e.g. 192.168.1.10)");
-cmd_edr_remote.addArgFlagString("-u", "user", "DOMAIN\\user for explicit authentication (optional)", "");
-cmd_edr_remote.addArgFlagString("-p", "pass", "Password for explicit authentication (optional)", "");
+var _cmd_edr_process = ax.create_command("process", "Enumerate processes only", "enum_edr process\nenum_edr process 192.168.1.10");
+_cmd_edr_process.addArgString("target", "", "");
+_cmd_edr_process.setPreHook(edrPreHook(3, "process"));
 
-cmd_edr_remote.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    var target = parsed_json["target"] || "";
-    var user   = parsed_json["user"]   || "";
-    var pass   = parsed_json["pass"]   || "";
-
-    var unc_target = target.startsWith("\\\\") ? target : "\\\\" + target;
-
-    let bof_path   = ax.script_dir() + "_bin/edrenumremote." + ax.arch(id) + ".o";
-    var bof_params = ax.bof_pack("wstr,wstr,wstr", [unc_target, user, pass]);
-    let message    = "Task: Remote EDR enum on " + target;
-
-    ax.execute_alias(id, cmdline, `execute bof -a ${bof_path} ${bof_params}`, message, null);
-});
-
-var group_edr = ax.create_commands_group("EDR-BOF", [
-    cmd_edr_both,
-    cmd_edr_svc,
-    cmd_edr_drv,
-    cmd_edr_remote
-]);
-ax.register_commands_group(group_edr, ["beacon", "gopher", "kharon"], ["windows"], []);
+var cmd_enum_edr = ax.create_command("enum_edr", "EDR/AV/EPP enumeration via SCM + WTS");
+cmd_enum_edr.addSubCommands([_cmd_edr_all, _cmd_edr_service, _cmd_edr_driver, _cmd_edr_process]);

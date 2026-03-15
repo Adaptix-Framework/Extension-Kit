@@ -79,7 +79,7 @@ void printoutput(BOOL done)
 {
 
     char * msg = NULL;
-    BeaconOutput(CALLBACK_OUTPUT, output, currentoutsize);
+    BeaconOutput(CALLBACK_OUTPUT_UTF8, output, currentoutsize);
     currentoutsize = 0;
     MSVCRT$memset(output, 0, bufsize);
     if(done) {MSVCRT$free(output); output=NULL;}

@@ -681,6 +681,8 @@ WINBASEAPI BOOL   WINAPI KERNEL32$TerminateThread(HANDLE hthread, DWORD dwExitCo
 WINBASEAPI DWORD  WINAPI KERNEL32$WaitForSingleObject (HANDLE hHandle, DWORD dwMilliseconds);
 WINBASEAPI BOOL   WINAPI KERNEL32$PeekNamedPipe(HANDLE hNamedPipe, LPVOID lpBuffer, DWORD nBufferSize, LPDWORD lpBytesRead, LPDWORD lpTotalBytesAvail, LPDWORD lpBytesLeftThisMessage);
 WINBASEAPI BOOL   WINAPI KERNEL32$FreeLibrary(HANDLE hLibModule);
+WINBASEAPI int    WINAPI KERNEL32$MultiByteToWideChar(UINT CodePage, DWORD dwFlags, LPCSTR lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar);
+WINBASEAPI int    WINAPI KERNEL32$WideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWSTR lpWideCharStr, int cchWideChar, LPSTR lpMultiByteStr, int cbMultiByte, LPCSTR lpDefaultChar, LPBOOL lpUsedDefaultChar);
 
 #define NtAllocateVirtualMemory      NTDLL$NtAllocateVirtualMemory
 #define NtProtectVirtualMemory       NTDLL$NtProtectVirtualMemory
@@ -718,3 +720,5 @@ WINBASEAPI BOOL   WINAPI KERNEL32$FreeLibrary(HANDLE hLibModule);
 #define WaitForSingleObject          KERNEL32$WaitForSingleObject
 #define PeekNamedPipe                KERNEL32$PeekNamedPipe
 #define FreeLibrary                  KERNEL32$FreeLibrary
+#define MultiByteToWideChar          KERNEL32$MultiByteToWideChar
+#define WideCharToMultiByte          KERNEL32$WideCharToMultiByte
