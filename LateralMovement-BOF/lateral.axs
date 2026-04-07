@@ -21,8 +21,8 @@ _cmd_jump_psexec.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)
     let svc_description = parsed_json["svc_description"];
 
     if (binary_name == "random")  binary_name = ax.random_string(8, "alphabetic") + ".exe";
-    if (svc_name.length == "random")  svc_name = ax.random_string(10, "alphabetic");
-    if (svc_description.length == "random")  svc_description = ax.random_string(16, "alphabetic");
+    if (svc_name == "random")  svc_name = ax.random_string(10, "alphabetic");
+    if (svc_description == "random")  svc_description = ax.random_string(16, "alphabetic");
 
     let bof_params = ax.bof_pack("cstr,bytes,cstr,cstr,cstr,cstr,cstr", [target, binary_content, binary_name, share, svc_path, svc_name, svc_description]);
     let bof_path = ax.script_dir() + "_bin/psexec." + ax.arch(id) + ".o";
