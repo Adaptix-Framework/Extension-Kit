@@ -2,6 +2,7 @@
 #include "bofdefs.h"
 #include "base.c"
 #include "queue.c"
+#include "fserror.h"
 
 void listDir(char *path, unsigned short subdirs) {
 
@@ -38,15 +39,17 @@ void listDir(char *path, unsigned short subdirs) {
 	// Query the first file
 	(hand = KERNEL32$FindFirstFileA(path, &fd));
 	if (hand == INVALID_HANDLE_VALUE) {
-		internal_printf("Couldn't open %s: Error %u\n", path, KERNEL32$GetLastError());
-		KERNEL32$FindClose(hand);
+		DWORD dwErr = KERNEL32$GetLastError();
+		char errMsg[256];
+		FsErrorMessage(dwErr, errMsg, sizeof(errMsg));
+		internal_printf("%s\n", errMsg);
 		return;
 	}
 	// If it's a single directory without a wildcard, re-run it with a \*
 	if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY && MSVCRT$strstr(path, "*") == NULL) {
 		MSVCRT$strcat(path, "\\*");
 		listDir(path, subdirs);
-		KERNEL32$FindClose(hand);
+		if (hand != INVALID_HANDLE_VALUE) { KERNEL32$FindClose(hand); }
 		return;
 	}
 
@@ -94,12 +97,14 @@ void listDir(char *path, unsigned short subdirs) {
 	// A single error (ERROR_NO_MORE_FILES) is normal
 	DWORD err = KERNEL32$GetLastError();
 	if (err != ERROR_NO_MORE_FILES) {
-		BeaconPrintf(CALLBACK_ERROR, "Error fetching files: %s\n", err);
-		KERNEL32$FindClose(hand);
+		char errMsg[256];
+		FsErrorMessage(err, errMsg, sizeof(errMsg));
+		internal_printf("%s\n", errMsg);
+		if (hand != INVALID_HANDLE_VALUE) { KERNEL32$FindClose(hand); }
 		return;
 	}
 
-	KERNEL32$FindClose(hand);
+	if (hand != INVALID_HANDLE_VALUE) { KERNEL32$FindClose(hand); }
 	while((curitem = dirQueue->pop(dirQueue)) != NULL) {
 		listDir(curitem, subdirs);
 		intFree(curitem);
@@ -133,6 +138,7 @@ VOID go(
 	// At worst, we will append \* so give it four bytes (= 2 wchar_t)
 	char * realPath = intAlloc(1024);
 	MSVCRT$strncat(realPath, path, 1023);
+	FsNormalizeSlashesA(realPath);
 
 	if(!bofstart())
 	{

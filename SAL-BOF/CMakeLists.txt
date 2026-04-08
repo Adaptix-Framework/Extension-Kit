@@ -9,7 +9,6 @@ include_directories(${CMAKE_SOURCE_DIR}/_include)
 # Source files
 set(ARP_SOURCES arp/arp.c)
 set(CACLS_SOURCES cacls/cacls.c)
-set(DIR_SOURCES dir/dir.c)
 set(ENV_SOURCES env/env.c)
 set(IPCONFIG_SOURCES ipconfig/ipconfig.c)
 set(LISTDNS_SOURCES listdns/listdns.c)
@@ -40,7 +39,6 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s")
 # Object file targets
 add_library(arp OBJECT ${ARP_SOURCES})
 add_library(cacls OBJECT ${CACLS_SOURCES})
-add_library(dir OBJECT ${DIR_SOURCES})
 add_library(env OBJECT ${ENV_SOURCES})
 add_library(ipconfig OBJECT ${IPCONFIG_SOURCES})
 add_library(listdns OBJECT ${LISTDNS_SOURCES})
@@ -117,12 +115,6 @@ add_custom_target(copy_cacls ALL
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:cacls> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/cacls.x64.o
     DEPENDS cacls
     COMMENT "Copying cacls object file"
-)
-
-add_custom_target(copy_dir ALL
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_OBJECTS:dir> ${CMAKE_CURRENT_SOURCE_DIR}/_bin/dir.x64.o
-    DEPENDS dir
-    COMMENT "Copying dir object file"
 )
 
 add_custom_target(copy_env ALL

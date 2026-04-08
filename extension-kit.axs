@@ -15,4 +15,5 @@ ax.script_load(path + "LateralMovement-BOF/lateral.axs");
 ax.script_load(path + "Postex-BOF/postex.axs");
 ax.script_load(path + "Process-BOF/process.axs");
 ax.script_load(path + "SAL-BOF/sal.axs");
+ax.script_load(path + "FS-BOF/fs.axs");
 ax.script_load(path + "SAR-BOF/sar.axs");

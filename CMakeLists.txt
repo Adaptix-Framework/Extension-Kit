@@ -36,6 +36,7 @@ add_subdirectory(LateralMovement-BOF)
 add_subdirectory(Postex-BOF)
 add_subdirectory(Process-BOF)
 add_subdirectory(SAL-BOF)
+add_subdirectory(FS-BOF)
 add_subdirectory(SAR-BOF)
 
 # Create a single target that builds all BOF projects
@@ -67,6 +68,7 @@ add_custom_target(clean-all-bins
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/Process-BOF/_bin
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/SAL-BOF/_bin
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/SAR-BOF/_bin
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/FS-BOF/_bin
     COMMENT "Cleaning all _bin directories"
 )
 
