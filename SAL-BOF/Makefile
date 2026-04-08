@@ -11,7 +11,6 @@ bof: clean
 	# 64-bit builds
 	@($(CC64) $(CFLAGS) arp/arp.c -o _bin/arp.x64.o && $(STRIP64) _bin/arp.x64.o) && echo '[+] arp x64' || echo '[!] arp x64'
 	@($(CC64) $(CFLAGS) cacls/cacls.c -o _bin/cacls.x64.o && $(STRIP64) _bin/cacls.x64.o) && echo '[+] cacls x64' || echo '[!] cacls x64'
-	@($(CC64) $(CFLAGS) dir/dir.c -o _bin/dir.x64.o && $(STRIP64) _bin/dir.x64.o) && echo '[+] dir x64' || echo '[!] dir x64'
 	@($(CC64) $(CFLAGS) env/env.c -o _bin/env.x64.o && $(STRIP64) _bin/env.x64.o) && echo '[+] env x64' || echo '[!] env x64'
 	@($(CC64) $(CFLAGS) ipconfig/ipconfig.c -o _bin/ipconfig.x64.o && $(STRIP64) _bin/ipconfig.x64.o) && echo '[+] ipconfig x64' || echo '[!] ipconfig x64'
 	@($(CC64) $(CFLAGS) listdns/listdns.c -o _bin/listdns.x64.o && $(STRIP64) _bin/listdns.x64.o) && echo '[+] listdns x64' || echo '[!] listdns x64'
@@ -39,7 +38,6 @@ bof: clean
 	# 32-bit builds
 	@($(CC86) $(CFLAGS) arp/arp.c -o _bin/arp.x32.o && $(STRIP86) _bin/arp.x32.o) && echo '[+] arp x32' || echo '[!] arp x32'
 	@($(CC86) $(CFLAGS) cacls/cacls.c -o _bin/cacls.x32.o && $(STRIP86) _bin/cacls.x32.o) && echo '[+] cacls x32' || echo '[!] cacls x32'
-	@($(CC86) $(CFLAGS) dir/dir.c -o _bin/dir.x32.o && $(STRIP86) _bin/dir.x32.o) && echo '[+] dir x32' || echo '[!] dir x32'
 	@($(CC86) $(CFLAGS) env/env.c -o _bin/env.x32.o && $(STRIP86) _bin/env.x32.o) && echo '[+] env x32' || echo '[!] env x32'
 	@($(CC86) $(CFLAGS) ipconfig/ipconfig.c -o _bin/ipconfig.x32.o && $(STRIP86) _bin/ipconfig.x32.o) && echo '[+] ipconfig x32' || echo '[!] ipconfig x32'
 	@($(CC86) $(CFLAGS) listdns/listdns.c -o _bin/listdns.x32.o && $(STRIP86) _bin/listdns.x32.o) && echo '[+] listdns x32' || echo '[!] listdns x32'

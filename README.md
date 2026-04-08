@@ -98,6 +98,12 @@ This extension allows you to customize the Beacon Object File (BOF) for future u
 
 
 
+## FS-BOF
+
+Filesystem operations: dir, type, mkdir, copy, move, del — without dropping to cmd.exe or PowerShell. [More details](./FS-BOF/README.md)
+
+
+
 ## SAL-BOF
 
 Situation Awareness Local BOFs. [More details](https://github.com/Adaptix-Framework/Extension-Kit/blob/main/SAL-BOF/README.md)

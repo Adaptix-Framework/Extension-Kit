@@ -20,14 +20,6 @@ List user permissions for the specified file or directory, wildcards supported
 cacls <path>
 ```
 
-## dir
-
-Lists files in a specified directory. Supports wildcards (e.g. "C:\Windows\S*"). Optionally, it can perform a recursive list with the `/s` argument
-
-```
-dir <path> [/s]
-```
-
 ## env
 
 List process environment variables

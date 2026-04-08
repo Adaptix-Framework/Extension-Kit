@@ -21,21 +21,6 @@ cmd_cacls.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: cacls");
 });
 
-var cmd_dir = ax.create_command("dir", "Lists files in a specified directory. Supports wildcards (e.g. \"C:\\Windows\\S*\"). Optionally, it can perform a recursive list with the /s argument", "dir C:\\Users /s");
-cmd_dir.addArgString("directory", "", ".\\");
-cmd_dir.addArgBool("/s", "Recursive list");
-cmd_dir.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
-    let directory = parsed_json["directory"];
-    let recursive = 0;
-
-    if(parsed_json["/s"]) { recursive = 1; }
-
-    let bof_params = ax.bof_pack("wstr,int", [directory, recursive]);
-    let bof_path = ax.script_dir() + "_bin/dir." + ax.arch(id) + ".o";
-
-    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, "BOF implementation: dir");
-});
-
 var cmd_env = ax.create_command("env", "List process environment variables", "env");
 cmd_env.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let bof_path = ax.script_dir() + "_bin/env." + ax.arch(id) + ".o";
@@ -167,5 +152,5 @@ cmd_whoami.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: whoami /all");
 });
 
-var group_test = ax.create_commands_group("SAL-BOF", [cmd_arp, cmd_cacls, cmd_dir, cmd_env, cmd_ipconfig, cmd_listdns, cmd_netstat, cmd_nslookup, cmd_privcheck, cmd_routeprint, cmd_uptime, cmd_useridletime, cmd_whoami]);
+var group_test = ax.create_commands_group("SAL-BOF", [cmd_arp, cmd_cacls, cmd_env, cmd_ipconfig, cmd_listdns, cmd_netstat, cmd_nslookup, cmd_privcheck, cmd_routeprint, cmd_uptime, cmd_useridletime, cmd_whoami]);
 ax.register_commands_group(group_test, ["beacon", "gopher", "kharon"], ["windows"], []);
