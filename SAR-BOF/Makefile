@@ -24,6 +24,9 @@ bof: clean
 
 	@$(MAKE) --no-print-directory -C EdrEnum-BOF
 	@cp EdrEnum-BOF/_bin/*.o _bin/
+	@$(MAKE) --no-print-directory -C ghost_task
+	@cp ghost_task/_bin/*.o _bin/
+
 
 clean:
-	@(rm -rf _bin)
+	@(rm -rf _bin ghost_task/_bin EdrEnum-BOF/_bin)

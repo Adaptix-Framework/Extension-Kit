@@ -62,5 +62,11 @@ bof: clean
 	@($(CC86) $(CFLAGS) privcheck/pshistory.c -o _bin/pshistory.x32.o && $(STRIP86) _bin/pshistory.x32.o) && echo '[+] pshistory x32' || echo '[!] pshistory x32'
 	@($(CC86) $(CFLAGS) privcheck/uacstatus.c -o _bin/uacstatus.x32.o && $(STRIP86) _bin/uacstatus.x32.o) && echo '[+] uacstatus x32' || echo '[!] uacstatus x32'
 	@($(CC86) $(CFLAGS) privcheck/privcheck_all.c -o _bin/privcheck_all.x32.o && $(STRIP86) _bin/privcheck_all.x32.o) && echo '[+] privcheck_all x32' || echo '[!] privcheck_all x32'
+
+	@$(MAKE) --no-print-directory -C clipboard
+	@cp clipboard/_bin/*.o _bin/
+	@$(MAKE) --no-print-directory -C sc_bof
+	@cp sc_bof/_bin/*.o _bin/
+
 clean:
-	@(rm -rf _bin)
+	@(rm -rf _bin clipboard/_bin sc_bof/_bin)
