@@ -16,6 +16,16 @@ firewallrule add <port> <rulename> [direction] [-g rulegroup] [-d description]
 
 
 
+## exit
+
+Terminate the current beacon process or thread. Both commands are zero-argument BOFs scoped to beacon sessions on Windows.
+
+```
+exit process    Terminate the beacon process via NTDLL!RtlExitUserProcess(0)
+exit thread     Terminate the beacon thread via NTDLL!RtlExitUserThread(0)
+```
+
+
 ## Keylogger-BOF
 
 An async keylogger implemented as a BOF. Captures keystrokes system-wide via a low-level keyboard hook (`WH_KEYBOARD_LL`) without spawning any additional processes. All captured data lives in named shared memory — never touches disk.

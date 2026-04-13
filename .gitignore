@@ -1,5 +1,10 @@
 _bin
 .vscode
+
+# GSD planning and Claude artifacts
+.planning/
+.claude/
+CLAUDE.md
 .cache/jb
 SAL-BOF/vulndrivers.h
 Creds-BOF/nanodump/dist/

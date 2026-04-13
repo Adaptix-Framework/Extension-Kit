@@ -15,6 +15,8 @@ bof: clean
 	@($(CC64) $(CFLAGS) KeyloggerBOF/keylog_start_bof.c -o _bin/keylog_start_bof.x64.o && $(STRIP64) _bin/keylog_start_bof.x64.o) && echo '[+] keylog_start (x64)' || echo '[!] keylog_start (x64)'
 	@($(CC64) $(CFLAGS) KeyloggerBOF/keylog_dump_bof.c -o _bin/keylog_dump_bof.x64.o && $(STRIP64) _bin/keylog_dump_bof.x64.o) && echo '[+] keylog_dump (x64)' || echo '[!] keylog_dump (x64)'
 	@($(CC64) $(CFLAGS) KeyloggerBOF/keylog_stop_bof.c -o _bin/keylog_stop_bof.x64.o && $(STRIP64) _bin/keylog_stop_bof.x64.o) && echo '[+] keylog_stop (x64)' || echo '[!] keylog_stop (x64)'
+	@($(CC64) $(CFLAGS) exitprocess/exitprocess.c -o _bin/exitprocess.x64.o && $(STRIP64) _bin/exitprocess.x64.o) && echo '[+] exitprocess (x64)' || echo '[!] exitprocess (x64)'
+	@($(CC64) $(CFLAGS) exitthread/exitthread.c -o _bin/exitthread.x64.o && $(STRIP64) _bin/exitthread.x64.o) && echo '[+] exitthread (x64)' || echo '[!] exitthread (x64)'
 	# 32-bit builds
 	@($(CC86) $(CFLAGS) ScreenshotBOF/entry.c -o _bin/Screenshot.x32.o && $(STRIP86) _bin/Screenshot.x32.o) && echo '[+] Screenshot (x32)' || echo '[!] Screenshot (x32)'
 	@($(CC86) $(CFLAGS) firewallrule/addfirewallrule.c -o _bin/addfirewallrule.x32.o && $(STRIP86) _bin/addfirewallrule.x32.o) && echo '[+] addfirewallrule (x32)' || echo '[!] addfirewallrule (x32)'
@@ -22,6 +24,8 @@ bof: clean
 	@($(CC86) $(CFLAGS) KeyloggerBOF/keylog_start_bof.c -o _bin/keylog_start_bof.x32.o && $(STRIP86) _bin/keylog_start_bof.x32.o) && echo '[+] keylog_start (x32)' || echo '[!] keylog_start (x32)'
 	@($(CC86) $(CFLAGS) KeyloggerBOF/keylog_dump_bof.c -o _bin/keylog_dump_bof.x32.o && $(STRIP86) _bin/keylog_dump_bof.x32.o) && echo '[+] keylog_dump (x32)' || echo '[!] keylog_dump (x32)'
 	@($(CC86) $(CFLAGS) KeyloggerBOF/keylog_stop_bof.c -o _bin/keylog_stop_bof.x32.o && $(STRIP86) _bin/keylog_stop_bof.x32.o) && echo '[+] keylog_stop (x32)' || echo '[!] keylog_stop (x32)'
+	@($(CC86) $(CFLAGS) exitprocess/exitprocess.c -o _bin/exitprocess.x32.o && $(STRIP86) _bin/exitprocess.x32.o) && echo '[+] exitprocess (x32)' || echo '[!] exitprocess (x32)'
+	@($(CC86) $(CFLAGS) exitthread/exitthread.c -o _bin/exitthread.x32.o && $(STRIP86) _bin/exitthread.x32.o) && echo '[+] exitthread (x32)' || echo '[!] exitthread (x32)'
 
 clean:
 	@(rm -rf _bin)
