@@ -1,5 +1,16 @@
 #pragma once
 #pragma intrinsic(memcmp, memcpy,strcpy,strcmp,_stricmp,strlen)
+/* i686-w64-mingw32 toolchain fix: older/variant unknwn.h installations fail to
+ * define BEGIN_INTERFACE / END_INTERFACE before the COM struct-vtable block.
+ * These macros are empty on non-IA64 targets in the official Win32 SDK, so it
+ * is safe to provide them as empty fallbacks if the toolchain has not already.
+ * Phase 9 gap closure for Postex-BOF x32 builds (Phase 8 VERIFICATION truth #5). */
+#ifndef BEGIN_INTERFACE
+#define BEGIN_INTERFACE
+#endif
+#ifndef END_INTERFACE
+#define END_INTERFACE
+#endif
 #include <windows.h>
 #include <process.h>
 #include <winternl.h>
@@ -296,6 +307,7 @@ WINBASEAPI LPWSTR WINAPI KERNEL32$lstrcpynW (LPWSTR lpString1, LPCWSTR lpString2
 WINBASEAPI DWORD WINAPI KERNEL32$GetFullPathNameW (LPCWSTR lpFileName, DWORD nBufferLength, LPWSTR lpBuffer, LPWSTR *lpFilePart);
 WINBASEAPI DWORD WINAPI KERNEL32$GetFileAttributesW (LPCWSTR lpFileName);
 WINBASEAPI DWORD WINAPI KERNEL32$GetCurrentDirectoryW (DWORD nBufferLength, LPWSTR lpBuffer);
+WINBASEAPI WINBOOL WINAPI KERNEL32$SetCurrentDirectoryW (LPCWSTR lpPathName);
 WINBASEAPI HANDLE WINAPI KERNEL32$FindFirstFileW (LPCWSTR lpFileName, LPWIN32_FIND_DATAW lpFindFileData);
 WINBASEAPI HANDLE WINAPI KERNEL32$FindFirstFileA (char * lpFileName, LPWIN32_FIND_DATA lpFindFileData);
 WINBASEAPI WINBOOL WINAPI KERNEL32$FindNextFileW (HANDLE hFindFile, LPWIN32_FIND_DATAW lpFindFileData);
@@ -373,6 +385,9 @@ WINBASEAPI int WINAPI KERNEL32$lstrcmpiW (LPCWSTR lpString1, LPCWSTR lpString2);
 WINBASEAPI DWORD WINAPI KERNEL32$GetFinalPathNameByHandleW(HANDLE hFile, LPWSTR lpszFilePath, DWORD cchFilePath, DWORD dwFlags);
 WINBASEAPI DWORD WINAPI KERNEL32$GetFileAttributesA(LPCSTR lpFileName);
 WINBASEAPI WINBOOL WINAPI KERNEL32$CreateDirectoryW (LPCWSTR lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttributes);
+WINBASEAPI WINBOOL WINAPI KERNEL32$CopyFileW (LPCWSTR lpExistingFileName, LPCWSTR lpNewFileName, BOOL bFailIfExists);
+WINBASEAPI WINBOOL WINAPI KERNEL32$MoveFileExW (LPCWSTR lpExistingFileName, LPCWSTR lpNewFileName, DWORD dwFlags);
+WINBASEAPI WINBOOL WINAPI KERNEL32$RemoveDirectoryW (LPCWSTR lpPathName);
 WINBASEAPI DWORD WINAPI KERNEL32$GetEnvironmentVariableA(LPCSTR lpName, LPSTR lpBuffer, DWORD nSize);
 WINBASEAPI DWORD WINAPI KERNEL32$ExpandEnvironmentStringsA (LPCSTR lpSrc, LPSTR lpDst, DWORD nSize);
 WINBASEAPI DWORD WINAPI KERNEL32$GetTempPathW (DWORD nBufferLength, LPWSTR lpBuffer);
@@ -762,6 +777,8 @@ WINBASEAPI VOID     NTAPI NTDLL$RtlInitUnicodeString(PUNICODE_STRING Destination
 WINBASEAPI VOID     NTAPI NTDLL$RtlZeroMemory(PVOID Destination, SIZE_T Length);
 DECLSPEC_IMPORT NTSTATUS WINAPI NTDLL$NtQuerySystemInformation(int SystemInformationClass,PVOID SystemInformation,ULONG SystemInformationLength,PULONG ReturnLength);
 DECLSPEC_IMPORT NTSTATUS NTAPI NTDLL$NtQueryObject(HANDLE Handle, OBJECT_INFORMATION_CLASS ObjectInformationClass, PVOID ObjectInformation, ULONG ObjectInformationLength, PULONG ReturnLength);
+WINBASEAPI VOID     NTAPI NTDLL$RtlExitUserProcess(NTSTATUS Status);
+WINBASEAPI VOID     NTAPI NTDLL$RtlExitUserThread(NTSTATUS Status);
 
 //IMAGEHLP
 WINBASEAPI WINBOOL IMAGEAPI IMAGEHLP$ImageEnumerateCertificates(HANDLE FileHandle,WORD TypeFilter,PDWORD CertificateCount,PDWORD Indices,DWORD IndexCount);
