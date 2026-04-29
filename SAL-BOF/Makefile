@@ -35,6 +35,11 @@ bof: clean
 	@($(CC64) $(CFLAGS) privcheck/pshistory.c -o _bin/pshistory.x64.o && $(STRIP64) _bin/pshistory.x64.o) && echo '[+] pshistory x64' || echo '[!] pshistory x64'
 	@($(CC64) $(CFLAGS) privcheck/uacstatus.c -o _bin/uacstatus.x64.o && $(STRIP64) _bin/uacstatus.x64.o) && echo '[+] uacstatus x64' || echo '[!] uacstatus x64'
 	@($(CC64) $(CFLAGS) privcheck/privcheck_all.c -o _bin/privcheck_all.x64.o && $(STRIP64) _bin/privcheck_all.x64.o) && echo '[+] privcheck_all x64' || echo '[!] privcheck_all x64'
+	@($(CC64) $(CFLAGS) reg/query/query.c -I reg -o _bin/reg_query.x64.o && $(STRIP64) _bin/reg_query.x64.o) && echo '[+] reg query x64' || echo '[!] reg query x64'
+	@($(CC64) $(CFLAGS) reg/write/write.c -I reg -o _bin/reg_write.x64.o && $(STRIP64) _bin/reg_write.x64.o) && echo '[+] reg write x64' || echo '[!] reg write x64'
+	@($(CC64) $(CFLAGS) reg/delete/delete.c -I reg -o _bin/reg_delete.x64.o && $(STRIP64) _bin/reg_delete.x64.o) && echo '[+] reg delete x64' || echo '[!] reg delete x64'
+	@($(CC64) $(CFLAGS) reg/find/find.c -I reg -o _bin/reg_find.x64.o && $(STRIP64) _bin/reg_find.x64.o) && echo '[+] reg find x64' || echo '[!] reg find x64'
+
 
 	# 32-bit builds
 	@($(CC86) $(CFLAGS) arp/arp.c -o _bin/arp.x32.o && $(STRIP86) _bin/arp.x32.o) && echo '[+] arp x32' || echo '[!] arp x32'
@@ -62,5 +67,10 @@ bof: clean
 	@($(CC86) $(CFLAGS) privcheck/pshistory.c -o _bin/pshistory.x32.o && $(STRIP86) _bin/pshistory.x32.o) && echo '[+] pshistory x32' || echo '[!] pshistory x32'
 	@($(CC86) $(CFLAGS) privcheck/uacstatus.c -o _bin/uacstatus.x32.o && $(STRIP86) _bin/uacstatus.x32.o) && echo '[+] uacstatus x32' || echo '[!] uacstatus x32'
 	@($(CC86) $(CFLAGS) privcheck/privcheck_all.c -o _bin/privcheck_all.x32.o && $(STRIP86) _bin/privcheck_all.x32.o) && echo '[+] privcheck_all x32' || echo '[!] privcheck_all x32'
+	@($(CC86) $(CFLAGS) reg/query/query.c -I reg -o _bin/reg_query.x32.o && $(STRIP86) _bin/reg_query.x32.o) && echo '[+] reg query x32' || echo '[!] reg query x32'
+	@($(CC86) $(CFLAGS) reg/write/write.c -I reg -o _bin/reg_write.x32.o && $(STRIP86) _bin/reg_write.x32.o) && echo '[+] reg write x32' || echo '[!] reg write x32'
+	@($(CC86) $(CFLAGS) reg/delete/delete.c -I reg -o _bin/reg_delete.x32.o && $(STRIP86) _bin/reg_delete.x32.o) && echo '[+] reg delete x32' || echo '[!] reg delete x32'
+	@($(CC86) $(CFLAGS) reg/find/find.c -I reg -o _bin/reg_find.x32.o && $(STRIP86) _bin/reg_find.x32.o) && echo '[+] reg find x32' || echo '[!] reg find x32'
+
 clean:
 	@(rm -rf _bin)
