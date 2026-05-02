@@ -1,4 +1,5 @@
 #pragma once
+#include <limits.h>
 
 #define ARGUMENT_PRESENT(ArgumentPointer) \
   ((CHAR*)((ULONG_PTR)(ArgumentPointer)) != (CHAR*)NULL)

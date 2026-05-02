@@ -1,6 +1,9 @@
 #include "ssp/ssp_utils.h"
 #include "utils.h"
 #include "pipe.h"
+#ifndef BOF
+#include <stdlib.h>
+#endif
 
 BOOL generate_random_dll_path(
     OUT LPSTR* random_path)

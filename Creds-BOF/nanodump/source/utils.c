@@ -3,6 +3,9 @@
 #include "dinvoke.h"
 #include "syscalls.h"
 #include "adaptix.h"
+#ifndef BOF
+#include <stdlib.h>
+#endif
 
 #ifndef SSP
 

@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <objbase.h>
 #include <stdint.h> 
 #include <ctype.h>
 #include <stdio.h>

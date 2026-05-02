@@ -8,6 +8,9 @@ Creds-BOF/nanodump/dist/
 .DS_Store
 **/.DS_Store
 
+.planning
+.claude
+
 *.o
 *.swp
 *.exe

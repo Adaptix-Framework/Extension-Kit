@@ -4,6 +4,14 @@
 #include "token_priv.h"
 #include "dinvoke.h"
 #include "handle.h"
+#ifdef PPL_MEDIC
+#ifndef CINTERFACE
+#define CINTERFACE
+#endif
+#include <objbase.h>
+#include <unknwn.h>
+#include <oaidl.h>
+#endif
 
 #define TH32CS_SNAPTHREAD 0x00000004
 
@@ -27,8 +35,10 @@ typedef ULONGLONG(WINAPI* GetTickCount64_t) ();
 typedef SC_HANDLE(WINAPI* OpenSCManagerW_t)(LPCWSTR lpMachineName, LPCWSTR lpDatabaseName, DWORD dwDesiredAccess);
 typedef SC_HANDLE(WINAPI* OpenServiceW_t)(SC_HANDLE hSCManager, LPCWSTR lpServiceName, DWORD dwDesiredAccess);
 typedef BOOL(WINAPI* CloseServiceHandle_t)(SC_HANDLE hSCObject);
+#ifdef PPL_MEDIC
 typedef HRESULT(WINAPI* LoadTypeLib_t)(LPCOLESTR szFile, ITypeLib **pptlib);
 typedef HRESULT(WINAPI* CreateTypeLib2_t)(SYSKIND syskind, LPCOLESTR szFile, ICreateTypeLib2 **ppctlib);
+#endif
 typedef BSTR(WINAPI* SysAllocString_t)(const OLECHAR *psz);
 typedef VOID(WINAPI* SysFreeString_t)(BSTR bstrString);
 typedef HANDLE(WINAPI* CreateToolhelp32Snapshot_t)(DWORD dwFlags, DWORD th32ProcessID);

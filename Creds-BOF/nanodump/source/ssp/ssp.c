@@ -1,5 +1,8 @@
 #include "ssp/ssp.h"
 #include "ssp/ssp_utils.h"
+#ifndef BOF
+#include <stdlib.h>
+#endif
 
 DWORD WINAPI load_ssp(LPVOID Parameter)
 {

@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <objbase.h>
 #include <winbase.h>
 #include <iphlpapi.h>
 #include "bofdefs.h"

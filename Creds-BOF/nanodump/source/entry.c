@@ -1,4 +1,7 @@
 #include "entry.h"
+#ifndef BOF
+#include <stdlib.h>
+#endif
 
 #ifdef BOF
  #include "nanodump.c"

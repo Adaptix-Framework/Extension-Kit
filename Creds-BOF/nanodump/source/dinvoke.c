@@ -1,4 +1,7 @@
 #include "dinvoke.h"
+#ifndef BOF
+#include <stdlib.h>
+#endif
 
 // used by spoof_callstack
 PVOID find_dll_by_pointer(

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <windows.h>
+#include <objbase.h>
 #include <netfw.h>
 #include "firewallrule.h"
 #include "beacon.h"

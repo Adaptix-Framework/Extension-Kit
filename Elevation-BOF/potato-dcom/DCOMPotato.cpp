@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <stdio.h>
+#include <objbase.h>
 #include <ocidl.h>
 #include <lm.h>
 #include "bofdefs.h"

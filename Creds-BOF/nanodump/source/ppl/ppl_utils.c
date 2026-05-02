@@ -623,6 +623,7 @@ VOID safe_free(
     }
 }
 
+#ifdef PPL_MEDIC
 VOID safe_release(
     IN IUnknown** Interface)
 {
@@ -632,6 +633,7 @@ VOID safe_release(
         *Interface = NULL;
     }
 }
+#endif
 
 BOOL get_type_lib_reg_value_path(
     OUT LPWSTR* TypeLibRegValuePath)

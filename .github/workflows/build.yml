@@ -1,0 +1,71 @@
+name: C/C++ Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os-image:
+          - ubuntu:latest
+          - kalilinux/kali-rolling
+          - archlinux:latest
+
+    container:
+      image: ${{ matrix.os-image }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Build Dependencies
+        run: |
+          if command -v apt-get &> /dev/null; then
+            apt-get update
+            apt-get install -y \
+              build-essential \
+              g++-mingw-w64-x86-64-posix \
+              gcc-mingw-w64-x86-64-posix \
+              mingw-w64-tools \
+              gcc-mingw-w64-i686 \
+              g++-mingw-w64-i686 \
+              python3
+          elif command -v pacman &> /dev/null; then
+            pacman -Sy --noconfirm base-devel mingw-w64-gcc
+          fi
+
+      - name: Run Make
+        run: make
+
+
+  build-macos:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Extra Dependencies
+        run: |
+          brew update || true
+          brew install mingw-w64
+
+      - name: Run Make
+        run: make
+
+
+  docker-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify Docker Build
+        run: make docker-build

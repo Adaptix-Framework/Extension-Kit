@@ -2,6 +2,7 @@
 #define SECURITY_WIN32
 
 #include <windows.h>
+#include <objbase.h>
 #include <stdio.h>
 #include <security.h>
 

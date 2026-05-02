@@ -1,4 +1,7 @@
 #include "ppl/ppl_dump.h"
+#ifndef BOF
+#include <stdlib.h>
+#endif
 
 BOOL run_ppl_dump_exploit(
     IN unsigned char nanodump_ppl_dump_dll[],

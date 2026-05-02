@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <objbase.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <gdiplus.h>

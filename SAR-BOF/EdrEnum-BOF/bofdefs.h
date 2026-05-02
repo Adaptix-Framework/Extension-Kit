@@ -1,5 +1,6 @@
 #pragma once
 #pragma intrinsic(memcmp, memcpy,strcpy,strcmp,_stricmp,strlen)
+#include <objbase.h>
 #include <windows.h>
 #include <process.h>
 #include <winternl.h>

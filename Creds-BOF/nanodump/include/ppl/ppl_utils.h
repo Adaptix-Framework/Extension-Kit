@@ -2,6 +2,13 @@
 
 #include <windows.h>
 #include <winternl.h>
+#ifdef PPL_MEDIC
+#ifndef CINTERFACE
+#define CINTERFACE
+#endif
+#include <objbase.h>
+#include <unknwn.h>
+#endif
 
 #include "utils.h"
 #include "dinvoke.h"
@@ -131,8 +138,10 @@ BOOL get_registry_string_value(
     IN LPCWSTR ValueName,
     OUT LPWSTR* ValueData);
 
+#ifdef PPL_MEDIC
 VOID safe_release(
     IN IUnknown** Interface);
+#endif
 
 BOOL generate_temp_path(
     OUT LPWSTR* Buffer);
