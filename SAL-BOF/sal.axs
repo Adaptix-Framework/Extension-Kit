@@ -3,6 +3,175 @@ var metadata = {
     description: "Situation Awareness Local BOFs"
 };
 
+// ax.script_import(ax.script_dir() + "clipboard/clipboard.axs")
+// ax.script_import(ax.script_dir() + "sc_bof/svcmgr.axs")
+
+// *********************** clipboard ***********************
+
+var cmd_clipboard = ax.create_command(
+    "clipboard",
+    "Read the current system clipboard contents [NOISE: low]",
+    "clipboard"
+);
+
+cmd_clipboard.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+
+    var bof_path = ax.script_dir() + "_bin/clipboard." + ax.arch(id) + ".o";
+
+    if (!ax.file_exists(bof_path)) {
+        ax.console_message(id,
+            "BOF not found: " + bof_path,
+            "error",
+            "Compile clipboard.c and place the .o files under _bin/ next to this script."
+        );
+        return;
+    }
+
+    var hook = function (task) {
+        if (!task.text) return task;
+
+        var lines = task.text.split("\n");
+        var out   = [];
+
+        for (var i = 0; i < lines.length; i++) {
+            var l = lines[i];
+            if (/^\[Clipboard\s*\//.test(l)) {
+                var fmt = /Unicode/.test(l) ? "Unicode" : "ANSI";
+                out.push("[Clipboard capture — " + fmt + "]");
+                continue;
+            }
+            out.push(l);
+        }
+
+        task.text = out.join("\n");
+        return task;
+    };
+
+    ax.execute_alias_hook(
+        id,
+        cmdline,
+        "execute bof " + bof_path,
+        "Task: Clipboard capture (BOF)",
+        hook
+    );
+});
+
+
+// *********************** clipboard end ***********************
+// ***********************     sc_bof    ***********************
+
+var cmd_svc_list = ax.create_command(
+    "svc_list",
+    "List all services (local or remote).",
+    "svc_list | svc_list -c 192.168.1.10 | svc_list -f driver");
+cmd_svc_list.addArgFlagString("-c", "computer", "Remote computer (skip = localhost)", "localhost");
+cmd_svc_list.addArgFlagString("-f", "filter",   "Filter: all | win32 | driver", "all");
+cmd_svc_list.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    var computer   = parsed_json["computer"] || "localhost";
+    var filter     = parsed_json["filter"]   || "all";
+    var bof_path   = ax.script_dir() + "_bin/svcmgr." + ax.arch(id) + ".o";
+    var bof_params = ax.bof_pack("cstr,cstr,cstr", ["list", computer, filter]);
+    ax.execute_alias(id, cmdline,
+        `execute bof ${bof_path} ${bof_params}`,
+        "Task: svc_list on " + computer, null);
+});
+
+var cmd_svc_query = ax.create_command(
+    "svc_query",
+    "Check the status and configuration of a service.",
+    "svc_query -n WinDefend | svc_query -n Spooler -c 192.168.1.10");
+cmd_svc_query.addArgFlagString("-n", "svcname",  "Service name");
+cmd_svc_query.addArgFlagString("-c", "computer", "Remote machine (skip = localhost)", "localhost");
+cmd_svc_query.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    var svcname    = parsed_json["svcname"]  || "";
+    var computer   = parsed_json["computer"] || "localhost";
+    if (!svcname) { ax.console_message(id, "missing -n <svcname>", "error"); return; }
+
+    var bof_path   = ax.script_dir() + "_bin/svcmgr." + ax.arch(id) + ".o";
+    var bof_params = ax.bof_pack("cstr,cstr,cstr", ["query", computer, svcname]);
+    ax.execute_alias(id, cmdline,
+        `execute bof "${bof_path}" "${bof_params}"`,
+        "Task: svc_query [" + svcname + "] on " + computer, null);
+});
+
+var cmd_svc_create = ax.create_command(
+    "svc_create",
+    "Create a new service (Win32 or kernel driver).",
+    "svc_create -n MySvc -p C:\\\\path\\\\svc.exe -t win32 -s auto | svc_create -n MyDrv -p C:\\\\path\\\\drv.sys -t driver -s demand");
+cmd_svc_create.addArgFlagString("-n", "svcname",   "Service internal name");
+cmd_svc_create.addArgFlagString("-p", "binpath",   "Path to the executable or .sys file");
+cmd_svc_create.addArgFlagString("-d", "dispname",  "Display name (optional)", "");
+cmd_svc_create.addArgFlagString("-t", "svctype",   "Type: win32 | driver", "win32");
+cmd_svc_create.addArgFlagString("-s", "starttype", "Start: auto | demand | disabled | boot | system", "demand");
+cmd_svc_create.addArgFlagString("-c", "computer",  "Remote machine (skip = localhost)", "localhost");
+cmd_svc_create.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    var svcname    = parsed_json["svcname"]   || "";
+    var binpath    = parsed_json["binpath"]   || "";
+    var dispname   = parsed_json["dispname"]  || "";
+    var svctype    = parsed_json["svctype"]   || "win32";
+    var starttype  = parsed_json["starttype"] || "demand";
+    var computer   = parsed_json["computer"]  || "localhost";
+    if (!svcname) { ax.console_message(id, "missing -n <svcname>", "error"); return; }
+    if (!binpath) { ax.console_message(id, "missing -p <binpath>", "error"); return; }
+    var bof_path   = ax.script_dir() + "_bin/svcmgr." + ax.arch(id) + ".o";
+    var bof_params = ax.bof_pack("cstr,cstr,cstr,cstr,cstr,cstr,cstr",
+        ["create", computer, svcname, dispname, binpath, svctype, starttype]);
+    ax.execute_alias(id, cmdline,
+        `execute bof ${bof_path} ${bof_params}`,
+        "Task: svc_create [" + svcname + "] on " + computer, null);
+});
+
+var cmd_svc_delete = ax.create_command(
+    "svc_delete",
+    "Remove a service (stops it first if running).",
+    "svc_delete -n MySvc | svc_delete -n MySvc -c 192.168.1.10");
+cmd_svc_delete.addArgFlagString("-n", "svcname",  "Service name");
+cmd_svc_delete.addArgFlagString("-c", "computer", "Remote machine (skip = localhost)", "localhost");
+cmd_svc_delete.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    var svcname    = parsed_json["svcname"]  || "";
+    var computer   = parsed_json["computer"] || "localhost";
+    if (!svcname) { ax.console_message(id, "missing -n <svcname>", "error"); return; }
+    var bof_path   = ax.script_dir() + "_bin/svcmgr." + ax.arch(id) + ".o";
+    var bof_params = ax.bof_pack("cstr,cstr,cstr", ["delete", computer, svcname]);
+    ax.execute_alias(id, cmdline,
+        `execute bof ${bof_path} ${bof_params}`,
+        "Task: svc_delete [" + svcname + "] on " + computer, null);
+});
+
+var cmd_svc_start = ax.create_command(
+    "svc_start",
+    "Start a service and wait for RUNNING confirmation.",
+    "svc_start -n Spooler | svc_start -n MySvc -c 192.168.1.10");
+cmd_svc_start.addArgFlagString("-n", "svcname",  "Service name");
+cmd_svc_start.addArgFlagString("-c", "computer", "Remote machine (skip = localhost)", "localhost");
+cmd_svc_start.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    var svcname    = parsed_json["svcname"]  || "";
+    var computer   = parsed_json["computer"] || "localhost";
+    if (!svcname) { ax.console_message(id, "missing -n <svcname>", "error"); return; }
+    var bof_path   = ax.script_dir() + "_bin/svcmgr." + ax.arch(id) + ".o";
+    var bof_params = ax.bof_pack("cstr,cstr,cstr", ["start", computer, svcname]);
+    ax.execute_alias(id, cmdline,
+        `execute bof ${bof_path} ${bof_params}`,
+        "Task: svc_start [" + svcname + "] on " + computer, null);
+});
+
+var cmd_svc_stop = ax.create_command(
+    "svc_stop",
+    "Stop a service and wait for STOPPED confirmation.",
+    "svc_stop -n Spooler | svc_stop -n MySvc -c 192.168.1.10");
+cmd_svc_stop.addArgFlagString("-n", "svcname",  "Service name");
+cmd_svc_stop.addArgFlagString("-c", "computer", "Remote machine (skip = localhost)", "localhost");
+cmd_svc_stop.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    var svcname    = parsed_json["svcname"]  || "";
+    var computer   = parsed_json["computer"] || "localhost";
+    if (!svcname) { ax.console_message(id, "missing -n <svcname>", "error"); return; }
+    var bof_path   = ax.script_dir() + "_bin/svcmgr." + ax.arch(id) + ".o";
+    var bof_params = ax.bof_pack("cstr,cstr,cstr", ["stop", computer, svcname]);
+    ax.execute_alias(id, cmdline,
+        `execute bof ${bof_path} ${bof_params}`,
+        "Task: svc_stop [" + svcname + "] on " + computer, null);
+});
+// ***********************  sc_bof end   ***********************
 
 var cmd_arp = ax.create_command("arp", "List ARP table", "arp");
 cmd_arp.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
@@ -167,5 +336,5 @@ cmd_whoami.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     ax.execute_alias(id, cmdline, `execute bof "${bof_path}"`, "BOF implementation: whoami /all");
 });
 
-var group_test = ax.create_commands_group("SAL-BOF", [cmd_arp, cmd_cacls, cmd_dir, cmd_env, cmd_ipconfig, cmd_listdns, cmd_netstat, cmd_nslookup, cmd_privcheck, cmd_routeprint, cmd_uptime, cmd_useridletime, cmd_whoami]);
+var group_test = ax.create_commands_group("SAL-BOF", [cmd_arp, cmd_cacls, cmd_dir, cmd_env, cmd_ipconfig, cmd_listdns, cmd_netstat, cmd_nslookup, cmd_privcheck, cmd_routeprint, cmd_uptime, cmd_useridletime, cmd_whoami, cmd_clipboard, cmd_svc_list, cmd_svc_query, cmd_svc_create, cmd_svc_delete, cmd_svc_start, cmd_svc_stop]);
 ax.register_commands_group(group_test, ["beacon", "gopher", "kharon"], ["windows"], []);

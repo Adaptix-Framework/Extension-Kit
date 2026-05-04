@@ -23,5 +23,7 @@ bof: clean
 	@($(CC86) $(CFLAGS) KeyloggerBOF/keylog_dump_bof.c -o _bin/keylog_dump_bof.x32.o && $(STRIP86) _bin/keylog_dump_bof.x32.o) && echo '[+] keylog_dump (x32)' || echo '[!] keylog_dump (x32)'
 	@($(CC86) $(CFLAGS) KeyloggerBOF/keylog_stop_bof.c -o _bin/keylog_stop_bof.x32.o && $(STRIP86) _bin/keylog_stop_bof.x32.o) && echo '[+] keylog_stop (x32)' || echo '[!] keylog_stop (x32)'
 
+	@$(MAKE) --no-print-directory -C wifi
+	@cp wifi/_bin/*.o _bin/
 clean:
-	@(rm -rf _bin)
+	@(rm -rf _bin wifi/_bin)
