@@ -6,6 +6,7 @@ all: bof
 
 bof:
 	@(mkdir -p _bin/Kerbeus-BOF 2>/dev/null) && echo 'creating _bin/Kerbeus-BOF' || echo '_bin/Kerbeus-BOF exists'
+	@($(CC64) $(CFLAGS) monitor/monitor.c -o _bin/Kerbeus-BOF/monitor.x64.o && $(STRIP64) _bin/Kerbeus-BOF/monitor.x64.o) && echo '[+] monitor' || echo '[!] monitor'
 	@($(CC64) $(CFLAGS) hash/hash.c -o _bin/Kerbeus-BOF/hash.x64.o    && $(STRIP64) _bin/Kerbeus-BOF/hash.x64.o) && echo '[+] hash' || echo '[!] hash'
 	@($(CC64) $(CFLAGS) klist/klist.c -o _bin/Kerbeus-BOF/klist.x64.o && $(STRIP64) _bin/Kerbeus-BOF/klist.x64.o) && echo '[+] klist' || echo '[!] klist'
 	@($(CC64) $(CFLAGS) -DTRIAGE klist/klist.c -o _bin/Kerbeus-BOF/triage.x64.o && $(STRIP64) _bin/Kerbeus-BOF/triage.x64.o) && echo '[+] triage' || echo '[!] triage'
@@ -22,6 +23,5 @@ bof:
 	@($(CC64) $(CFLAGS) kerberoasting/kerberoasting.c -o _bin/Kerbeus-BOF/kerberoasting.x64.o && $(STRIP64) _bin/Kerbeus-BOF/kerberoasting.x64.o) && echo '[+] kerberoasting' || echo '[!] kerberoasting'
 	@($(CC64) $(CFLAGS) s4u/s4u.c -o _bin/Kerbeus-BOF/s4u.x64.o             && $(STRIP64) _bin/Kerbeus-BOF/s4u.x64.o) && echo '[+] s4u' || echo '[!] s4u'
 	@($(CC64) $(CFLAGS) s4u/cross_s4u.c -o _bin/Kerbeus-BOF/cross_s4u.x64.o && $(STRIP64) _bin/Kerbeus-BOF/cross_s4u.x64.o) && echo '[+] cross_s4u' || echo '[!] cross_s4u'
-
 clean:
 	@(rm -rf _bin)
