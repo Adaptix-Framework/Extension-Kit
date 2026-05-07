@@ -7,7 +7,7 @@ void printoutput(BOOL done);
 #include <ntsecapi.h>
 #include <ntstatus.h>
 
-ECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaRegisterLogonProcess(PLSA_STRING LogonProcessName, PHANDLE LsaHandle, PLSA_OPERATIONAL_MODE SecurityMode);
+DECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaRegisterLogonProcess(PLSA_STRING LogonProcessName, PHANDLE LsaHandle, PLSA_OPERATIONAL_MODE SecurityMode);
 DECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaGetLogonSessionData(PLUID LogonId, PSECURITY_LOGON_SESSION_DATA* ppLogonSessionData);
 DECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaEnumerateLogonSessions(PULONG LogonSessionCount, PLUID* LogonSessionList);
 DECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaFreeReturnBuffer(PVOID Buffer);
@@ -127,6 +127,9 @@ static char* b64_encode(BYTE* input, size_t input_len) {
     return (char*)out;
 }
 
+// -----------------------------------------------------------------------
+// IsSystem / GetCurrentToken / GetLsaHandle
+// -----------------------------------------------------------------------
 static BOOL IsSystem(void) {
     HANDLE hToken = NULL;
     UCHAR bTokenUser[sizeof(TOKEN_USER) + 8 + 4 * SID_MAX_SUB_AUTHORITIES];
