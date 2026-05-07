@@ -4,8 +4,8 @@ var metadata = {
 };
 
 
-let _cmd_monitor = ax.create_command("monitor", "Monitor Kerberos cache for new TGTs and extract them automatically", "kerbeus monitor /interval:30 /runtime:300");
-_cmd_monitor.addArgString("params", "Args: [/interval:SECONDS] [/runtime:SECONDS]  (defaults: interval=30, runtime=300)", "");
+let _cmd_monitor = ax.create_command("monitor", "Monitor Kerberos cache for new TGTs and extract them automatically", "kerbeus monitor /interval:30");
+_cmd_monitor.addArgString("params", "Args: [/interval:SECONDS] (defaults: interval=30)", "");
 _cmd_monitor.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
     let params = parsed_json["params"] || "";
 
@@ -14,10 +14,6 @@ _cmd_monitor.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines) {
 
     ax.execute_alias(id, cmdline, `execute bof -a "${bof_path}" ${bof_params}`, "Task: Kerbeus MONITOR");
 });
-
-
-
-
 
 let _cmd_asreproasting = ax.create_command("asreproasting", "Perform AS-REP roasting", "kerbeus asreproasting /user:pre_user");
 _cmd_asreproasting.addArgString("params", true, "Args: /user:USER [/dc:DC] [/domain:DOMAIN]");
