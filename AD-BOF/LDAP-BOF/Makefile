@@ -35,6 +35,7 @@ bof: clean
 	@$(CC) $(CFLAGS) src/add/add-rbcd.c -o _bin/LDAP/add-rbcd.x64.o && $(STRIP) _bin/LDAP/add-rbcd.x64.o && echo '[+] add-rbcd' || echo '[!] add-rbcd'
 	@$(CC) $(CFLAGS) src/add/add-ace.c -o _bin/LDAP/add-ace.x64.o && $(STRIP) _bin/LDAP/add-ace.x64.o && echo '[+] add-ace' || echo '[!] add-ace'
 	@$(CC) $(CFLAGS) src/set/set-password.c -o _bin/LDAP/set-password.x64.o && $(STRIP) _bin/LDAP/set-password.x64.o && echo '[+] set-password' || echo '[!] set-password'
+	@$(CC) $(CFLAGS) src/set/set-password-auth.c -o _bin/LDAP/set-password-auth.x64.o && $(STRIP) _bin/LDAP/set-password-auth.x64.o && echo '[+] set-password-auth' || echo '[!] set-password-auth'
 	@$(CC) $(CFLAGS) src/set/set-spn.c -o _bin/LDAP/set-spn.x64.o && $(STRIP) _bin/LDAP/set-spn.x64.o && echo '[+] set-spn' || echo '[!] set-spn'
 	@$(CC) $(CFLAGS) src/set/set-delegation.c -o _bin/LDAP/set-delegation.x64.o && $(STRIP) _bin/LDAP/set-delegation.x64.o && echo '[+] set-delegation' || echo '[!] set-delegation'
 	@$(CC) $(CFLAGS) src/set/set-attribute.c -o _bin/LDAP/set-attribute.x64.o && $(STRIP) _bin/LDAP/set-attribute.x64.o && echo '[+] set-attribute' || echo '[!] set-attribute'
