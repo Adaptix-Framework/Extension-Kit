@@ -74,6 +74,11 @@ typedef struct ldapmsg {
     BOOLEAN ConnectionReferenced;
 } LDAPMessage, *PLDAPMessage;
 
+typedef struct l_timeval {
+    LONG tv_sec;
+    LONG tv_usec;
+} LDAP_TIMEVAL;
+
 // LDAP Constants
 #define LDAP_PORT 389
 #define LDAP_SSL_PORT 636
