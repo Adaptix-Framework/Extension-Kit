@@ -23,7 +23,7 @@ nanodump:
 	@$(CC_x86) -c source/entry.c -o dist/$(BOFNAME).x86.o $(OPTIONS) -DNANO -DBOF
 	@$(STRIP_x86) --strip-unneeded dist/$(BOFNAME).x86.o && echo '[+] nanodump x86' || echo '[!] nanodump x86'
 
-	@$(GCC) source/bin2c.c -o dist/bin2c -static -s -Os
+	@$(GCC) source/bin2c.c -o dist/bin2c -s -Os
 
 	@$(CC_x64) source/utils.c source/handle.c source/modules.c source/syscalls.c source/token_priv.c source/nanodump.c source/dinvoke.c source/pipe.c source/entry.c -o dist/$(BOFNAME)_ssp.x64.dll $(OPTIONS) $(SSP_OPTIONS) -DNANO -DSSP -DDDL -shared
 	@$(STRIP_x64) --strip-all dist/$(BOFNAME)_ssp.x64.dll && echo '[+] nanodump_ssp Dll x64' || echo '[!] nanodump_ssp Dll x64'
@@ -75,8 +75,8 @@ nanodump:
 	@$(CC_x64) -c source/ppl/ppl.c -o dist/$(BOFNAME)_ppl_medic.x64.o $(OPTIONS) $(PPL_MEDIC_OPTIONS) -DBOF -DPPL_MEDIC
 	@$(STRIP_x64) --strip-unneeded dist/$(BOFNAME)_ppl_medic.x64.o && echo '[+] nanodump_ppl_medic x64' || echo '[!] nanodump_ppl_medic x64'
 
-	@$(GCC) source/restore_signature.c -o scripts/restore_signature -static -s -Os
-	@$(STRIP_x64) --strip-all scripts/restore_signature
+	@$(GCC) source/restore_signature.c -o scripts/restore_signature -s -Os
+	@strip -x scripts/restore_signature
 
 clean:
 	@rm -f dist/*
