@@ -14,6 +14,7 @@ void go(char *args, int alen) {
     char* dcAddress = ValidateInput(BeaconDataExtract(&parser, NULL));
     int useLdaps = BeaconDataInt(&parser);
     int resolveNames = BeaconDataInt(&parser);
+    char* trustee = ValidateInput(BeaconDataExtract(&parser, NULL));
 
     if (!objectIdentifier || MSVCRT$strlen(objectIdentifier) == 0) {
         BeaconPrintf(CALLBACK_ERROR, "[-] Object identifier is required");
@@ -102,8 +103,10 @@ void go(char *args, int alen) {
     }
 
     // Display security descriptor
-    PrintSecurityDescriptorInfo(sdInfo, targetDN, objectSidStr);
-
+    if (trustee) {
+        BeaconPrintf(CALLBACK_OUTPUT, "[+] Filtering Output for %s", trustee);
+        PrintFilteredSecurityDescriptorInfo(sdInfo, targetDN, objectSidStr, trustee);
+    } else PrintSecurityDescriptorInfo(sdInfo, targetDN, objectSidStr);
     // Cleanup
     FreeSecurityDescriptorInfo(sdInfo);
     if (objectSidStr) MSVCRT$free(objectSidStr);

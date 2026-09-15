@@ -440,6 +440,7 @@ char* GetGuidFriendlyName(GUID* guid);
 
 // Display utilities
 void PrintSecurityDescriptorInfo(PSD_INFO sdInfo, const char* objectDN, const char* objectSid);
+void PrintFilteredSecurityDescriptorInfo(PSD_INFO sdInfo, const char* objectDN, const char* objectSid, const char* trustee);
 void PrintAceInfo(PPARSED_ACE_INFO aceInfo, int index, const char* objectDN, const char* objectSid);
 
 // ACL modification utilities
