@@ -1192,6 +1192,63 @@ void PrintSecurityDescriptorInfo(PSD_INFO sdInfo, const char* objectDN, const ch
     BeaconPrintf(CALLBACK_OUTPUT, "=====================================\n");
 }
 
+void PrintFilteredSecurityDescriptorInfo(PSD_INFO sdInfo, const char* objectDN, const char* objectSid, const char* trustee) {
+    if (!sdInfo) return;
+
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[+] Security Descriptor Information:\n=====================================");
+
+    // Owner
+    if (sdInfo->OwnerSid) {
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Owner: %s", sdInfo->OwnerSid);
+        if (sdInfo->OwnerName) {
+            BeaconPrintf(CALLBACK_OUTPUT, "    Name: %s", sdInfo->OwnerName);
+        }
+    }
+
+    // Group
+    if (sdInfo->GroupSid) {
+        BeaconPrintf(CALLBACK_OUTPUT, "[*] Group: %s", sdInfo->GroupSid);
+        if (sdInfo->GroupName) {
+            BeaconPrintf(CALLBACK_OUTPUT, "    Name: %s", sdInfo->GroupName);
+        }
+    }
+
+    // Control flags
+    BeaconPrintf(CALLBACK_OUTPUT, "[*] Control Flags: 0x%04x", sdInfo->ControlFlags);
+    if (sdInfo->ControlFlags & SE_DACL_PROTECTED) {
+        BeaconPrintf(CALLBACK_OUTPUT, "    - DACL is protected (inheritance blocked)");
+    }
+    if (sdInfo->ControlFlags & SE_SACL_PROTECTED) {
+        BeaconPrintf(CALLBACK_OUTPUT, "    - SACL is protected");
+    }
+
+    // DACL
+    BeaconPrintf(CALLBACK_OUTPUT, "\n[*] DACL (Discretionary Access Control List):");
+    if (!sdInfo->HasDacl) {
+        BeaconPrintf(CALLBACK_OUTPUT, "    No DACL present (NULL DACL - everyone has full access!)");
+    } else if (sdInfo->DaclAceCount == 0) {
+        BeaconPrintf(CALLBACK_OUTPUT, "    Empty DACL (no one has access)");
+    } else {
+        BeaconPrintf(CALLBACK_OUTPUT, "    %d ACE(s):", sdInfo->DaclAceCount);
+        for (DWORD i = 0; i < sdInfo->DaclAceCount; i++) {
+            if (!MSVCRT$strcmp(sdInfo->DaclAces[i].TrusteeSid, trustee)) {
+               PrintAceInfo(&sdInfo->DaclAces[i], i, objectDN, objectSid); 
+            }
+        }
+    }
+
+    // SACL (if present)
+    if (sdInfo->HasSacl && sdInfo->SaclAceCount > 0) {
+        BeaconPrintf(CALLBACK_OUTPUT, "\n[*] SACL (System Access Control List):");
+        BeaconPrintf(CALLBACK_OUTPUT, "    %d ACE(s):", sdInfo->SaclAceCount);
+        for (DWORD i = 0; i < sdInfo->SaclAceCount; i++) {
+            PrintAceInfo(&sdInfo->SaclAces[i], i, objectDN, objectSid);
+        }
+    }
+
+    BeaconPrintf(CALLBACK_OUTPUT, "=====================================\n");
+}
+
 // Print individual ACE information (PowerView format)
 void PrintAceInfo(PPARSED_ACE_INFO aceInfo, int index, const char* objectDN, const char* objectSid) {
     if (!aceInfo) return;

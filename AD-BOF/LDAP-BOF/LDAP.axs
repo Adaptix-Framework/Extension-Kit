@@ -310,13 +310,14 @@ _cmd_getspn.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
 var _cmd_getacl = ax.create_command(
     "get-acl",
     "Get ACL/security descriptor for an object",
-    "ldap get-acl jane.doe -ou \"OU=Users,DC=domain,DC=local\" -dc dc01.domain.local --resolve"
+    "ldap get-acl jane.doe -trustee S-1-5-21-1472672667-4013031263-495691846-1113 -ou \"OU=Users,DC=domain,DC=local\" -dc dc01.domain.local --resolve"
 );
 _cmd_getacl.addArgString("target", true, "Object name or DN");
 _cmd_getacl.addArgFlagString("-ou", "ou_path", false, "OU path to search");
 _cmd_getacl.addArgFlagString("-dc", "dc_fqdn", false, "Domain Controller FQDN");
 _cmd_getacl.addArgBool("--ldaps", "Use LDAPS (port 636)");
 _cmd_getacl.addArgBool("--resolve", "Resolve SID names");
+_cmd_getacl.addArgFlagString("-trustee", "trustee", false, "Filter ACLs by trustee SID");
 _cmd_getacl.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let target = parsed_json["target"];
     let is_dn = identifyInputType(target);
@@ -324,8 +325,9 @@ _cmd_getacl.setPreHook(function (id, cmdline, parsed_json, ...parsed_lines){
     let dc_fqdn = parsed_json["dc_fqdn"] || "";
     let use_ldaps = parsed_json["--ldaps"] ? 1 : 0;
     let resolve = parsed_json["--resolve"] ? 1 : 0;
+    let trustee = parsed_json["trustee"] || "";
 
-    let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int,int", [target, is_dn, ou_path, dc_fqdn, use_ldaps, resolve]);
+    let bof_params = ax.bof_pack("cstr,int,cstr,cstr,int,int,cstr", [target, is_dn, ou_path, dc_fqdn, use_ldaps, resolve, trustee]);
     let bof_path = ax.script_dir() + "_bin/LDAP/get-acl." + ax.arch(id) + ".o";
     ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Querying ACL for ${target}...`);
 });
