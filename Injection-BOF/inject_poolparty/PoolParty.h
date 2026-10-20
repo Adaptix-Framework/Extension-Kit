@@ -51,6 +51,8 @@ WINBASEAPI time_t       WINAPI   MSVCRT$time(time_t *seconds);
 WINBASEAPI void         WINAPI   MSVCRT$srand(unsigned int seed);
 WINBASEAPI void*        WINAPI   MSVCRT$calloc(size_t number, size_t size);
 WINBASEAPI void*        WINAPI   MSVCRT$malloc(size_t size);
+WINBASEAPI void*        WINAPI   MSVCRT$realloc(void* memblock, size_t size);
+WINBASEAPI void         WINAPI   MSVCRT$free(void* memblock);
 
 WINBASEAPI wchar_t     *__cdecl  MSVCRT$wcscmp(const wchar_t *_lhs,const wchar_t *_rhs);
 WINBASEAPI errno_t      __cdecl  MSVCRT$wcscat_s(wchar_t *_Dst, rsize_t _DstSize, const wchar_t *_Src);
@@ -747,10 +749,19 @@ BYTE* NtQueryObject_(HANDLE x, OBJECT_INFORMATION_CLASS y) {
     BYTE* Information = NULL;
 
     do {
-        Information = (BYTE*)MSVCRT$realloc(Information, InformationLength);
+        BYTE* Information_ = (BYTE*)MSVCRT$realloc(Information, InformationLength);
+        if (!Information_ && InformationLength) {
+            if (Information) MSVCRT$free(Information);
+            return NULL;
+        }
+        Information = Information_;
         Ntstatus = NtQueryObject(x, y, Information, InformationLength, &InformationLength);
     } while (STATUS_INFO_LENGTH_MISMATCH == Ntstatus);
 
+    if (Ntstatus != 0) {
+        if (Information) MSVCRT$free(Information);
+        return NULL;
+    }
     return Information;
 }
 
@@ -814,29 +825,39 @@ HANDLE HijackProcessHandle(PWSTR wsObjectType, HANDLE p_hTarget, DWORD dwDesired
 
     PPROCESS_HANDLE_SNAPSHOT_INFORMATION pProcessHandleInformation = (PPROCESS_HANDLE_SNAPSHOT_INFORMATION)(Information);
 
-    HANDLE p_hDuplicatedObject;
-    ULONG InformationLength_ = 0;
+    HANDLE p_hDuplicatedObject = NULL;
 
     for (int i = 0; i < pProcessHandleInformation->NumberOfHandles; i++) {
-        KERNEL32$DuplicateHandle(
-            p_hTarget,
-            pProcessHandleInformation->Handles[i].HandleValue,
-            KERNEL32$GetCurrentProcess(),
-            &p_hDuplicatedObject,
-            dwDesiredAccess,
-            FALSE,
-            (DWORD_PTR)NULL);
-
-        BYTE* pObjectInformation;
-        pObjectInformation = NtQueryObject_(p_hDuplicatedObject, ObjectTypeInformation);
-        PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInformation = (PPUBLIC_OBJECT_TYPE_INFORMATION)(pObjectInformation);
-
-        if (MSVCRT$wcscmp(wsObjectType, pObjectTypeInformation->TypeName.Buffer) != 0) {
+        p_hDuplicatedObject = NULL;
+        if (!KERNEL32$DuplicateHandle(
+                p_hTarget,
+                pProcessHandleInformation->Handles[i].HandleValue,
+                KERNEL32$GetCurrentProcess(),
+                &p_hDuplicatedObject,
+                dwDesiredAccess,
+                FALSE,
+                (DWORD_PTR)NULL)) {
             continue;
         }
 
+        BYTE* pObjectInformation;
+        pObjectInformation = NtQueryObject_(p_hDuplicatedObject, ObjectTypeInformation);
+        if (!pObjectInformation) {
+            KERNEL32$CloseHandle(p_hDuplicatedObject);
+            continue;
+        }
+        PPUBLIC_OBJECT_TYPE_INFORMATION pObjectTypeInformation = (PPUBLIC_OBJECT_TYPE_INFORMATION)(pObjectInformation);
+
+        if (MSVCRT$wcscmp(wsObjectType, pObjectTypeInformation->TypeName.Buffer) != 0) {
+            MSVCRT$free(pObjectInformation);
+            KERNEL32$CloseHandle(p_hDuplicatedObject);
+            continue;
+        }
+
+        MSVCRT$free(pObjectInformation);
         return p_hDuplicatedObject;
     }
+    return NULL;
 }
 
 HANDLE HijackTargetThreadPoolHandle(PWSTR wsObjectType, HANDLE processHandle, DWORD dwDesiredAccess) {

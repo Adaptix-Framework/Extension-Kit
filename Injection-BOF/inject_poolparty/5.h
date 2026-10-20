@@ -54,7 +54,7 @@ void RemoteTpAlpcInsertionSetupExecution(HANDLE hTarget, LPVOID pShellcodeAddres
         AlpcClientObjectAttributes.Length = sizeof(OBJECT_ATTRIBUTES);
 
         const char* Buffer = POOL_PARTY_POEM;
-        int BufferLength = sizeof(Buffer);
+        int BufferLength = sizeof(POOL_PARTY_POEM) - 1;
 
         ALPC_MESSAGE ClientAlpcPortMessage = { 0 };
         ClientAlpcPortMessage.PortHeader.u1.s1.DataLength = BufferLength;

