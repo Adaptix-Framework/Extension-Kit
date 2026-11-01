@@ -17,8 +17,8 @@ cmd_execute_assembly.setPreHook(function (id, cmdline, parsed_json, ...parsed_li
     let async = "";
     if (parsed_json["--async"]) async = "-a ";
 
-    if(assembly_content.length == 0) {
-        throw new Error(`file ${parsed_json["path"]} not readed`);
+    if(assembly_content.byteLength == 0) {
+        throw new Error(`file ${parsed_json["path_path"]} not readed`);
     }
 
     let bof_params = ax.bof_pack("bytes,cstr", [assembly_content, assembly_params]);
