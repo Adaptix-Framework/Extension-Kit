@@ -13,6 +13,20 @@ DECLSPEC_IMPORT void* __cdecl MSVCRT$memset(void* dest, int c, size_t count);
 DECLSPEC_IMPORT size_t __cdecl MSVCRT$strlen(const char* str);
 DECLSPEC_IMPORT char* __cdecl MSVCRT$strcpy(char* dest, const char* src);
 
+// Import required WLDAP32 paging functions
+typedef VOID* PLDAPSearch;
+struct l_timeval { LONG tv_sec; LONG tv_usec; };
+DECLSPEC_IMPORT PLDAPSearch WLDAP32$ldap_search_init_pageA(LDAP*, const char*, ULONG, const char*, char*[], ULONG, LDAPControlA**, LDAPControlA**, ULONG, ULONG, VOID*);
+DECLSPEC_IMPORT ULONG       WLDAP32$ldap_get_next_page_s(LDAP*, PLDAPSearch, struct l_timeval*, ULONG, ULONG*, LDAPMessage**);
+DECLSPEC_IMPORT ULONG       WLDAP32$ldap_search_abandon_page(LDAP*, PLDAPSearch);
+
+#ifndef LDAP_NO_LIMIT
+#define LDAP_NO_LIMIT            0
+#endif
+#ifndef LDAP_NO_RESULTS_RETURNED
+#define LDAP_NO_RESULTS_RETURNED 0x5e
+#endif
+
 // Structure to hold user information
 typedef struct _USER_INFO {
     char* distinguishedName;
@@ -33,89 +47,102 @@ USER_INFO* EnumerateAllUsers(LDAP* ld, const char* searchBase, int* userCount, i
     // If onlyUsers=1, filter to SAM_USER_OBJECT (0x30000000) and SAM_TRUST_ACCOUNT (0x30000002) only
     char* filter = onlyUsers ? "(&(objectClass=user)(|(sAMAccountType=805306368)(sAMAccountType=805306370)))" : "(objectClass=user)";
     char* attrs[] = { "distinguishedName", "sAMAccountName", "objectGUID", NULL };
-    
-    // Search for all user objects
-    ULONG result = WLDAP32$ldap_search_s(
+
+    USER_INFO* users = NULL;
+    int capacity = 0;
+    int index = 0;
+    ULONG totalCount = 0;
+
+    PLDAPSearch pageHandle = WLDAP32$ldap_search_init_pageA(
         ld,
-        (char*)searchBase,
+        searchBase,
         LDAP_SCOPE_SUBTREE,
         filter,
         attrs,
         0,
-        &searchResult
+        NULL, NULL,
+        0,
+        LDAP_NO_LIMIT,
+        NULL
     );
-    
-    if (result != LDAP_SUCCESS) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to enumerate users: 0x%x", result);
+
+    if (!pageHandle) {
+        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to enumerate users: ldap_search_init_page failed");
         return NULL;
     }
-    
-    // Count entries
-    int count = WLDAP32$ldap_count_entries(ld, searchResult);
-    if (count <= 0) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] No users found in domain");
-        WLDAP32$ldap_msgfree(searchResult);
-        return NULL;
-    }
-    
-    // Allocate array for user info
-    USER_INFO* users = (USER_INFO*)MSVCRT$malloc(count * sizeof(USER_INFO));
-    if (!users) {
-        BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for user list");
-        WLDAP32$ldap_msgfree(searchResult);
-        return NULL;
-    }
-    MSVCRT$memset(users, 0, count * sizeof(USER_INFO));
-    
-    // Iterate through entries
-    int index = 0;
-    entry = WLDAP32$ldap_first_entry(ld, searchResult);
-    
-    while (entry && index < count) {
-        // Get distinguishedName
-        char** dnValues = WLDAP32$ldap_get_values(ld, entry, "distinguishedName");
-        if (dnValues && dnValues[0]) {
-            size_t len = MSVCRT$strlen(dnValues[0]) + 1;
-            users[index].distinguishedName = (char*)MSVCRT$malloc(len);
-            if (users[index].distinguishedName) {
-                MSVCRT$strcpy(users[index].distinguishedName, dnValues[0]);
+
+    ULONG result;
+    while ((result = WLDAP32$ldap_get_next_page_s(ld, pageHandle, NULL, 1000, &totalCount, &searchResult)) == LDAP_SUCCESS) {
+
+        // Count entries
+        int count = WLDAP32$ldap_count_entries(ld, searchResult);
+
+        // Allocate/grow array for user info
+        if (count > 0 && index + count > capacity) {
+            int newCapacity = index + count;
+            USER_INFO* tmp = (USER_INFO*)MSVCRT$realloc(users, newCapacity * sizeof(USER_INFO));
+            if (!tmp) {
+                BeaconPrintf(CALLBACK_ERROR, "[-] Failed to allocate memory for user list");
+                WLDAP32$ldap_msgfree(searchResult);
+                break;
             }
-            WLDAP32$ldap_value_free(dnValues);
+            users = tmp;
+            MSVCRT$memset(users + capacity, 0, (newCapacity - capacity) * sizeof(USER_INFO));
+            capacity = newCapacity;
         }
-        
-        // Get sAMAccountName
-        char** samValues = WLDAP32$ldap_get_values(ld, entry, "sAMAccountName");
-        if (samValues && samValues[0]) {
-            size_t len = MSVCRT$strlen(samValues[0]) + 1;
-            users[index].samAccountName = (char*)MSVCRT$malloc(len);
-            if (users[index].samAccountName) {
-                MSVCRT$strcpy(users[index].samAccountName, samValues[0]);
+
+        // Iterate through entries
+        entry = WLDAP32$ldap_first_entry(ld, searchResult);
+
+        while (entry && index < capacity) {
+            // Get distinguishedName
+            char** dnValues = WLDAP32$ldap_get_values(ld, entry, "distinguishedName");
+            if (dnValues && dnValues[0]) {
+                size_t len = MSVCRT$strlen(dnValues[0]) + 1;
+                users[index].distinguishedName = (char*)MSVCRT$malloc(len);
+                if (users[index].distinguishedName) {
+                    MSVCRT$strcpy(users[index].distinguishedName, dnValues[0]);
+                }
+                WLDAP32$ldap_value_free(dnValues);
             }
-            WLDAP32$ldap_value_free(samValues);
+
+            // Get sAMAccountName
+            char** samValues = WLDAP32$ldap_get_values(ld, entry, "sAMAccountName");
+            if (samValues && samValues[0]) {
+                size_t len = MSVCRT$strlen(samValues[0]) + 1;
+                users[index].samAccountName = (char*)MSVCRT$malloc(len);
+                if (users[index].samAccountName) {
+                    MSVCRT$strcpy(users[index].samAccountName, samValues[0]);
+                }
+                WLDAP32$ldap_value_free(samValues);
+            }
+
+            // Get objectGUID
+            struct berval** guidValues = WLDAP32$ldap_get_values_len(ld, entry, "objectGUID");
+            if (guidValues && guidValues[0] && guidValues[0]->bv_len == sizeof(GUID)) {
+                MSVCRT$memcpy(&users[index].objectGuid, guidValues[0]->bv_val, sizeof(GUID));
+                WLDAP32$ldap_value_free_len(guidValues);
+            }
+
+            // Only count users that have all required fields
+            if (users[index].distinguishedName && users[index].samAccountName) {
+                index++;
+            } else {
+                // Free incomplete entry
+                if (users[index].distinguishedName) MSVCRT$free(users[index].distinguishedName);
+                if (users[index].samAccountName) MSVCRT$free(users[index].samAccountName);
+                MSVCRT$memset(&users[index], 0, sizeof(USER_INFO));
+            }
+
+            entry = WLDAP32$ldap_next_entry(ld, entry);
         }
-        
-        // Get objectGUID
-        struct berval** guidValues = WLDAP32$ldap_get_values_len(ld, entry, "objectGUID");
-        if (guidValues && guidValues[0] && guidValues[0]->bv_len == sizeof(GUID)) {
-            MSVCRT$memcpy(&users[index].objectGuid, guidValues[0]->bv_val, sizeof(GUID));
-            WLDAP32$ldap_value_free_len(guidValues);
-        }
-        
-        // Only count users that have all required fields
-        if (users[index].distinguishedName && users[index].samAccountName) {
-            index++;
-        } else {
-            // Free incomplete entry
-            if (users[index].distinguishedName) MSVCRT$free(users[index].distinguishedName);
-            if (users[index].samAccountName) MSVCRT$free(users[index].samAccountName);
-            MSVCRT$memset(&users[index], 0, sizeof(USER_INFO));
-        }
-        
-        entry = WLDAP32$ldap_next_entry(ld, entry);
+
+        WLDAP32$ldap_msgfree(searchResult);
+        searchResult = NULL;
     }
-    
-    WLDAP32$ldap_msgfree(searchResult);
-    
+
+    WLDAP32$ldap_search_abandon_page(ld, pageHandle);
+
     *userCount = index;
     BeaconPrintf(CALLBACK_OUTPUT, "[+] Successfully enumerated %d users", index);
     
